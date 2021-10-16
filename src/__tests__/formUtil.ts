@@ -52,11 +52,7 @@ describe('Form util', () => {
         defaults: string[],
         expected: string[]) => {
         const form = { items: items } as FormRepresentation;
-        // eslint-disable-next-line
-        // @ts-ignore sorry, can't quite line up typings
-        const fields = FormUtil.fieldsRequiringUpdate(resource, document, form, defaults);
-        // eslint-disable-next-line
-        // @ts-ignore sorry, can't quite line up typings
+        const fields = FormUtil.fieldsRequiringUpdate(resource, document, form, defaults) as string[];
         assertThat(fields).is(expected);
     });
 

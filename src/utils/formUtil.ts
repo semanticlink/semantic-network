@@ -124,6 +124,8 @@ export class FormUtil {
      * @param form
      * @param defaultFields that require update
      * @returns fields to merge that actually requiring updating based on being a different value
+     *
+     * // TODO; return Omit<P, "links">
      */
     public static fieldsRequiringUpdate<T extends LinkedRepresentation | Partial<T>,
         TForm extends FormRepresentation,

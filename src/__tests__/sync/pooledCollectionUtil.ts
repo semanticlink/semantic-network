@@ -49,8 +49,10 @@ describe('Pooled collection', () => {
             const mock = jest.fn();
             const options = {
                 resolver: {
-                    add: (l, r) => {
-                        mock(l, r);
+                    add: (documentUriResolved, nodUriResolved) => {
+                        mock(documentUriResolved, nodUriResolved);
+                        assertThat(documentUriResolved).is('http://api.example.com/role/2');
+                        assertThat(nodUriResolved).is('http://api.example.com/role/1');
                     },
                 },
             } as PooledCollectionOptions;

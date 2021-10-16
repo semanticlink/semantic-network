@@ -86,7 +86,10 @@ async function createCollectionItem<T extends LinkedRepresentation>(
         formRel = [LinkRelation.CreateForm, LinkRelation.SearchForm] as RelationshipType,
     } = { ...options };
 
-    const form = await ApiUtil.get(resource, { ...options, rel: formRel });
+    const form = await ApiUtil.get(resource as unknown as TrackedRepresentation<T>, {
+        ...options,
+        rel: formRel,
+    }) as FormRepresentation;
 
     if (instanceOfForm(form)) {
         try {
@@ -103,8 +106,8 @@ async function createCollectionItem<T extends LinkedRepresentation>(
                 const contextResource = hasSubmitRel ? form : resource;
                 const rel = hasSubmitRel ? LinkRelation.Submit : LinkRelation.Self;
 
-                const item = await TrackedRepresentationFactory.create<CollectionRepresentation, T>(
-                    contextResource,
+                const item = await TrackedRepresentationFactory.create(
+                    contextResource as unknown as TrackedRepresentation<T>,
                     merged,
                     { ...options, rel });
 
@@ -118,7 +121,11 @@ async function createCollectionItem<T extends LinkedRepresentation>(
                 log.info('No create required %s', LinkUtil.getUri(resource, LinkRelation.Self));
             }
         } catch (e) {
-            log.error('Merge error %s', e.message);
+            if (typeof e === 'string') {
+                log.error('[Merge] unknown create error %s', e);
+            } else {
+                log.error('[Merge] unknown create error %o', e);
+            }
         }
     } else {
         log.info('Create not possible - resource has no form %s', LinkUtil.getUri(resource, LinkRelation.Self));

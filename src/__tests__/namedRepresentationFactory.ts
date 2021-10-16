@@ -1,11 +1,18 @@
 import { LinkedRepresentation } from 'semantic-link';
-import { assertThat } from 'mismatched';
+import { IanaLinkRelation } from '../ianaLinkRelation';
+import { assertThat, match } from 'mismatched';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { NamedRepresentationFactory } from '../representation/namedRepresentationFactory';
+import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
+import { Status } from '../models/status';
+import SparseRepresentationFactory from '../representation/sparseRepresentationFactory';
+import NamedRepresentationFactory from '../representation/namedRepresentationFactory';
 import { TrackedRepresentation } from '../types/types';
+import RepresentationUtil from '../utils/representationUtil';
+import { instanceOfSingleton } from '../utils/instanceOf';
 import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 
@@ -94,10 +101,12 @@ describe('Named Representation Factory', () => {
                 // the inside load "fails" returning the location only
                 if (instanceOfTrackedRepresentation(actual)) {
                     const { status } = TrackedRepresentationUtil.getState(actual);
-                    // assertThat(actual).is(singletonRepresentation);
+                    assertThat(actual).is(match.predicate(instanceOfSingleton));
                     assertThat(status).is(Status.hydrated);
                     const name = NamedRepresentationFactory.defaultNameStrategy(rel) as keyof ApiRepresentation;
-                    // assertThat(RepresentationUtil.getProperty(api, name)).is(actual);
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore because the type checking is good that a failing design == failing runtime!
+                    assertThat(RepresentationUtil.getProperty(api, name)).is(actual);
                     assertThat(TrackedRepresentationUtil.isTracked(api, name)).is(true);
                 }
             } else {
@@ -106,10 +115,7 @@ describe('Named Representation Factory', () => {
                 expect(actual).toBeUndefined();
             }
             post.mockReset();
-        })
-        ;
+        });
 
-    })
-    ;
-})
-;
+    });
+});

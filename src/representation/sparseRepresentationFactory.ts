@@ -1,4 +1,4 @@
-import { FeedRepresentation, LinkedRepresentation } from 'semantic-link';
+import { CollectionRepresentation, FeedRepresentation, LinkedRepresentation } from 'semantic-link';
 import { SingletonRepresentation, state, TrackedRepresentation } from '../types/types';
 import { State } from './state';
 import { Status } from './status';
@@ -19,7 +19,7 @@ export class SparseRepresentationFactory {
      * be at worst sparse with a state ({@link Status.locationOnly}, {@link Status.virtual}). At best, the representation
      * is {@link Status.hydrated} when a resource is presented that has been retrieved across the wire.
      */
-    public static make<T extends LinkedRepresentation>(options?: ResourceFactoryOptions): TrackedRepresentation<T> {
+    public static make<T extends LinkedRepresentation | CollectionRepresentation>(options?: ResourceFactoryOptions): TrackedRepresentation<T> {
 
         const { on } = { ...options };
 

@@ -8,6 +8,8 @@ import { LinkRelation } from '../linkRelation';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { HttpRequestError } from '../interfaces/httpRequestError';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
+import { HttpRequestError, isHttpRequestError } from '../interfaces/httpRequestError';
+import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
 import { ResourceQueryOptions } from '../interfaces/resourceQueryOptions';
 import { ResourceMergeOptions } from '../interfaces/resourceAssignOptions';
 import { parallelWaitAll, sequentialWaitAll } from '../utils/promiseWaitAll';
@@ -77,8 +79,8 @@ export class TrackedRepresentationFactory {
                     }
 
                     // TODO: decide on pluggable hydration strategy
-                    const newVar = await this.load(SparseRepresentationFactory.make({ uri }), options);
-                    return newVar;
+                    const hydrated = await this.load(SparseRepresentationFactory.make({ uri }), options);
+                    return hydrated as unknown as undefined | T;
                 } else {
                     // other response codes (200, 202) should be dealt with separately
                     // see https://stackoverflow.com/a/29096228
@@ -86,10 +88,15 @@ export class TrackedRepresentationFactory {
                     // fall through to undefined
                 }
             } catch (e) {
-                // errors don't get attached back on the context resource, just log them
-                log.error(`Request error: '${(e as HttpRequestError<T>).message}'}`);
-                log.debug((e as HttpRequestError<T>).stack);
-                // fall through to undefined
+                if (isHttpRequestError(e)) {
+                    // errors don't get attached back on the context resource, just log them
+                    log.error(`Request error: '${e.message}'}`);
+                    log.debug(e.stack);
+                    // fall through to undefined
+                } else {
+                    log.warn('TODO: re-throw??');
+                    // throw(e);
+                }
             }
         } else {
             return Promise.reject('No context to find uri to POST on');
@@ -136,21 +143,25 @@ export class TrackedRepresentationFactory {
                     // when was it retrieved - for later queries
                     const response = await HttpRequestFactory.Instance().del(resource, options);
 
-                    trackedState.status = Status.deleted;
-                    // mutate the original resource headers
-                    // how was it retrieved
-                    trackedState.headers = response.headers;
-                    // save the across-the-wire meta data so we can check for collisions/staleness
-                    trackedState.retrieved = new Date();
+                trackedState.status = Status.deleted;
+                // mutate the original resource headers
+                // how was it retrieved
+                trackedState.headers = response?.headers;
+                // save the across-the-wire meta data so we can check for collisions/staleness
+                trackedState.retrieved = new Date();
 
                     return await resource as unknown as T;
 
-                } catch (e) {
+            } catch (e) {
+                if (isHttpRequestError(e)) {
                     this.processError(e, uri, resource, trackedState);
+                } else {
+                    // throw (e);
                 }
-            } else {
-                log.error('Undefined returned on link \'%s\' (check stack trace)', rel);
             }
+        } else {
+            log.error('Undefined returned on link \'%s\' (check stack trace)', rel);
+        }
 
         } else {
             // TODO: decide if we want to make a locationOnly resource if possible and then continue
@@ -195,8 +206,12 @@ export class TrackedRepresentationFactory {
 
                     return await this.processResource(resource, document, options) as T;
 
-                } catch (e) {
+            } catch (e) {
+                if (isHttpRequestError(e)) {
                     this.processError(e, uri, resource, trackedState);
+                } else {
+                    log.warn('TODO: re-throw');
+                    // throw(e);
                 }
             }
         } else {
@@ -265,7 +280,12 @@ export class TrackedRepresentationFactory {
                         return await this.processResource(resource, response.data as DocumentRepresentation<T>, options) as T;
 
                     } catch (e) {
-                        this.processError(e, uri, resource, trackedState);
+                        if (isHttpRequestError(e)) {
+                            this.processError<T>(e, uri, resource, trackedState);
+                        } else {
+                            log.warn('TODO: re-throw??');
+                            // throw(e);
+                        }
                     }
                 } else {
                     log.debug('return cached resource: \'%s\'', uri);
@@ -299,8 +319,8 @@ export class TrackedRepresentationFactory {
         return undefined;
     }
 
-    private static processError<T extends LinkedRepresentation>(e: Error, uri: Uri, resource: T, trackedState: State): void {
-        const { response } = e as HttpRequestError<T>;
+    private static processError<T extends LinkedRepresentation>(e: HttpRequestError, uri: Uri, resource: T, trackedState: State): void {
+        const { response } = e;
         if (response) {
 
             if (response.status === 403) {
@@ -330,8 +350,8 @@ export class TrackedRepresentationFactory {
                 log.info(`Server error '${response.statusText}' on resource ${uri}`);
                 trackedState.status = Status.unknown;
             } else {
-                log.error(`Request error: '${(e as HttpRequestError<T>).message}'}`);
-                log.debug((e as HttpRequestError<T>).stack);
+                log.error(`Request error: '${e.message}'}`);
+                log.debug(e.stack);
                 trackedState.status = Status.unknown;
                 /**
                  * We really don't know what is happening here. But allow the application

@@ -1,62 +1,57 @@
-import { CollectionRepresentation, LinkUtil } from 'semantic-link';
-import { assertThat } from 'mismatched';
-import {
-    collectionRepresentation,
-    linkedRepresentation,
-    RepresentationMatcher,
-    singletonRepresentation,
-} from './helpers/representationMatcher';
-import { Status } from '../representation/status';
+import { CollectionRepresentation, instanceOfLinkedRepresentation, LinkUtil } from 'semantic-link';
+import { IanaLinkRelation } from '../ianaLinkRelation';
+import { assertThat, match } from 'mismatched';
+import { Status } from '../models/status';
 import each from 'jest-each';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
-import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
-import { LinkRelation } from '../linkRelation';
+import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
+import { instanceOfCollection, instanceOfSingleton } from '../utils/instanceOf';
 
 describe('Sparse Representation Factory', () => {
 
     describe('make', () => {
         each([
-            ['sparse, singleton, unknown (undefined)', undefined, singletonRepresentation, Status.virtual, false],
-            ['sparse, singleton, unknown (null)', null, singletonRepresentation, Status.virtual, false],
-            ['sparse, singleton, unknown (empty)', {}, singletonRepresentation, Status.virtual, false],
-            ['sparse, singleton, location only (default)', { uri: 'http://example.com/1' }, singletonRepresentation, Status.locationOnly, true],
+            ['sparse, singleton, unknown (undefined)', undefined, instanceOfSingleton, Status.virtual, false],
+            ['sparse, singleton, unknown (null)', null, instanceOfSingleton, Status.virtual, false],
+            ['sparse, singleton, unknown (empty)', {}, instanceOfSingleton, Status.virtual, false],
+            ['sparse, singleton, location only (default)', { uri: 'http://example.com/1' }, instanceOfSingleton, Status.locationOnly, true],
             ['sparse, singleton, location only (explicit)', {
                 uri: 'http://example.com/1',
                 sparseType: 'singleton',
-            }, singletonRepresentation, Status.locationOnly, true],
+            }, instanceOfSingleton, Status.locationOnly, true],
             ['sparse, collection, location only', {
                 uri: 'http://example.com/1',
                 sparseType: 'collection',
-            }, collectionRepresentation, Status.locationOnly, true],
+            }, instanceOfCollection, Status.locationOnly, true],
             ['sparse, singleton, on (undefined)', {
                 uri: 'http://example.com/1',
                 on: undefined,
-            }, singletonRepresentation, Status.locationOnly, true],
+            }, instanceOfSingleton, Status.locationOnly, true],
+            ['sparse, singleton, on (returns undefined)', {
+                uri: 'http://example.com/1',
+                on: () => undefined,
+            }, instanceOfSingleton, Status.locationOnly, true],
             ['hydrated, singleton', {
-                on: { links: [] },
-            } as ResourceFactoryOptions, singletonRepresentation, Status.hydrated, false],
+                on: () => ({ links: [] }),
+            } as ResourceFactoryOptions, instanceOfSingleton, Status.hydrated, false],
             ['hydrated, collection', {
                 sparseType: 'collection',
-                on: { links: [], items: [] },
-            } as ResourceFactoryOptions, collectionRepresentation, Status.hydrated, false],
+                on: () => ({ links: [], items: [] }),
+            } as ResourceFactoryOptions, instanceOfCollection, Status.hydrated, false],
         ])
             .describe(
                 '%s',
-                (title: string, options: ResourceFactoryOptions, type: RepresentationMatcher, status: Status, matchesSelf: boolean) => {
+                (title: string, options: ResourceFactoryOptions, instanceOfType: (v: unknown) => boolean, status: Status, matchesSelf: boolean) => {
 
                     const resource = SparseRepresentationFactory.make(options);
 
                     it('should be defined as linkedRepresentation', () => {
-                        // eslint-disable-next-line
-                        // @ts-ignore
-                        assertThat(resource).is(linkedRepresentation);
+                        assertThat(resource).is(match.predicate(instanceOfLinkedRepresentation));
                     });
 
                     it('should be of type', () => {
-                        // eslint-disable-next-line
-                        // @ts-ignore
-                        assertThat(resource).is(type);
+                        assertThat(resource).is(match.predicate(instanceOfType));
                     });
 
                     it('should have Self link', () => {
@@ -89,9 +84,7 @@ describe('Sparse Representation Factory', () => {
                     const resource = SparseRepresentationFactory.make<CollectionRepresentation>(options);
 
                     it('should be of type', () => {
-                        // eslint-disable-next-line
-                        // @ts-ignore
-                        assertThat(resource).is(collectionRepresentation);
+                        assertThat(resource).is(match.predicate(instanceOfCollection));
                     });
 
                     it('has items', () => {
@@ -104,9 +97,7 @@ describe('Sparse Representation Factory', () => {
 
                     it('any items are singletons', () => {
                         for (const item of resource.items) {
-                            // eslint-disable-next-line
-                            // @ts-ignore
-                            assertThat(item).is(singletonRepresentation);
+                            assertThat(item).is(match.predicate(instanceOfSingleton));
                         }
                     });
 

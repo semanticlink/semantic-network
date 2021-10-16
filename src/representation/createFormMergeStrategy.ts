@@ -10,7 +10,10 @@ export const defaultCreateFormStrategy: CreateFormMergeStrategy = async (documen
     try {
         return await ResourceMergeFactory.createMerge(documentResource, form, options);
     } catch (e) {
-        log.error('[Merge] unknown merge error: %s' + e.message);
-    }
+        if (typeof e === 'string') {
+            log.error('[Merge form] unknown create error %s', e);
+        } else {
+            log.error('[Merge form] unknown create error %o', e);
+        }   }
 
 };

@@ -10,7 +10,11 @@ export const defaultEditFormStrategy: EditFormMergeStrategy = async (resource, d
     try {
         return await ResourceMergeFactory.editMerge(resource, documentResource, form, options);
     } catch (e) {
-        log.error('[Merge] unknown merge error: %s' + e.message);
+        if (typeof e === 'string') {
+            log.error('[Merge form] unknown edit error %s', e);
+        } else {
+            log.error('[Merge form] unknown edit error %o', e);
+        }
     }
 
 };

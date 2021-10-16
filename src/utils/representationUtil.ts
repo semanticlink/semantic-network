@@ -43,6 +43,18 @@ export function getProperty<T, K extends Extract<keyof T, string>>(o: T, propert
 }
 
 /*
+
+export function properties<T extends LinkedRepresentation | Partial<T>, K extends Exclude<keyof T, 'links'>>(representation: T): K[] {
+    return Object.keys(representation)
+        .map(x => x as K)
+        .filter(x => x !== 'links');
+}
+
+export function getProperty<T extends LinkedRepresentation | Partial<T>, K extends keyof Omit<T, 'links'>>(o: T, propertyName: K): T[K] {
+    return o[propertyName];
+}
+
+
 export function getProperty22<T extends LinkedRepresentation,
     TField extends Omit<Extract<keyof T, string>, "links">>(o: T, propertyName: TField): T[TField] {
     return o[propertyName];

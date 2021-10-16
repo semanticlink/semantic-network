@@ -76,7 +76,11 @@ async function updateSingleton<T extends LinkedRepresentation>(
                 log.info('No update required %s', LinkUtil.getUri(resource, LinkRelation.Self));
             }
         } catch (e) {
-            log.error('Merge error %s', e.message);
+            if (typeof e === 'string') {
+                log.error('[Merge] unknown update error %s', e);
+            } else {
+                log.error('[Merge] unknown update error %o', e);
+            }
         }
     } else {
         log.info('Update not possible - resource has no edit form %s', LinkUtil.getUri(resource, LinkRelation.Self));

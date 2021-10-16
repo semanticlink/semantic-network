@@ -23,6 +23,10 @@ const log = anylogger('get');
  */
 export async function get<T extends LinkedRepresentation, TResult extends LinkedRepresentation>(
     resource: T,
+export default async function get<T extends LinkedRepresentation,
+    U extends T | CollectionRepresentation<T>,
+    TResult extends LinkedRepresentation = TrackedRepresentation<U>>(
+    resource: TrackedRepresentation<T>,
     options?: ResourceFactoryOptions &
         ResourceQueryOptions &
         ResourceLinkOptions &

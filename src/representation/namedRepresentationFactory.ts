@@ -57,7 +57,9 @@ export class NamedRepresentationFactory {
 
         if (rel && name) {
             if (TrackedRepresentationUtil.isTracked(resource, name)) {
-                const namedResource = RepresentationUtil.getProperty(resource, name) as unknown as U;
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore arrgghhhh
+                const namedResource = RepresentationUtil.getProperty(resource, name);
                 if (namedResource) {
                     // don't just return value but ensure it has loading rules respected (eg expires)
                     return await TrackedRepresentationFactory.load(

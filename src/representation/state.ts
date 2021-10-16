@@ -35,6 +35,8 @@ export class State {
 
     /**
      * Header meta data from the across-the-wire response
+     *
+     * TODO: axios changed its implementation away from array to record (object)
      */
     headers: Record<StandardResponseHeader | string, string>;
     /**

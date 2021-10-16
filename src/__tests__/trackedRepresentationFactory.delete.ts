@@ -1,12 +1,19 @@
 import { LinkedRepresentation } from 'semantic-link';
 import { assertThat } from 'mismatched';
+import { IanaLinkRelation } from '../ianaLinkRelation';
+import { assertThat, match } from 'mismatched';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
+import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
+import { Status } from '../models/status';
 import { TrackedRepresentation } from '../types/types';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
 import { LinkRelation } from '../linkRelation';
+import SparseRepresentationFactory from '../representation/sparseRepresentationFactory';
+import TrackedRepresentationFactory from '../representation/trackedRepresentationFactory';
+import { instanceOfSingleton } from '../utils/instanceOf';
 
 describe('Tracked Representation Factory', () => {
 
@@ -72,7 +79,7 @@ describe('Tracked Representation Factory', () => {
                 del.mockResolvedValue(
                     {
                         data: undefined,
-                        headers: [{ x: 'test' }],
+                        headers: { x: 'test' },
                         status: 200,
                         statusText: '',
                         config: {},
@@ -88,11 +95,11 @@ describe('Tracked Representation Factory', () => {
                     collection,
                     singleton,
                 } = TrackedRepresentationUtil.getState(api);
-                // assertThat(api).is(singletonRepresentation);
+                assertThat(api).is(match.predicate(instanceOfSingleton));
                 assertThat(api).is($api);
                 assertThat(status).is(Status.deleted);
                 assertThat(previousStatus).is(Status.locationOnly);
-                // assertThat(headers).is([{ x: 'test' }]);
+                assertThat(headers).is({ 'x': 'test' });
                 assertThat(collection).is(new Set<string>());
                 assertThat(singleton).is(new Set<string>());
                 // assertThat(retrieved).is(Date);
@@ -117,7 +124,12 @@ describe('Tracked Representation Factory', () => {
 
                 del.mockImplementation(async () => {
                     if (statusCode >= 400) {
-                        return Promise.reject({ response: { status: statusCode } });
+                        /* emulate that is an axios error to get through code */
+                        const rejection = {
+                            isAxiosError: true,
+                            response: { status: statusCode },
+                        };
+                        return Promise.reject(rejection);
                     } else {
                         return {
                             data: undefined,

@@ -4,9 +4,16 @@ import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
+import { IanaLinkRelation } from '../ianaLinkRelation';
+import { assertThat, match } from 'mismatched';
+import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
+import { Status } from '../models/status';
+import SparseRepresentationFactory from '../representation/sparseRepresentationFactory';
+import TrackedRepresentationFactory from '../representation/trackedRepresentationFactory';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
+import { instanceOfSingleton } from '../utils/instanceOf';
 
 describe('Tracked Representation Factory', () => {
 
@@ -92,7 +99,7 @@ describe('Tracked Representation Factory', () => {
                 // the inside load "fails" returning the location only
                 if (instanceOfTrackedRepresentation(actual)) {
                     const { status } = TrackedRepresentationUtil.getState(actual);
-                    // assertThat(actual).is(singletonRepresentation);
+                    assertThat(actual).is(match.predicate(instanceOfSingleton));
                     assertThat(status).is(Status.locationOnly);
                 }
             } else {

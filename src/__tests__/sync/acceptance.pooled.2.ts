@@ -63,7 +63,7 @@ describe('Steps with pooled (new) resources', () => {
         log.debug('[Fake] POST location %s', location);
         return {
             headers: {
-                status: 201,
+                status: '201',
                 location,
                 statusText: '[Fake] created',
             },

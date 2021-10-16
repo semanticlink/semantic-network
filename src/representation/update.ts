@@ -1,3 +1,4 @@
+import { instanceOfCollection, instanceOfUriList } from '../utils/instanceOf';
 import { LinkedRepresentation, LinkUtil } from 'semantic-link';
 import { ResourceUpdateOptions } from '../interfaces/ResourceUpdateOptions';
 import anylogger from 'anylogger';
@@ -11,8 +12,6 @@ import { ResourceLinkOptions } from '../interfaces/resourceLinkOptions';
 import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
 import { ResourceMergeOptions } from '../interfaces/resourceAssignOptions';
 import { ResourceFetchOptions } from '../interfaces/resourceFetchOptions';
-import { instanceOfUriList } from '../utils/instanceOf/instanceOfUriList';
-import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { instanceOfForm } from '../utils/instanceOf/instanceOfForm';
 
 const log = anylogger('Update');

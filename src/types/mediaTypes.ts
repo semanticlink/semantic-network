@@ -23,6 +23,4 @@ import { Uri } from 'semantic-link';
  * @see http://amundsen.com/hypermedia/urilist/
  * @see http://tools.ietf.org/html/rfc2483#section-5
  */
-
-
 export type UriList = Uri | Uri[] | string;

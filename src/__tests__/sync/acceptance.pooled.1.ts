@@ -51,7 +51,7 @@ describe('Steps with pooled resources', () => {
         }
         return {
             headers: {
-                status: 201,
+                status: '201',
                 location,
                 statusText: '[Fake] created',
             },

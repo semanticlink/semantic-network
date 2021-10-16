@@ -43,7 +43,7 @@ describe('Synchroniser', () => {
 
     const successPut: AxiosResponse = {
         data: undefined,
-        headers: [],
+        headers: {},
         status: 204,
         statusText: '',
         config: {},

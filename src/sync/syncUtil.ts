@@ -58,7 +58,7 @@ export class SyncUtil {
          * real resource in our network.
          */
         const updateResourceAndUpdateResolver: UpdateStrategy = async <T extends LinkedRepresentation>(updateResource: T, updateDataDocument: T) => {
-            const result = await ApiUtil.get(updateResource as TrackedRepresentation<T>, options);
+            const result = await ApiUtil.get(updateResource, options) as T;
             if (result) {
                 const update = await ApiUtil.update(result, updateDataDocument, options);
                 if (update) {
@@ -251,7 +251,7 @@ export class SyncUtil {
         // check whether to update or create
         if (item && !forceCreate) {
             // synchronise the item in the collection from the server
-            const result = await ApiUtil.get<CollectionRepresentation<T>, T>(resource, { ...options, where: item });
+            const result = await ApiUtil.get(resource, { ...options, where: item }) as T;
             if (result) {
                 const resource = await ApiUtil.update(result, document, options);
                 if (resource) {

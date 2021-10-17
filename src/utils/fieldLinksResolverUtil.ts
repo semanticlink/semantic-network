@@ -21,7 +21,7 @@ export class FieldLinksResolverUtil {
      */
     public static async resolveLinks<T extends LinkedRepresentation | Partial<T>,
         TForm extends FormRepresentation,
-        TField extends Extract<keyof T, string>>(
+        TField extends Extract<keyof Omit<T, 'links'>, string>>(
         resource: T,
         form: TForm,
         options?: MergeOptions): Promise<T | undefined> {

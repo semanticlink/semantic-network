@@ -1,9 +1,9 @@
 import anylogger from 'anylogger';
 import { CollectionRepresentation, LinkedRepresentation, LinkUtil, RelationshipType } from 'semantic-link';
-import ApiUtil from '../../apiUtil';
-import LinkRelation from '../../linkRelation';
+import { ApiUtil } from '../../apiUtil';
+import { LinkRelation } from '../../linkRelation';
 import { TrackedRepresentation } from '../../types/types';
-import RepresentationUtil from '../../utils/representationUtil';
+import { RepresentationUtil } from '../../utils/representationUtil';
 import { noopResolver } from '../resourceMergeFactory';
 import { PooledCollectionOptions } from '../../interfaces/pooledCollectionOptions';
 
@@ -40,7 +40,8 @@ function addToResolver<T extends LinkedRepresentation>(document: T, resource: T,
 async function makeAndResolveResource<T extends LinkedRepresentation>(collectionResource: T, resourceDocument: T, options?: PooledCollectionOptions): Promise<T | undefined> {
     const result = await ApiUtil.create(resourceDocument, {
         ...options,
-        on: <T>() => collectionResource as unknown as T,
+        // @ts-ignore - typings seem wrong (predicate vs value)
+        on: <T>() => collectionResource,
     });
     if (result) {
         log.info('Pooled resource created: created %s', LinkUtil.getUri(result as unknown as LinkedRepresentation, LinkRelation.Self));

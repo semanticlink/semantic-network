@@ -6,10 +6,8 @@ import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
 import { SingletonMerger } from './singletonMerger';
 import { LinkRelation } from '../linkRelation';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
-import { HttpRequestError } from '../interfaces/httpRequestError';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { HttpRequestError, isHttpRequestError } from '../interfaces/httpRequestError';
-import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
 import { ResourceQueryOptions } from '../interfaces/resourceQueryOptions';
 import { ResourceMergeOptions } from '../interfaces/resourceAssignOptions';
 import { parallelWaitAll, sequentialWaitAll } from '../utils/promiseWaitAll';
@@ -80,7 +78,7 @@ export class TrackedRepresentationFactory {
 
                     // TODO: decide on pluggable hydration strategy
                     const hydrated = await this.load(SparseRepresentationFactory.make({ uri }), options);
-                    return hydrated as unknown as undefined | T;
+                    return hydrated;
                 } else {
                     // other response codes (200, 202) should be dealt with separately
                     // see https://stackoverflow.com/a/29096228
@@ -143,25 +141,25 @@ export class TrackedRepresentationFactory {
                     // when was it retrieved - for later queries
                     const response = await HttpRequestFactory.Instance().del(resource, options);
 
-                trackedState.status = Status.deleted;
-                // mutate the original resource headers
-                // how was it retrieved
-                trackedState.headers = response?.headers;
-                // save the across-the-wire meta data so we can check for collisions/staleness
-                trackedState.retrieved = new Date();
+                    trackedState.status = Status.deleted;
+                    // mutate the original resource headers
+                    // how was it retrieved
+                    trackedState.headers = response?.headers;
+                    // save the across-the-wire meta data so we can check for collisions/staleness
+                    trackedState.retrieved = new Date();
 
                     return await resource as unknown as T;
 
-            } catch (e) {
-                if (isHttpRequestError(e)) {
-                    this.processError(e, uri, resource, trackedState);
-                } else {
-                    // throw (e);
+                } catch (e) {
+                    if (isHttpRequestError(e)) {
+                        this.processError(e, uri, resource, trackedState);
+                    } else {
+                        // throw (e);
+                    }
                 }
+            } else {
+                log.error('Undefined returned on link \'%s\' (check stack trace)', rel);
             }
-        } else {
-            log.error('Undefined returned on link \'%s\' (check stack trace)', rel);
-        }
 
         } else {
             // TODO: decide if we want to make a locationOnly resource if possible and then continue
@@ -174,7 +172,7 @@ export class TrackedRepresentationFactory {
     public static async update<T extends LinkedRepresentation>(
         resource: T | TrackedRepresentation<T>,
         document: T | DocumentRepresentation<T>,
-        options?: ResourceLinkOptions & HttpRequestOptions & ResourceMergeOptions & ResourceFetchOptions): Promise<T> {
+        options?: ResourceLinkOptions & HttpRequestOptions & ResourceMergeOptions & ResourceFetchOptions): Promise<T | void> {
 
 
         if (instanceOfTrackedRepresentation(resource)) {
@@ -206,19 +204,23 @@ export class TrackedRepresentationFactory {
 
                     return await this.processResource(resource, document, options) as T;
 
-            } catch (e) {
-                if (isHttpRequestError(e)) {
-                    this.processError(e, uri, resource, trackedState);
-                } else {
-                    log.warn('TODO: re-throw');
-                    // throw(e);
+                } catch (e) {
+                    if (isHttpRequestError(e)) {
+                        this.processError(e, uri, resource, trackedState);
+                    } else {
+                        log.warn('TODO: re-throw');
+                        // throw(e);
+                    }
                 }
+            } else {
+                log.error(`No link rel`);
             }
+
+            return resource;
         } else {
             return Promise.reject(`No state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
         }
 
-        return resource;
     }
 
     /**

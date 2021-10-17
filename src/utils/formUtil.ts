@@ -54,7 +54,7 @@ export class FormUtil {
      */
     public static fieldsToResolve<T extends LinkedRepresentation | Partial<T>,
         TForm extends FormRepresentation,
-        TField extends Extract<keyof T, string> = Extract<keyof T, string>>(
+        TField extends Extract<keyof Omit<T, 'links'>, string> = Extract<keyof Omit<T, 'links'>, string>>(
         document: T,
         form: TForm,
         defaultFields: TField[] = []): Omit<Extract<keyof T, string>, 'links'>[] {
@@ -83,7 +83,7 @@ export class FormUtil {
      */
     public static linksToResolve<T extends LinkedRepresentation | Partial<T>,
         TForm extends FormRepresentation,
-        TField extends Extract<keyof T, string> = Extract<keyof T, string>>(
+        TField extends Extract<keyof Omit<T, 'links'>, string> = Extract<keyof Omit<T, 'links'>, string>>(
         document: T,
         form: TForm,
         defaultFields: TField[] = []): TField[] {
@@ -129,7 +129,7 @@ export class FormUtil {
      */
     public static fieldsRequiringUpdate<T extends LinkedRepresentation | Partial<T>,
         TForm extends FormRepresentation,
-        TField extends Extract<keyof T, string> = Extract<keyof T, string>>(
+        TField extends Extract<keyof Omit<T, 'links'>, string> = Extract<keyof Omit<T, 'links'>, string>>(
         resource: T,
         document: T | DocumentRepresentation<T>,
         form: TForm,
@@ -153,7 +153,7 @@ export class FormUtil {
      * @param options
      */
     public static fieldsToReturnFromForm<T extends LinkedRepresentation | Partial<T>,
-        TField extends Extract<keyof T, string>>(
+        TField extends Extract<keyof Omit<T, 'links'>, string>>(
         document: T,
         form: FormRepresentation,
         options?: MergeOptions): DocumentRepresentation {

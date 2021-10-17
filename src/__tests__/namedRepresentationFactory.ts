@@ -1,20 +1,15 @@
 import { LinkedRepresentation } from 'semantic-link';
-import { IanaLinkRelation } from '../ianaLinkRelation';
 import { assertThat, match } from 'mismatched';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { NamedRepresentationFactory } from '../representation/namedRepresentationFactory';
-import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
-import { Status } from '../models/status';
-import SparseRepresentationFactory from '../representation/sparseRepresentationFactory';
-import NamedRepresentationFactory from '../representation/namedRepresentationFactory';
 import { TrackedRepresentation } from '../types/types';
-import RepresentationUtil from '../utils/representationUtil';
-import { instanceOfSingleton } from '../utils/instanceOf';
 import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
+import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
+import { RepresentationUtil } from '../utils/representationUtil';
 
 const makeHydratedResource = <T extends LinkedRepresentation>(document: T): TrackedRepresentation<T> =>
     // note: clone the document for multiple uses

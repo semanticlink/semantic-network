@@ -1,4 +1,4 @@
-import { LinkedRepresentation } from 'semantic-link';
+import { CollectionRepresentation, LinkedRepresentation } from 'semantic-link';
 import { NamedRepresentationFactory } from './namedRepresentationFactory';
 import { TrackedRepresentationFactory } from './trackedRepresentationFactory';
 import { ResourceQueryOptions } from '../interfaces/resourceQueryOptions';
@@ -11,6 +11,7 @@ import { RepresentationUtil } from '../utils/representationUtil';
 import anylogger from 'anylogger';
 import { ResourceUpdateOptions } from '../interfaces/resourceUpdateOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
+import { TrackedRepresentation } from '../types/types';
 
 const log = anylogger('get');
 
@@ -21,12 +22,10 @@ const log = anylogger('get');
  * @param resource
  * @param options
  */
-export async function get<T extends LinkedRepresentation, TResult extends LinkedRepresentation>(
-    resource: T,
-export default async function get<T extends LinkedRepresentation,
+export async function get<T extends LinkedRepresentation,
     U extends T | CollectionRepresentation<T>,
     TResult extends LinkedRepresentation = TrackedRepresentation<U>>(
-    resource: TrackedRepresentation<T>,
+    resource: T | TrackedRepresentation<T>,
     options?: ResourceFactoryOptions &
         ResourceQueryOptions &
         ResourceLinkOptions &

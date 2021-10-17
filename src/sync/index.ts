@@ -264,7 +264,7 @@ export async function syncResource<T extends LinkedRepresentation>(
         if (namedResource) {
             log.debug('[Sync] resource (named singleton) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
             const namedDocument = RepresentationUtil.getProperty(document, nameOnDocument) as DocumentRepresentation<T>;
-            const updated = await ApiUtil.update(namedResource, namedDocument, options);
+            const updated = await ApiUtil.update(namedResource as T, namedDocument, options);
             if (updated) {
                 await (await SyncUtil.syncResources(updated, namedDocument as T, strategies, options))();
             }

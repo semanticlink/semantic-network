@@ -1,12 +1,13 @@
 import { CollectionRepresentation, instanceOfLinkedRepresentation, LinkUtil } from 'semantic-link';
-import { IanaLinkRelation } from '../ianaLinkRelation';
 import { assertThat, match } from 'mismatched';
-import { Status } from '../models/status';
 import each from 'jest-each';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
-import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
-import { instanceOfCollection, instanceOfSingleton } from '../utils/instanceOf';
+import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
+import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
+import { Status } from '../representation/status';
+import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
+import { LinkRelation } from '../linkRelation';
 
 describe('Sparse Representation Factory', () => {
 
@@ -30,14 +31,14 @@ describe('Sparse Representation Factory', () => {
             }, instanceOfSingleton, Status.locationOnly, true],
             ['sparse, singleton, on (returns undefined)', {
                 uri: 'http://example.com/1',
-                on: () => undefined,
+                on: undefined,
             }, instanceOfSingleton, Status.locationOnly, true],
             ['hydrated, singleton', {
-                on: () => ({ links: [] }),
+                on:  ({ links: [] }),
             } as ResourceFactoryOptions, instanceOfSingleton, Status.hydrated, false],
             ['hydrated, collection', {
                 sparseType: 'collection',
-                on: () => ({ links: [], items: [] }),
+                on: ({ links: [], items: [] }),
             } as ResourceFactoryOptions, instanceOfCollection, Status.hydrated, false],
         ])
             .describe(

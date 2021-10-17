@@ -54,7 +54,7 @@ export class ResourceMergeFactory {
      */
     public static async editMerge<T extends TrackedRepresentation | LinkedRepresentation,
         TForm extends FormRepresentation,
-        TField extends Extract<keyof T, string>>(
+        TField extends Extract<keyof Omit<T, 'links'>, string>>(
         resource: T,
         document: T | DocumentRepresentation<T>,
         form: TForm,

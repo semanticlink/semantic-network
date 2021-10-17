@@ -8,6 +8,7 @@ import anylogger from 'anylogger';
 import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SparseRepresentationFactory } from './sparseRepresentationFactory';
 import { RepresentationUtil } from '../utils/representationUtil';
+import { TrackedRepresentation } from '../types/types';
 
 const log = anylogger('NamedRepresentationFactory');
 
@@ -47,9 +48,9 @@ export class NamedRepresentationFactory {
      * @param resource context resource that has the sub-resource added (and is tracked {@link State.collection} and {@link State.singleton})
      * @param options specify the {@link ResourceQueryOptions.rel} to pick the name resource
      */
-    public static async load<T extends LinkedRepresentation, U extends LinkedRepresentation>(
+    public static async load<T extends LinkedRepresentation, TResult extends LinkedRepresentation>(
         resource: T,
-        options?: ResourceQueryOptions & ResourceAssignOptions): Promise<U | undefined> {
+        options?: ResourceQueryOptions & ResourceAssignOptions): Promise<TrackedRepresentation<TResult> | undefined> {
         const {
             rel = undefined,
             name = NamedRepresentationFactory.defaultNameStrategy(rel, resource),
@@ -57,28 +58,26 @@ export class NamedRepresentationFactory {
 
         if (rel && name) {
             if (TrackedRepresentationUtil.isTracked(resource, name)) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore arrgghhhh
-                const namedResource = RepresentationUtil.getProperty(resource, name);
+                const namedResource = RepresentationUtil.getProperty(resource, name) as unknown as LinkedRepresentation;
                 if (namedResource) {
                     // don't just return value but ensure it has loading rules respected (eg expires)
                     return await TrackedRepresentationFactory.load(
                         namedResource,
-                        { ...options, rel: LinkRelation.Self });
+                        { ...options, rel: LinkRelation.Self }) as TrackedRepresentation<TResult>;
                 } // else fall through to undefined
                 // if the resource is tracked it is very unlikely that this resource doesn't exist
                 log.warn('Named resource \'%s\' on %s is undefined', name, LinkUtil.getUri(resource, LinkRelation.Self));
             } else {
                 const uri = LinkUtil.getUri(resource, rel);
                 if (uri) {
-                    const sparse = SparseRepresentationFactory.make({ uri }) as U;
+                    const sparse = SparseRepresentationFactory.make({ uri }) as TResult;
                     const namedResource = await TrackedRepresentationFactory.load(
                         sparse,
                         { ...options, rel: LinkRelation.Self });
                     if (namedResource) {
                         TrackedRepresentationUtil.add(resource, name, namedResource);
                     }
-                    return namedResource;
+                    return namedResource as TrackedRepresentation<TResult>;
                 } // else fall through to undefined
             }
         } else {

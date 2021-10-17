@@ -1,19 +1,13 @@
 import { LinkedRepresentation } from 'semantic-link';
-import { assertThat } from 'mismatched';
+import { assertThat, match } from 'mismatched';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
-import { IanaLinkRelation } from '../ianaLinkRelation';
-import { assertThat, match } from 'mismatched';
-import TrackedRepresentationUtil from '../utils/trackedRepresentationUtil';
-import { Status } from '../models/status';
-import SparseRepresentationFactory from '../representation/sparseRepresentationFactory';
-import TrackedRepresentationFactory from '../representation/trackedRepresentationFactory';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
-import { instanceOfSingleton } from '../utils/instanceOf';
+import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 
 describe('Tracked Representation Factory', () => {
 

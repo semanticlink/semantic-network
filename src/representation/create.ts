@@ -89,7 +89,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
     const form = await ApiUtil.get(resource as unknown as TrackedRepresentation<T>, {
         ...options,
         rel: formRel,
-    }) as FormRepresentation;
+    }) /*as FormRepresentation*/;
 
     if (instanceOfForm(form)) {
         try {
@@ -114,7 +114,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
                 // 201 will return an item compared with 200, 202
                 if (item) {
                     RepresentationUtil.addItemToCollection(resource, item);
-                    return item;
+                    return item as T;
                 } // drop through and return undefined
 
             } else {

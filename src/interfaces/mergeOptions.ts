@@ -16,7 +16,7 @@ export interface MergeOptions {
      * @remarks
      * The current implementation always includes the 'name' attribute
      */
-    readonly defaultFields?: string[];
+    readonly defaultFields?: Extract<keyof Omit<LinkedRepresentation, 'links'>, string> | string[];
     readonly resolver?: Resolver;
     readonly resourceResolver?: ResourceResolver;
     /**

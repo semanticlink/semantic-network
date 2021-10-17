@@ -1,5 +1,6 @@
 import { parallelWaitAll, sequentialWaitAll } from '../utils/promiseWaitAll';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
+import { CollectionRepresentation } from 'semantic-link';
 
 describe('Async wait all collection mixins', () => {
 
@@ -15,7 +16,7 @@ describe('Async wait all collection mixins', () => {
         const myMock = jest.fn();
 
         await promiseWaitAll(
-            SparseRepresentationFactory.make({ sparseType: 'collection', defaultItems: items }),
+            SparseRepresentationFactory.make({ sparseType: 'collection', defaultItems: items }) as CollectionRepresentation,
             async i => {
                 // change order of completion based on timeouts to simulate network call responses
                 await new Promise(r => setTimeout(() => {

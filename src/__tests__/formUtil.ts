@@ -51,9 +51,9 @@ describe('Form util', () => {
         items: FormItem[],
         defaults: string[],
         expected: string[]) => {
-        const form = { items: items } as FormRepresentation;
-        const fields = FormUtil.fieldsRequiringUpdate(resource, document, form, defaults) as string[];
-        assertThat(fields).is(expected);
+        const form = { items: items, links: [] };
+        const fields = FormUtil.fieldsRequiringUpdate(resource, document, form, defaults as Extract<keyof Omit<LinkedRepresentation, 'links'>, string>);
+        assertThat(fields).is(expected  as Extract<keyof Omit<LinkedRepresentation, 'links'>, string>);
     });
 
     test.each([
@@ -69,7 +69,7 @@ describe('Form util', () => {
         document: Partial<LinkedRepresentation>,
         items: FormItem[],
         expected: DocumentRepresentation) => {
-        const form = { items: items } as FormRepresentation;
+        const form = { items: items, links: [] };
         const fields = FormUtil.fieldsToReturnFromForm(document, form);
         assertThat(fields).is(expected);
     });

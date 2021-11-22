@@ -17,7 +17,7 @@ export type PromiseWaitAll = <T extends CollectionRepresentation<U>, U extends L
  * @param iterator promise-based iterator
  * @returns the array of mapped representations that have been iterated across
  */
-export type PromiseMapWaitAll = <T extends CollectionRepresentation<U>, U extends LinkedRepresentation, TMap extends unknown>(
+export type PromiseMapWaitAll = <T extends CollectionRepresentation<U>, U extends LinkedRepresentation, TMap>(
     resource: T,
     iterator: (item: U) => Promise<TMap>) => Promise<TMap[]>;
 
@@ -30,7 +30,7 @@ export type PromiseMapWaitAll = <T extends CollectionRepresentation<U>, U extend
  * @returns the array of mapped representations that have been iterated across
  * @see parallelMapWaitAll
  */
-export const sequentialMapWaitAll: PromiseMapWaitAll = async <T extends CollectionRepresentation<U>, U extends LinkedRepresentation, TMap extends unknown>(
+export const sequentialMapWaitAll: PromiseMapWaitAll = async <T extends CollectionRepresentation<U>, U extends LinkedRepresentation, TMap>(
     resource: T,
     iterator: (item: U) => Promise<TMap>): Promise<TMap[]> => {
 
@@ -49,7 +49,7 @@ export const sequentialMapWaitAll: PromiseMapWaitAll = async <T extends Collecti
  * @returns the array of mapped representations that have been iterated across
  * @see sequentialMapWaitAll
  */
-export const parallelMapWaitAll: PromiseMapWaitAll = async <T extends CollectionRepresentation<U>, U extends LinkedRepresentation, TMap extends unknown>(
+export const parallelMapWaitAll: PromiseMapWaitAll = async <T extends CollectionRepresentation<U>, U extends LinkedRepresentation, TMap>(
     resource: T,
     iterator: (item: U) => Promise<TMap>): Promise<TMap[]> => {
 

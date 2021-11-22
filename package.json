@@ -54,7 +54,7 @@
     "mismatched": "^2.9.2",
     "ts-jest": "^27.0.3",
     "typescript": ">=4.5.2",
-    "ulog": "^1.1.0"
+    "ulog": "1.1.0"
   },
   "dependencies": {
     "anylogger": "^1.0.11",

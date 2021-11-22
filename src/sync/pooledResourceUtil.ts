@@ -134,6 +134,7 @@ export class PooledResourceUtil {
         const result = await ApiUtil.get(resource, { ...options, rel: collectionRel });
         if (result) {
             log.debug('Pooled collection \'%s\' on %s', collectionName, LinkUtil.getUri(resource, LinkRelation.Self));
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore chaos in typing, sorry
             return await this.sync(result, resourceDocument, options);
         }

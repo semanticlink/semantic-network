@@ -1,5 +1,4 @@
 import { CollectionRepresentation, LinkedRepresentation } from 'semantic-link';
-import { TrackedRepresentation } from '../types/types';
 
 /**
  * Resolution of promises across a collection. Returns when all resolutions have occurred.

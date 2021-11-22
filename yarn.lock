@@ -1780,10 +1780,10 @@ atob@^2.1.2:
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
-axios@>=0.22.0:
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.23.0.tgz#b0fa5d0948a8d1d75e3d5635238b6c4625b05149"
-  integrity sha512-NmvAE4i0YAv5cKq8zlDoPd1VLKAqX5oLuZKs8xkJa4qi6RGn0uhCYFjWtHHC9EM/MwOwYWOs53W+V0aqEXq1sg==
+axios@>=0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.24.0.tgz#804e6fa1e4b9c5288501dd9dff56a7a0940d20d6"
+  integrity sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==
   dependencies:
     follow-redirects "^1.14.4"
 
@@ -4444,13 +4444,13 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-semantic-link@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/semantic-link/-/semantic-link-1.0.6.tgz#393f144c91ad1289690ad7e983cfbd5cc779299e"
-  integrity sha512-ldAjqidy1BfTiMV5flATaurEgtPGNcIC/E2CYzPe8nw8+RBCVp1DuZ84FfwnzNbFBnOPd3mIqLvnrIyHzDvkaA==
+semantic-link@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/semantic-link/-/semantic-link-1.0.7.tgz#ec9ce428857136cc6ccb8f339b532343e963f993"
+  integrity sha512-N0h2NZKHWAq3eXdtKI5Qaf9RlBxZddJFNS9Ch6rVM2lfU80wRS7I4/jt/R0RmizntLCIxBvqWafgZ+Qj6/c2HA==
   dependencies:
     anylogger ">0.11"
-    axios ">=0.22.0"
+    axios ">=0.24.0"
 
 semver@7.0.0:
   version "7.0.0"

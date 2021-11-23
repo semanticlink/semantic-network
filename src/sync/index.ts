@@ -228,7 +228,7 @@ export async function syncResource<T extends LinkedRepresentation>(
 
         const result = await ApiUtil.get(resource, options);
         if (instanceOfCollection(result)) {
-            const syncInfo = await SyncUtil.syncResourceInCollection(result, document as T, options);
+            const syncInfo = await SyncUtil.syncResourceInCollection(result, document, options);
             if (syncInfo) {
                 return await SyncUtil.syncInfos(strategies, options)(syncInfo) as T;
             }

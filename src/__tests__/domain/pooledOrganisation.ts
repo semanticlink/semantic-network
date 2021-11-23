@@ -1,5 +1,5 @@
 import { LinkedRepresentation } from 'semantic-link';
-import { PooledResource, PooledResourceResolver, RelName, } from '../../sync/pooledResource';
+import { PooledResource, PooledResourceResolver, RelName } from '../../sync/pooledResource';
 import { CustomLinkRelation } from './customLinkRelation';
 import { Question } from './question';
 

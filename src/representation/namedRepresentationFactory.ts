@@ -8,7 +8,7 @@ import anylogger from 'anylogger';
 import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SparseRepresentationFactory } from './sparseRepresentationFactory';
 import { RepresentationUtil } from '../utils/representationUtil';
-import { TrackedRepresentation } from '../types/types';
+import { Nullable, TrackedRepresentation } from '../types/types';
 
 const log = anylogger('NamedRepresentationFactory');
 
@@ -48,9 +48,11 @@ export class NamedRepresentationFactory {
      * @param resource context resource that has the sub-resource added (and is tracked {@link State.collection} and {@link State.singleton})
      * @param options specify the {@link ResourceQueryOptions.rel} to pick the name resource
      */
-    public static async load<T extends LinkedRepresentation, TResult extends LinkedRepresentation>(
+    public static async load<TReturn extends LinkedRepresentation,
+        T extends LinkedRepresentation | TReturn = LinkedRepresentation,
+        TResult extends TReturn = T extends TReturn ? T : TReturn>(
         resource: T,
-        options?: ResourceQueryOptions & ResourceAssignOptions): Promise<TrackedRepresentation<TResult> | undefined> {
+        options?: ResourceQueryOptions & ResourceAssignOptions): Promise<Nullable<TrackedRepresentation<TResult>>> {
         const {
             rel = undefined,
             name = NamedRepresentationFactory.defaultNameStrategy(rel, resource),
@@ -70,7 +72,7 @@ export class NamedRepresentationFactory {
             } else {
                 const uri = LinkUtil.getUri(resource, rel);
                 if (uri) {
-                    const sparse = SparseRepresentationFactory.make({ uri }) as TResult;
+                    const sparse = SparseRepresentationFactory.make({ uri });
                     const namedResource = await TrackedRepresentationFactory.load(
                         sparse,
                         { ...options, rel: LinkRelation.Self });

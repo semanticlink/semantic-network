@@ -25,7 +25,7 @@ const log = anylogger('Update');
  * @param options
  */
 export async function update<T extends LinkedRepresentation>(
-    resource: T | TrackedRepresentation<T> ,
+    resource: T | TrackedRepresentation<T>,
     document: T | DocumentRepresentation<T>,
     options?: ResourceUpdateOptions &
         ResourceLinkOptions &
@@ -78,9 +78,9 @@ async function updateSingleton<T extends LinkedRepresentation>(
             }
         } catch (e) {
             if (typeof e === 'string') {
-                log.error('[Merge] unknown update error %s', e);
+                log.error('Unknown (merge) update error %s', e);
             } else {
-                log.error('[Merge] unknown update error %o', e);
+                log.error('Unknown (merge) update error %o', e);
             }
         }
     } else {

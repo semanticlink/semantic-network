@@ -11,7 +11,7 @@ import { LinkRelation } from '../linkRelation';
 import anylogger from 'anylogger';
 import { NamedRepresentationFactory } from '../representation/namedRepresentationFactory';
 import { instanceOfCollection } from './instanceOf/instanceOfCollection';
-import { TrackedRepresentation } from '../types/types';
+import { Nullable, TrackedRepresentation } from '../types/types';
 
 const log = anylogger('RepresentationUtil');
 
@@ -108,7 +108,7 @@ export function omit<T extends LinkedRepresentation,
  */
 export function findInCollection<T extends LinkedRepresentation>(
     collection: CollectionRepresentation<T>,
-    options?: ResourceQueryOptions): T | undefined {
+    options?: ResourceQueryOptions): Nullable<T> {
 
     if (!collection || !instanceOfCollection(collection)) {
         log.debug(`Not an instance of collection: '${LinkUtil.getUri(collection, LinkRelation.Self, undefined)}'`);
@@ -128,7 +128,7 @@ export function findInCollection<T extends LinkedRepresentation>(
             resourceIdentifier = uri;
         } else {
             log.error('find resource in collection failed: no \'where\' and \'rel\' options that combine to create resource identifier');
-            return;
+            return undefined;
         }
     }
 

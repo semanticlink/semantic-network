@@ -4,6 +4,7 @@ import { PooledCollectionOptions } from '../interfaces/pooledCollectionOptions';
 import { ResourceResolver } from '../interfaces/resourceResolver';
 import { LinkRelation } from '../linkRelation';
 import { PooledResourceUtil } from './pooledResourceUtil';
+import { Nullable } from '../types/types';
 
 const log = anylogger('PooledResource');
 
@@ -12,7 +13,7 @@ const log = anylogger('PooledResource');
  * that is used to resolve the resource itself via a known link relation
  */
 export type RelName = string;
-export type PooledResourceResolver = <T extends LinkedRepresentation>(resource: T, options?: PooledCollectionOptions) => Promise<T | undefined>;
+export type PooledResourceResolver = <T extends LinkedRepresentation>(resource: T, options?: PooledCollectionOptions) => Promise<Nullable<T>>;
 const noopUndefined = async () => undefined;
 
 export abstract class PooledResource<T extends LinkedRepresentation> {

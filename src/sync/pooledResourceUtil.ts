@@ -1,8 +1,8 @@
 import anylogger from 'anylogger';
-import { CollectionRepresentation, LinkedRepresentation, LinkUtil, RelationshipType } from 'semantic-link';
+import { LinkedRepresentation, LinkUtil, RelationshipType } from 'semantic-link';
 import { ApiUtil } from '../apiUtil';
 import { LinkRelation } from '../linkRelation';
-import { TrackedRepresentation } from '../types/types';
+import { Nullable, TrackedRepresentation } from '../types/types';
 import { RepresentationUtil } from '../utils/representationUtil';
 import { noopResolver } from '../representation/resourceMergeFactory';
 import { PooledCollectionOptions } from '../interfaces/pooledCollectionOptions';
@@ -66,13 +66,13 @@ export class PooledResourceUtil {
      * When pooled collection is read-only then no resources may be added from other contexts.
      *
      */
-    static async sync<T extends LinkedRepresentation>(context: T, aDocument: T, options?: PooledCollectionOptions): Promise<T | undefined> {
+    static async sync<T extends LinkedRepresentation>(context: T, aDocument: T, options?: PooledCollectionOptions): Promise<Nullable<T>> {
 
         const { rel, resolver = noopResolver } = { ...options };
 
         // step 1: generate the context as a collection
         const resource = rel ?
-            await ApiUtil.get(context as TrackedRepresentation<T>, options) :
+            await ApiUtil.get(context, options) :
             context;
 
         // step 2: process
@@ -102,13 +102,17 @@ export class PooledResourceUtil {
                             log.error('Unexpected error: resource \'%s\' is not found on %s', resolvedUri, uri);
                         }
                     } else {
-                        return await makeAndResolveResource(resource, aDocument as unknown as CollectionRepresentation<T>, options) as unknown as T;
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        return await makeAndResolveResource(resource, aDocument, options) as unknown as T;
                     }
                 }
 
             } else {
                 // strategy four: make if we can because we at least might have the attributes
-                return await makeAndResolveResource(resource, aDocument as unknown as CollectionRepresentation<T>, options) as unknown as T;
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                return await makeAndResolveResource(resource, aDocument, options) as unknown as T;
             }
         }
 

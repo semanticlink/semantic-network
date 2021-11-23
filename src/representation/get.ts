@@ -1,4 +1,4 @@
-import { CollectionRepresentation, LinkedRepresentation } from 'semantic-link';
+import { LinkedRepresentation } from 'semantic-link';
 import { NamedRepresentationFactory } from './namedRepresentationFactory';
 import { TrackedRepresentationFactory } from './trackedRepresentationFactory';
 import { ResourceQueryOptions } from '../interfaces/resourceQueryOptions';
@@ -11,20 +11,68 @@ import { RepresentationUtil } from '../utils/representationUtil';
 import anylogger from 'anylogger';
 import { ResourceUpdateOptions } from '../interfaces/resourceUpdateOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
-import { TrackedRepresentation } from '../types/types';
+import { Nullable, TrackedRepresentation } from '../types/types';
 
 const log = anylogger('get');
 
+
+/*
+export async function t<TReturn extends LinkedRepresentation,
+    T extends LinkedRepresentation | TReturn = LinkedRepresentation,
+    TResult extends TReturn = T extends TReturn ? T : TReturn>(
+    resource: T | TrackedRepresentation<T>):
+    Promise<Nullable<TResult | TrackedRepresentation<TResult>>> {
+    if (resource) {
+        return await TrackedRepresentationFactory.load(resource) as unknown as TResult;
+    }
+    // return undefined;
+}
+
+interface F extends LinkedRepresentation {
+    name: string;
+}
+
+interface Z extends LinkedRepresentation {
+    name: string;
+}
+
+interface FColl extends CollectionRepresentation<F> {
+}
+
+async function f() {
+
+    const newVar: Z = { name: 'dfdf', links: [] };
+    const j = await t(newVar);
+    const h = await t<Z>(newVar);
+    const l = await t<F>(newVar);
+    const i = await t<FColl>(newVar);
+    const k = await t<FColl, Z>(newVar);
+    const m = await t<FColl, F>(newVar);
+
+    console.log(j, h , i, k, l, m);
+
+    const newColl: FColl = {
+        links: [],
+        items: []
+    }
+
+    const a = await t<FColl>(newColl);
+    const a1 = await t(newColl);
+    const a2 = await t(newColl) as Unbox<FColl>;
+
+}
+*/
+
 /**
+ * Retrieve a resource based on its context and options, and its current state (ie hydrated or not)
  *
- * TODO: accept but don't require TrackedRepresentation interface
+ * Note: a returned resource will not always be the same (ie self) but rather a different linked resource.
  *
- * @param resource
- * @param options
+ * TODO: where 'named' resources are known, return that type based on the 'rel' in options.
  */
-export async function get<T extends LinkedRepresentation,
-    U extends T | CollectionRepresentation<T>,
-    TResult extends LinkedRepresentation = TrackedRepresentation<U>>(
+export async function get<TReturn extends LinkedRepresentation,
+    T extends LinkedRepresentation | TReturn = LinkedRepresentation,
+    TResult extends TReturn = T extends TReturn ? T : TReturn>(
     resource: T | TrackedRepresentation<T>,
     options?: ResourceFactoryOptions &
         ResourceQueryOptions &
@@ -32,7 +80,7 @@ export async function get<T extends LinkedRepresentation,
         HttpRequestOptions &
         ResourceMergeOptions &
         ResourceFetchOptions &
-        ResourceUpdateOptions): Promise<TResult | undefined> {
+        ResourceUpdateOptions): Promise<Nullable<TResult | TrackedRepresentation<TResult>>> {
 
     const {
         rel = undefined,
@@ -47,7 +95,7 @@ export async function get<T extends LinkedRepresentation,
             // then check for existence
             const item = RepresentationUtil.findInCollection(collection, options);
             if (item) {
-                return await TrackedRepresentationFactory.load(item, options) as TResult;
+                return await TrackedRepresentationFactory.load(item, options) as TrackedRepresentation<TResult>;
             } else {
                 log.debug('Item not found in collection');
                 return;

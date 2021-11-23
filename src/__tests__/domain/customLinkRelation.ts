@@ -1,10 +1,8 @@
-import { RelationshipType } from 'semantic-link';
-
 export class CustomLinkRelation {
-    static readonly Steps: RelationshipType = 'steps';
-    static readonly Field: RelationshipType = 'field';
-    static readonly Information: RelationshipType = 'information';
-    static readonly Question: RelationshipType = 'question';
-    static readonly Questions: RelationshipType = 'questions';
-    static readonly Choices: RelationshipType = 'choices';
+    static readonly Steps = 'steps';
+    static readonly Field = 'field';
+    static readonly Information = 'information';
+    static readonly Question = 'question';
+    static readonly Questions = 'questions';
+    static readonly Choices = 'choices';
 }

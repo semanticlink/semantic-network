@@ -31,7 +31,7 @@ describe('get', () => {
 
         it('load, forceLoad hydrated', async () => {
             await ApiUtil.get(
-                makeFromFixture(resource as LinkedRepresentation),
+                makeFromFixture(resource),
                 { getFactory: get, putFactory: put, deleteFactory: del, postFactory: post, forceLoad: true });
 
             const calls = [

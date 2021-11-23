@@ -5,7 +5,7 @@ import { ApiUtil } from '../../apiUtil';
 import { ResourceQueryOptions } from '../../interfaces/resourceQueryOptions';
 import { StepType } from './interfaces/stepType';
 import { StepRepresentation } from './interfaces/stepRepresentation';
-import { TrackedRepresentation } from '../../types/types';
+import { Nullable } from '../../types/types';
 import { QuestionRepresentation } from './interfaces/questionRepresentation';
 import { ChoiceCollection } from './interfaces/choiceCollection';
 
@@ -16,22 +16,16 @@ export class Step {
     /**
      * Return steps collection with items hydrated
      */
-    public static async getSteps(step: StepRepresentation, options?: ResourceQueryOptions): Promise<StepCollection | undefined> {
-        return await ApiUtil.get(
-            step as TrackedRepresentation<StepRepresentation>,
-            { ...options, includeItems: true, rel: CustomLinkRelation.Steps });
+    public static async getSteps(step: StepRepresentation, options?: ResourceQueryOptions): Promise<Nullable<StepCollection>> {
+        return await ApiUtil.get(step, { ...options, includeItems: true, rel: CustomLinkRelation.Steps });
     }
 
-    public static async getQuestion(sections: StepRepresentation, options?: ResourceQueryOptions): Promise<QuestionRepresentation | undefined> {
-        return await ApiUtil.get(
-            sections as TrackedRepresentation<StepRepresentation>,
-            { ...options, rel: CustomLinkRelation.Field });
+    public static async getQuestion(sections: StepRepresentation, options?: ResourceQueryOptions): Promise<Nullable<QuestionRepresentation>> {
+        return await ApiUtil.get(sections, { ...options, rel: CustomLinkRelation.Field });
     }
 
-    public static async getChoices(questions: QuestionRepresentation, options?: ResourceQueryOptions): Promise<ChoiceCollection | undefined> {
-        return await ApiUtil.get(
-            questions as TrackedRepresentation<QuestionRepresentation>,
-            { includeItems: true, ...options, rel: CustomLinkRelation.Choices });
+    public static async getChoices(questions: QuestionRepresentation, options?: ResourceQueryOptions): Promise<Nullable<ChoiceCollection>> {
+        return await ApiUtil.get(questions, { includeItems: true, ...options, rel: CustomLinkRelation.Choices });
     }
 
     /**

@@ -79,10 +79,13 @@ export type Representation = SingletonRepresentation | CollectionRepresentation 
  */
 export type TrackedRepresentation<T extends LinkedRepresentation = LinkedRepresentation> = T & LocalState;
 
-export type Unbox<T> = T extends TrackedRepresentation<CollectionRepresentation<infer U>> ?
+export type Unbox<T extends LinkedRepresentation = LinkedRepresentation> = T extends TrackedRepresentation<CollectionRepresentation<infer U>> ?
     U :
     T extends TrackedRepresentation<infer U> ?
-        U : LinkedRepresentation
+        U :
+        T extends LinkedRepresentation ?
+            T :
+            never;
 
 /**
  * A field (key) from the form 'name' is matched to the value in the form representation items field
@@ -94,4 +97,7 @@ export type FormFieldName<T extends FormRepresentation = FormRepresentation> = T
  * the representations type
  */
 export type FormFieldReturnType<T, K> = K extends (keyof (T)) ? T[K] : never;
+
+export type Nullable<T> = T | undefined;
+
 

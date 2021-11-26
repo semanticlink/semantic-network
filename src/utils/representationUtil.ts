@@ -111,7 +111,7 @@ export function findInCollection<T extends LinkedRepresentation>(
     options?: ResourceQueryOptions): Nullable<T> {
 
     if (!collection || !instanceOfCollection(collection)) {
-        log.debug(`Not an instance of collection: '${LinkUtil.getUri(collection, LinkRelation.Self, undefined)}'`);
+        log.error(`find resource in collection failed: not an instance of collection — '${LinkUtil.getUri(collection, LinkRelation.Self, undefined)}'`);
         return undefined;
     }
 
@@ -130,6 +130,10 @@ export function findInCollection<T extends LinkedRepresentation>(
             log.error('find resource in collection failed: no \'where\' and \'rel\' options that combine to create resource identifier');
             return undefined;
         }
+    } else if (Array.isArray(where)) {
+        log.warn('find resource in collection failed: array cannot be assigned to where');
+    } else {
+        log.warn('find resource in collection failed: unknown where');
     }
 
     // attribute look up strategy. Used for fallback strategy 2.
@@ -200,5 +204,26 @@ export class RepresentationUtil {
             collection.items = [item];
         }
         return collection;
+    }
+
+    /**
+     * Returns the first item from a collection
+     *
+     * TODO: this should never be used but rather look for the 'current' on links and return
+     */
+    public static current<T extends LinkedRepresentation>(collection: Nullable<CollectionRepresentation<T>>): T | undefined {
+
+        if (!collection){
+            return undefined;
+        }
+
+        if (instanceOfCollection(collection)) {
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [head, ...tail] = collection.items;
+            return head;
+        }
+
+        return undefined;
     }
 }

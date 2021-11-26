@@ -20,6 +20,7 @@ export enum FieldType {
     // html field types
     Text = 'http://types/text',
     TextArea = 'http://types/text/area',
+    TextHtml = 'http://types/text/html',
     Password = 'http://types/text/password',
     Address = 'http://types/text/address',
     Email = 'http://types/text/email',
@@ -52,6 +53,7 @@ export enum FieldType {
 export type FormType =
     | FieldType.Text
     | FieldType.TextArea
+    | FieldType.TextHtml
     | FieldType.Password
     | FieldType.Address
     | FieldType.Email

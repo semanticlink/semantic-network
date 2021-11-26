@@ -79,10 +79,13 @@ export type Representation = SingletonRepresentation | CollectionRepresentation 
  */
 export type TrackedRepresentation<T extends LinkedRepresentation = LinkedRepresentation> = T & LocalState;
 
-export type Unbox<T extends LinkedRepresentation = LinkedRepresentation> = T extends TrackedRepresentation<CollectionRepresentation<infer U>> ?
+export type Unbox<T extends LinkedRepresentation = LinkedRepresentation> =
+    T extends TrackedRepresentation<CollectionRepresentation<infer U>> ?
     U :
     T extends TrackedRepresentation<infer U> ?
         U :
+        T extends CollectionRepresentation<infer U> ?
+            U :
         T extends LinkedRepresentation ?
             T :
             never;

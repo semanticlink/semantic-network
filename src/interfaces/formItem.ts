@@ -102,6 +102,7 @@ export interface FormItem {
     readonly rules?: string;
 
     // group collection
+    readonly additionalInformation?: string;
 
     /**
      * A {@link FieldType.Select} or {@link FieldType.Collection} may have a set of by-value items for display

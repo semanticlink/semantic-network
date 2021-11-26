@@ -1,6 +1,6 @@
 import { LinkedRepresentation } from 'semantic-link';
 
-export type ComparableRepresentation = LinkedRepresentation & { name?: string }
+export type ComparableRepresentation = LinkedRepresentation & { name?: string, id? : string }
 
 /**
  * A set of comparators for matching resources in the network of data differencer (@link Differencer}

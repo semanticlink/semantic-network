@@ -219,5 +219,18 @@ export class FormUtil {
         }
     }
 
+    /**
+     * Take a form representation and return back a document based on the keys in the form representation.
+     *
+     * TODO: values are currently null but could include any defaults from the form
+     */
+    public static toEmptyDocument(form: FormRepresentation): DocumentRepresentation {
+        const formItems = form.items || [];
+        const documentation = formItems.map(key => ({ [key.name]: null }));
+        // ensure that it is cloned
+        //?? check, shouldn't need this
+        return Object.assign({}, ...documentation);
+    }
+
 
 }

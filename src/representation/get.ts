@@ -12,6 +12,8 @@ import anylogger from 'anylogger';
 import { ResourceUpdateOptions } from '../interfaces/resourceUpdateOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { Nullable, TrackedRepresentation } from '../types/types';
+import { LinkRelation } from '../linkRelation';
+import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 
 const log = anylogger('get');
 
@@ -87,6 +89,12 @@ export async function get<TReturn extends LinkedRepresentation,
         where = undefined,
     } = { ...options };
 
+    // look at the context resource and ensure that it is first hydrated before loading sub resources
+    if (rel && rel !== LinkRelation.Self && TrackedRepresentationUtil.needsFetchFromState(resource as TrackedRepresentation)) {
+        log.debug('load self context resource')
+        await TrackedRepresentationFactory.load(resource, { ...options, rel: LinkRelation.Self });
+    }
+
     // find specific item in collection
     if (where) {
         if (instanceOfCollection(resource)) {
@@ -98,7 +106,7 @@ export async function get<TReturn extends LinkedRepresentation,
                 return await TrackedRepresentationFactory.load(item, options) as TrackedRepresentation<TResult>;
             } else {
                 log.debug('Item not found in collection');
-                return;
+                return undefined;
             }
         } else {
             log.warn('Where options cannot be used outside of a collection, skipping where');

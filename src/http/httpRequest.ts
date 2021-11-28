@@ -3,12 +3,16 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
 import { DocumentRepresentation } from '../interfaces/document';
 import { LinkRelation } from '../linkRelation';
+import { Loader } from './loader';
 
 export class HttpRequest {
     private options: Required<HttpRequestOptions>;
+    private loader: Loader;
 
     constructor(options: Required<HttpRequestOptions>) {
         this.options = options;
+        // currently not injected
+        this.loader = new Loader();
     }
 
     /**
@@ -24,6 +28,11 @@ export class HttpRequest {
 
         const { getFactory = this.options.getFactory } = { ...options };
 
+        // note: leaving media type out
+        // const id = LinkUtil.getUri(link, rel);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        // return await this.loader.schedule(id, getFactory, link, rel, options);
         return await getFactory<T>(link, rel, options);
     }
 

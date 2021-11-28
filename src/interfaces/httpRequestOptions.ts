@@ -17,7 +17,7 @@ export interface HttpRequestOptions {
     postFactory?: <T>(
         link: LinkType,
         rel: RelationshipType,
-        document: T |DocumentRepresentation<T>,
+        document: T | DocumentRepresentation<T>,
         options?: AxiosRequestConfig
     ) => Promise<AxiosResponse<T>>;
     deleteFactory?: (link: LinkType, rel: RelationshipType) => Promise<AxiosResponse<void>>;

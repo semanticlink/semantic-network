@@ -1,4 +1,4 @@
-import { LinkedRepresentation } from 'semantic-link';
+import { CollectionRepresentation, LinkedRepresentation } from 'semantic-link';
 import { NamedRepresentationFactory } from './namedRepresentationFactory';
 import { TrackedRepresentationFactory } from './trackedRepresentationFactory';
 import { ResourceQueryOptions } from '../interfaces/resourceQueryOptions';
@@ -97,12 +97,25 @@ export async function get<TReturn extends LinkedRepresentation,
 
     // find specific item in collection
     if (where) {
+
+        // when combined with rel, the sub resource should be the collection
+        // TODO: write tests across this path
+        if (rel && rel !== LinkRelation.Self){
+            const namedSubResource =  await NamedRepresentationFactory.load(resource, options);
+            if (namedSubResource){
+                resource = namedSubResource as TrackedRepresentation<T>;
+                // now that sub resource is loaded, re-contextualise to this resource (ie will become 'self')
+                delete options?.rel
+            }
+        }
+
         if (instanceOfCollection(resource)) {
-            // refresh collection first
+            // synchronise collection by applying all current rules (eg includeItems)
             const collection = await TrackedRepresentationFactory.load(resource, options);
             // then check for existence
             const item = RepresentationUtil.findInCollection(collection, options);
             if (item) {
+                log.debug('Item found in collection');
                 return await TrackedRepresentationFactory.load(item, options) as TrackedRepresentation<TResult>;
             } else {
                 log.debug('Item not found in collection');

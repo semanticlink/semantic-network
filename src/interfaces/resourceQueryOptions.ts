@@ -11,6 +11,9 @@ export interface ResourceQueryOptions {
     where?: LinkedRepresentation | Uri | (<T extends LinkedRepresentation>() => T);
     /**
      * Identifies the link rel to follow to add {@link LinkedRepresentation} onto the resource.
+     *
+     * When combined with {@link where} the rel denotes a sub resource to follow first which should contain the collection
+     * to query on.
      */
     rel?: RelationshipType;
    /**

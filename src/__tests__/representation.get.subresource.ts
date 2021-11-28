@@ -11,8 +11,7 @@ import { TrackedRepresentation } from '../types/types';
 import { ApiOptions } from '../interfaces/apiOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 
-
-describe('Tracked Representation Factory, on sub resource', () => {
+describe('resource, get, on sub resource', () => {
 
     const post = jest.fn();
     const get = jest.fn();
@@ -30,8 +29,7 @@ describe('Tracked Representation Factory, on sub resource', () => {
         name: string;
     }
 
-    interface UserCollection extends CollectionRepresentation<UserRepresentation> {
-    }
+    type UserCollection = CollectionRepresentation<UserRepresentation>
 
     interface ApiRepresentation extends LinkedRepresentation {
         version: string;

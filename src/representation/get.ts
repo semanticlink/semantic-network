@@ -1,4 +1,4 @@
-import { CollectionRepresentation, LinkedRepresentation } from 'semantic-link';
+import { LinkedRepresentation } from 'semantic-link';
 import { NamedRepresentationFactory } from './namedRepresentationFactory';
 import { TrackedRepresentationFactory } from './trackedRepresentationFactory';
 import { ResourceQueryOptions } from '../interfaces/resourceQueryOptions';
@@ -91,7 +91,7 @@ export async function get<TReturn extends LinkedRepresentation,
 
     // look at the context resource and ensure that it is first hydrated before loading sub resources
     if (rel && rel !== LinkRelation.Self && TrackedRepresentationUtil.needsFetchFromState(resource as TrackedRepresentation)) {
-        log.debug('load self context resource')
+        log.debug('load self context resource');
         await TrackedRepresentationFactory.load(resource, { ...options, rel: LinkRelation.Self });
     }
 
@@ -99,13 +99,12 @@ export async function get<TReturn extends LinkedRepresentation,
     if (where) {
 
         // when combined with rel, the sub resource should be the collection
-        // TODO: write tests across this path
-        if (rel && rel !== LinkRelation.Self){
-            const namedSubResource =  await NamedRepresentationFactory.load(resource, options);
-            if (namedSubResource){
+        if (rel && rel !== LinkRelation.Self) {
+            const namedSubResource = await NamedRepresentationFactory.load(resource, options);
+            if (namedSubResource) {
                 resource = namedSubResource as TrackedRepresentation<T>;
                 // now that sub resource is loaded, re-contextualise to this resource (ie will become 'self')
-                delete options?.rel
+                delete options?.rel;
             }
         }
 
@@ -128,7 +127,8 @@ export async function get<TReturn extends LinkedRepresentation,
     }
 
     // named resources
-    if (rel) {
+    // do not add 'self' as sub resource
+    if (rel && rel !== LinkRelation.Self) {
         return await NamedRepresentationFactory.load(resource, options);
     }
 

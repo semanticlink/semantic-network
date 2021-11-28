@@ -10,7 +10,7 @@ import { get as apiGet } from '../representation/get';
 import { TrackedRepresentation } from '../types/types';
 
 
-describe('Tracked Representation Factory, on sparse', () => {
+describe('resource, get, on sparse', () => {
 
     const post = jest.fn();
     const get = jest.fn();

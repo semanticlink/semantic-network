@@ -7,6 +7,7 @@ import { LinkRelation } from '../linkRelation';
 import { assertThat } from 'mismatched';
 import { ApiUtil } from '../apiUtil';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
+import { bottleneckLoader } from '../http/bottleneckLoader';
 
 /**
  * Helper to create a {@link LinkedRepresentation} with {@link State}
@@ -33,7 +34,7 @@ describe('get', () => {
         it('load, forceLoad hydrated', async () => {
 
             HttpRequestFactory.Instance(
-                { getFactory: get, putFactory: put, deleteFactory: del, postFactory: post }, true);
+                { getFactory: get, putFactory: put, deleteFactory: del, postFactory: post, loader: bottleneckLoader }, true);
 
             await ApiUtil.get(makeFromFixture(resource as LinkedRepresentation), { forceLoad: true });
 

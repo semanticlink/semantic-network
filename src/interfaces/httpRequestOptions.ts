@@ -1,6 +1,7 @@
 import { LinkType, RelationshipType } from 'semantic-link';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { DocumentRepresentation } from './document';
+import { Loader } from './loader';
 
 export interface HttpRequestOptions {
     getFactory?: <T>(
@@ -21,5 +22,6 @@ export interface HttpRequestOptions {
         options?: AxiosRequestConfig
     ) => Promise<AxiosResponse<T>>;
     deleteFactory?: (link: LinkType, rel: RelationshipType) => Promise<AxiosResponse<void>>;
+    loader?: Loader;
 }
 

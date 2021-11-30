@@ -6,6 +6,7 @@ import { LinkRelation } from '../linkRelation';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 import { get as apiGet } from '../representation/get';
 import { ApiOptions } from '../interfaces/apiOptions';
+import { bottleneckLoader } from '../http/bottleneckLoader';
 
 
 describe('resource, get, on self', () => {
@@ -16,7 +17,7 @@ describe('resource, get, on self', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del }, true);
+        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
 
     afterEach(() => {
         get.mockReset();

@@ -10,6 +10,7 @@ import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 import { RepresentationUtil } from '../utils/representationUtil';
+import { bottleneckLoader } from '../http/bottleneckLoader';
 
 const makeHydratedResource = <T extends LinkedRepresentation>(document: T): TrackedRepresentation<T> =>
     // note: clone the document for multiple uses
@@ -23,7 +24,7 @@ describe('Named Representation Factory', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del }, true);
+        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
 
     function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {
         assertThat({

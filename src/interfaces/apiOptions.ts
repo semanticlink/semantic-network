@@ -6,6 +6,7 @@ import { ResourceFactoryOptions } from './resourceFactoryOptions';
 import { ResourceUpdateOptions } from './resourceUpdateOptions';
 import { MergeOptions } from './mergeOptions';
 import { HttpRequestOptions } from './httpRequestOptions';
+import { LoaderJobOptions } from './loader';
 
 export type ApiOptions =
     ResourceQueryOptions &
@@ -15,4 +16,5 @@ export type ApiOptions =
     ResourceFactoryOptions &
     ResourceUpdateOptions &
     HttpRequestOptions &
-    MergeOptions;
+    MergeOptions &
+    LoaderJobOptions;

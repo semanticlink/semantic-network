@@ -14,6 +14,7 @@ import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { Nullable, TrackedRepresentation } from '../types/types';
 import { LinkRelation } from '../linkRelation';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
+import { LoaderJobOptions } from '../interfaces/loader';
 
 const log = anylogger('get');
 
@@ -82,7 +83,8 @@ export async function get<TReturn extends LinkedRepresentation,
         HttpRequestOptions &
         ResourceMergeOptions &
         ResourceFetchOptions &
-        ResourceUpdateOptions): Promise<Nullable<TResult | TrackedRepresentation<TResult>>> {
+        ResourceUpdateOptions &
+        LoaderJobOptions): Promise<Nullable<TResult | TrackedRepresentation<TResult>>> {
 
     const {
         rel = undefined,

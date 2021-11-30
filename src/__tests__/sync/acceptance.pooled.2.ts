@@ -28,6 +28,7 @@ import { assertThat } from 'mismatched';
 import { StepRepresentation } from '../domain/interfaces/stepRepresentation';
 import { PooledCollectionOptions } from '../../interfaces/pooledCollectionOptions';
 import { SyncOptions } from '../../interfaces/sync/syncOptions';
+import { bottleneckLoader } from '../../http/bottleneckLoader';
 
 const log = anylogger('Steps Test');
 
@@ -77,7 +78,7 @@ describe('Steps with pooled (new) resources', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del }, true);
+        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
 
 
     function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {
@@ -173,16 +174,14 @@ describe('Steps with pooled (new) resources', () => {
                 ['self', 'https://api.example.com/question/1/choice'],
                 ['self', 'https://api.example.com/choice/881e3ed135'],
                 ['self', 'https://api.example.com/organisation/a656927b0f/step/92c28454b7'],
-                ['self', 'https://api.example.com/choice/form/edit'],
+                // ['self', 'https://api.example.com/choice/form/edit'],
             ];
 
-            verifyMocks(10, 2, 0, 0);
+            verifyMocks(9, 2, 0, 0);
 
-            const actualUris = get.mock.calls.map(x => [x[1], LinkUtil.getUri(x[0], x[1])]);
-            assertThat(actualUris).is(uris);
+            const actualUris = get.mock.calls.map(x => LinkUtil.getUri(x[0], x[1]));
+            assertThat(actualUris).is(uris.map(x => x[1]));
             assertThat(actualPostUris).is(postUris);
-
-            // verifyMocks(9, 2, 0, 0);
 
         }, 100000);
     });

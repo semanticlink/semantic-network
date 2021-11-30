@@ -9,6 +9,7 @@ import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SparseRepresentationFactory } from './sparseRepresentationFactory';
 import { RepresentationUtil } from '../utils/representationUtil';
 import { Nullable, TrackedRepresentation } from '../types/types';
+import { LoaderJobOptions } from '../interfaces/loader';
 
 const log = anylogger('NamedRepresentationFactory');
 
@@ -52,7 +53,7 @@ export class NamedRepresentationFactory {
         T extends LinkedRepresentation | TReturn = LinkedRepresentation,
         TResult extends TReturn = T extends TReturn ? T : TReturn>(
         resource: T,
-        options?: ResourceQueryOptions & ResourceAssignOptions): Promise<Nullable<TrackedRepresentation<TResult>>> {
+        options?: ResourceQueryOptions & ResourceAssignOptions & LoaderJobOptions): Promise<Nullable<TrackedRepresentation<TResult>>> {
         const {
             rel = undefined,
             name = NamedRepresentationFactory.defaultNameStrategy(rel, resource),

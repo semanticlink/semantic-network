@@ -22,6 +22,7 @@ import { State } from './state';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 import { instanceOfFeed } from '../utils/instanceOf/instanceOfFeed';
 import { FormRepresentation } from '../interfaces/formRepresentation';
+import { LoaderJobOptions } from '../interfaces/loader';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -45,7 +46,8 @@ export class TrackedRepresentationFactory {
             ResourceQueryOptions &
             ResourceLinkOptions &
             HttpRequestOptions &
-            ResourceFetchOptions): Promise<TResult | TrackedRepresentation<TResult> | undefined> {
+            ResourceFetchOptions &
+            LoaderJobOptions): Promise<TResult | TrackedRepresentation<TResult> | undefined> {
 
         const {
             rel = LinkRelation.Self,
@@ -105,7 +107,11 @@ export class TrackedRepresentationFactory {
 
     public static async del<T extends LinkedRepresentation>(
         resource: T | TrackedRepresentation<T>,
-        options?: ResourceLinkOptions & HttpRequestOptions & ResourceMergeOptions & ResourceQueryOptions): Promise<T | TrackedRepresentation<T>> {
+        options?: ResourceLinkOptions &
+            HttpRequestOptions &
+            ResourceMergeOptions &
+            ResourceQueryOptions &
+            LoaderJobOptions): Promise<T | TrackedRepresentation<T>> {
 
         if (instanceOfTrackedRepresentation(resource)) {
 
@@ -172,7 +178,11 @@ export class TrackedRepresentationFactory {
     public static async update<T extends LinkedRepresentation>(
         resource: T | TrackedRepresentation<T>,
         document: T | DocumentRepresentation<T>,
-        options?: ResourceLinkOptions & HttpRequestOptions & ResourceMergeOptions & ResourceFetchOptions): Promise<T | void> {
+        options?: ResourceLinkOptions &
+            HttpRequestOptions &
+            ResourceMergeOptions &
+            ResourceFetchOptions &
+            LoaderJobOptions): Promise<T | void> {
 
 
         if (instanceOfTrackedRepresentation(resource)) {
@@ -236,7 +246,11 @@ export class TrackedRepresentationFactory {
      */
     public static async load<T extends LinkedRepresentation>(
         resource: T | TrackedRepresentation<T>,
-        options?: ResourceLinkOptions & HttpRequestOptions & ResourceMergeOptions & ResourceFetchOptions): Promise<T | TrackedRepresentation<T>> {
+        options?: ResourceLinkOptions &
+            HttpRequestOptions &
+            ResourceMergeOptions &
+            ResourceFetchOptions &
+            LoaderJobOptions): Promise<T | TrackedRepresentation<T>> {
 
         if (instanceOfTrackedRepresentation(resource)) {
 
@@ -387,7 +401,8 @@ export class TrackedRepresentationFactory {
             HttpRequestOptions &
             ResourceMergeOptions &
             ResourceFetchOptions &
-            ResourceQueryOptions): Promise<CollectionRepresentation<T>> {
+            ResourceQueryOptions &
+            LoaderJobOptions): Promise<CollectionRepresentation<T>> {
         const { rel = LinkRelation.Self, includeItems } = { ...options };
 
         const uri = LinkUtil.getUri(resource, rel);
@@ -428,7 +443,8 @@ export class TrackedRepresentationFactory {
             HttpRequestOptions &
             ResourceMergeOptions &
             ResourceFetchOptions &
-            ResourceQueryOptions)): Promise<void> {
+            ResourceQueryOptions &
+            LoaderJobOptions)): Promise<void> {
 
         const { forceLoad, forceLoadFeedOnly, batchSize = 1 } = { ...options };
 
@@ -462,7 +478,8 @@ export class TrackedRepresentationFactory {
         options ?: ResourceLinkOptions &
             HttpRequestOptions &
             ResourceMergeOptions &
-            ResourceFetchOptions): Promise<Extract<U, T>> {
+            ResourceFetchOptions &
+            LoaderJobOptions): Promise<Extract<U, T>> {
 
         return SingletonMerger.merge(resource, representation, options);
     }

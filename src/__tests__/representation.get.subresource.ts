@@ -10,6 +10,7 @@ import { get as apiGet } from '../representation/get';
 import { TrackedRepresentation } from '../types/types';
 import { ApiOptions } from '../interfaces/apiOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
+import { bottleneckLoader } from '../http/bottleneckLoader';
 
 describe('resource, get, on sub resource', () => {
 
@@ -19,7 +20,7 @@ describe('resource, get, on sub resource', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del }, true);
+        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
 
     afterEach(() => {
         get.mockReset();

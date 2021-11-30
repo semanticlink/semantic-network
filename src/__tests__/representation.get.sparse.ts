@@ -8,6 +8,7 @@ import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 import { get as apiGet } from '../representation/get';
 import { TrackedRepresentation } from '../types/types';
+import { bottleneckLoader } from '../http/bottleneckLoader';
 
 
 describe('resource, get, on sparse', () => {
@@ -18,7 +19,7 @@ describe('resource, get, on sparse', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del }, true);
+        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
 
     afterEach(() => {
         post.mockReset();

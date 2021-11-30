@@ -23,6 +23,7 @@ import { assertThat } from 'mismatched';
 import { PooledOrganisation } from '../domain/pooledOrganisation';
 import { CustomLinkRelation } from '../domain/customLinkRelation';
 import { PooledCollectionOptions } from '../../interfaces/pooledCollectionOptions';
+import { bottleneckLoader } from '../../http/bottleneckLoader';
 
 const log = anylogger('Steps Test');
 /**
@@ -65,7 +66,7 @@ describe('Steps with pooled resources', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del }, true);
+        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
 
 
     function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {

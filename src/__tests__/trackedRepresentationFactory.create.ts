@@ -8,6 +8,7 @@ import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
+import { bottleneckLoader } from '../http/bottleneckLoader';
 
 describe('Tracked Representation Factory', () => {
 
@@ -17,7 +18,7 @@ describe('Tracked Representation Factory', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del }, true);
+        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
 
     function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {
         assertThat({

@@ -1,40 +1,32 @@
 import Bottleneck from 'bottleneck';
 import anylogger from 'anylogger';
+import { Loader, LoaderJobOptions, LoaderOptions } from '../interfaces/loader';
+import { LoaderRequest } from '../interfaces/loaderRequest';
 
 const log = anylogger('Loader');
 
-/**
- * Wrapper over the Bottleneck options
- * @see {@Link Loader.defaultOptions}
- */
-export type LoaderOptions = Bottleneck.ConstructorOptions;
 
 /**
  * Loading service to allow for rate limiting and prioritising concurrent requests and
  * being able to cancel some or all requests.
  *
- * Wraps bottleneck and axios cancellables in the background using es6 promises.
+ * Wraps bottleneck and axios cancellable in the background using es6 promises.
  *
  */
-export class Loader {
-    requests: Record<string, any>;
+export class BottleneckLoader implements Loader {
+    public readonly requests: Map<string, LoaderRequest>;
     private readonly _currentOptions: Bottleneck.ConstructorOptions;
-    private readonly _cancel: () => Promise<void>;
 
-    constructor(options: Bottleneck.ConstructorOptions = {}) {
+    constructor(options: LoaderOptions = {}) {
         this._currentOptions = options;
+        this._limiter = BottleneckLoader.limiterFactory(options);
+        this.requests = new Map<string, LoaderRequest>();
 
-        this._limiter = Loader.limiterFactory(options);
-
-        this.requests = [];
-
-        this._cancel = () => this._limiter.stop();
-
-        this._limiter.on(Loader.event.ERROR, error => {
+        this._limiter.on(BottleneckLoader.event.ERROR, error => {
             log.error('[Limiter] Error: %s', error);
         });
 
-        this._limiter.on(Loader.event.DEBUG, message => {
+        this._limiter.on(BottleneckLoader.event.DEBUG, message => {
             // this is quite noisy so limiting down to trace
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -91,7 +83,6 @@ export class Loader {
 
     /**
      * Current options in the limiter
-     * @return {module:bottleneck.ConstructorOptions|*}
      */
     public get currentOptions(): Bottleneck.ConstructorOptions {
         return this._currentOptions;
@@ -102,7 +93,7 @@ export class Loader {
      */
     public static limiterFactory(options: Bottleneck.ConstructorOptions): Bottleneck {
         log.debug('limiter factory created');
-        return new Bottleneck({ ...Loader.defaultOptions, ...options });
+        return new Bottleneck({ ...BottleneckLoader.defaultOptions, ...options });
     }
 
     /**
@@ -117,56 +108,51 @@ export class Loader {
      *
      * @see https://github.com/SGrondin/bottleneck/issues/68
      *
-     * @param {string} id
-     * @param {PromiseLike<T>} action
-     * @param {*[]} args
-     * @return {Promise<AxiosResponse>}
      */
-    public async schedule<T>(id: string, action: () => Promise<T>, ...args: any[]): Promise<T> {
-        log.debug('pending requests (%s total)', this.requests.length);
+    async schedule<T>(id: string, action: () => Promise<T>, options?: LoaderJobOptions | undefined): Promise<T> {
+        log.debug('pending requests (%s total)', this.requests.size);
 
-        if (!this.requests[id]) {
+        const request = this.requests.get(id);
+        if (!request) {
             const p = new Promise<T>(async (resolve, reject) => {
 
                 try {
-                    const result = await this._limiter.schedule({ id }, action, args);
 
-                    log.debug(`[Loader] resolved '${id}' (${this.requests[id].promises.length} subsequent requests)`);
+                    const { loaderJob } = { ...options };
+                    const result = await this._limiter.schedule({ ...loaderJob, id }, action);
 
                     // Do this before request is resolved,
                     // so a request with the same id must now resolve to a new request
-                    delete this.requests[id];
+                    this.requests.delete(id);
 
-                    // resolving with chain through to the subsequent requests
+                    // resolving with chain through to the pending requests
                     resolve(result);
                 } catch (error) {
                     // Do this before request is resolved,
                     // so a request with the same id must now resolve to a new request
-                    delete this.requests[id];
+                    this.requests.delete(id);
                     reject(error);
                 }
             });
 
-            this.requests[id] = {
-                request: p,
-                promises: [],
-            };
 
-            log.debug('add \'%s\' (%s in queue)', id, this.requests[id].promises.length);
+            this.requests.set(id, { request: p, promises: [] });
+
+            log.debug('add \'%s\' (%s in queue)', id);
 
             return p;
         } else {
             // construct an array of promises that will be resolved with the original request value
             const p = new Promise<T>(async (resolve, reject) => {
                 try {
-                    const result = await this.requests[id].request;
+                    const result = await request.request;
                     resolve(result);
                 } catch (e) {
                     reject(e);
                 }
             });
-            this.requests[id].promises.push(p);
-            log.debug('queued \'%s\' (%s in queue)', id, this.requests[id].promises.length);
+            request.promises.push(p);
+            log.debug('queued \'%s\' (%s in queue)', id, request.promises.length);
             return p;
         }
     }
@@ -175,20 +161,15 @@ export class Loader {
      * This method wraps the limiter scheduler.
      *
      * This is primarily used for POST, PUT, PATCH, DELETE requests
-     *
-     * @param {PromiseLike<T>} action
-     * @param {*[]} args
-
-     * @return {*}
      */
-    public submit<T>(action: () => PromiseLike<T>, ...args: any[]): Promise<T> {
-        return this._limiter.schedule(action, args);
+    submit<T>(action: () => PromiseLike<T>, options?: LoaderJobOptions | undefined): Promise<T> {
+        return this._limiter.schedule(action, options);
     }
 
     /**
      * Stop all current and pending requests and reset all queues.
      */
-    public async clearAll(): Promise<void> {
+    async clearAll(): Promise<void> {
         const { RECEIVED, RUNNING, EXECUTING, QUEUED } = this._limiter.counts();
         const itemsQueued = RECEIVED + QUEUED + RUNNING + EXECUTING;
 
@@ -201,15 +182,19 @@ export class Loader {
 
         // this will abort any xhr requests
         try {
-            await this._cancel();
+            await this._limiter.stop();
             // unfortunately, we still need one! TODO: ask library for update to be able to clear queues and keep running
-            this._limiter = Loader.limiterFactory(this._currentOptions);
+            this._limiter = BottleneckLoader.limiterFactory(this._currentOptions);
         } catch (e) {
-            log.warn('Stopping loader: %s');
+            log.warn('Stopping loader failure');
         }
+    }
+
+    getRequest(id: string): LoaderRequest | undefined {
+        return this.requests.get(id);
     }
 }
 
-const loader = new Loader();
+const bottleneckLoader = new BottleneckLoader();
 
-export { loader };
+export { bottleneckLoader };

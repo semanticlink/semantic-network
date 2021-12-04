@@ -1,11 +1,11 @@
 import { Representation } from '../../types/types';
 import { CollectionRepresentation, LinkedRepresentation, RelationshipType } from 'semantic-link';
-import { Comparator } from './comparator';
+import { SyncComparator } from './syncComparator';
 import { UriListResolver } from './uriListResolver';
 import { SyncResolverOptions } from './syncResolverOptions';
-import { FieldResolver } from './fieldResolver';
 import { Resolver } from '../resolver';
 import { ResourceQueryOptions } from '../resourceQueryOptions';
+import { FieldResolver } from '../fieldResolver';
 
 export type PooledResolver = <T extends LinkedRepresentation>(resource: T, document: T, options?: SyncOptions) => Promise<void>;
 
@@ -71,7 +71,7 @@ export interface SyncOptions extends Partial<SyncResolverOptions> {
      * A set of comparators for matching resources in the network of data (@link Differencer} to compute the identity
      * of an object based on a transformation
      */
-    readonly comparators?: Comparator[];
+    readonly comparators?: SyncComparator[];
 
     readonly fieldResolver?: FieldResolver;
     readonly resolver?: Resolver;

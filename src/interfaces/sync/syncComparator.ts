@@ -38,6 +38,6 @@ import { Representation } from '../../types/types';
  *  }
  *
  */
-export interface Comparator {
+export interface SyncComparator {
     (lvalue: Representation, rvalue: Representation): boolean;
 }

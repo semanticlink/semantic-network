@@ -1,5 +1,5 @@
 import { Representation } from '../../types/types';
 
-export interface ResourceResolver {
+export interface SyncResourceResolver {
     (resource: string | any): Representation;
 }

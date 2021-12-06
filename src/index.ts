@@ -1,5 +1,20 @@
 export * from './apiUtil';
 export * from './linkRelation';
+// representation
+export * from './representation/collectionMerger';
+export * from './representation/create';
+export * from './representation/createFormMergeStrategy';
+export * from './representation/delete';
+export * from './representation/editFormMergeStrategy';
+export * from './representation/get';
+export * from './representation/namedRepresentationFactory';
+export * from './representation/resourceMergeFactory';
+export * from './representation/singletonMerger';
+export * from './representation/sparseRepresentationFactory';
+export * from './representation/state';
+export * from './representation/status';
+export * from './representation/trackedRepresentationFactory';
+export * from './representation/update';
 // http
 export * from './http/bottleneckLoader';
 export * from './http/httpRequest';

@@ -47,7 +47,7 @@ async function makeAndResolveResource<T extends LinkedRepresentation>(
         on: collectionResource,
     });
     if (result) {
-        log.info('Pooled resource created: created %s', LinkUtil.getUri(result as unknown as LinkedRepresentation, LinkRelation.Self));
+        log.debug('Pooled resource created: created %s', LinkUtil.getUri(result as unknown as LinkedRepresentation, LinkRelation.Self));
         return addToResolver(resourceDocument, result as unknown as T, options);
     }
     return undefined;

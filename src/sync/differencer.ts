@@ -158,7 +158,7 @@ export class Differencer {
         //
         // 1. Delete all resource first
         //
-        log.debug('[Diff] Calling delete strategy: count \'%s\'', deleteItems.length);
+        log.debug('delete strategy: count \'%s\'', deleteItems.length);
         for (const item of deleteItems) {
             await deleteStrategy(item);
         }
@@ -166,7 +166,7 @@ export class Differencer {
         //
         //  2. Then update the existing resources
         //
-        log.debug('[Diff] Calling update strategy: count \'%s\'', updateItems.length);
+        log.debug('update strategy: count \'%s\'', updateItems.length);
         if (batchSize === 0 || !batchSize) {
             for (const item of updateItems) {
                 await updateStrategy(item.lVal, item.rVal);
@@ -208,7 +208,7 @@ export class Differencer {
         ];
 
         log.debug(
-            '[Diff] [add, matched, remove] (%s %s %s) on %s',
+            '[add, matched, remove] (%s %s %s) on %s',
             createResults.length,
             updateItems.length,
             deleteItems.length,

@@ -17,13 +17,13 @@ import { StepRepresentation } from '../domain/interfaces/stepRepresentation';
 import { LinkRelation } from '../../linkRelation';
 import { Step } from '../domain/step';
 import { uriMappingResolver } from '../../sync/uriMappingResolver';
-import { sync } from '../../sync';
 import { HttpRequestFactory } from '../../http/httpRequestFactory';
 import { assertThat } from 'mismatched';
 import { PooledOrganisation } from '../domain/pooledOrganisation';
 import { CustomLinkRelation } from '../domain/customLinkRelation';
 import { PooledCollectionOptions } from '../../interfaces/pooledCollectionOptions';
 import { bottleneckLoader } from '../../http/bottleneckLoader';
+import { sync } from '../../sync/sync';
 
 const log = anylogger('Steps Test');
 /**

@@ -14,7 +14,16 @@ const log = anylogger('TrackedRepresentationUtil');
 
 export class TrackedRepresentationUtil {
     public static getState<T extends LinkedRepresentation, U extends TrackedRepresentation<T>>(resource: U): State {
-        return resource[state];
+        const tracking = resource[state];
+        if (!tracking) {
+            const uri = LinkUtil.getUri(resource, LinkRelation.Self);
+            if (uri) {
+                log.error('state not found on %s', uri);
+            } else {
+                log.error('state not found on unknown');
+            }
+        }
+        return tracking;
     }
 
     /**
@@ -66,20 +75,25 @@ export class TrackedRepresentationUtil {
         options?: ResourceFetchOptions): boolean {
 
         const { forceLoad = false } = { ...options };
-        const status = this.getState(resource).status;
+        const { status = undefined } = this.getState(resource);
 
-        const fetch = status === Status.unknown ||
-            status === Status.locationOnly ||
-            status === Status.stale ||
-            (forceLoad && status === Status.hydrated);
+        if (status) {
+            const fetch = /*status === Status.unknown ||*/
+                status === Status.locationOnly ||
+                status === Status.stale ||
+                (forceLoad && status === Status.hydrated);
 
-        if (fetch) {
-            log.debug('Fetch resource %s \'s\': %s', status.toString, fetch, LinkUtil.getUri(resource, LinkRelation.Self));
+            if (fetch) {
+                log.debug('fetch resource %s \'s\': %s', status.toString, fetch, LinkUtil.getUri(resource, LinkRelation.Self));
+            } else {
+                log.debug('fetch resource not required: %s', LinkUtil.getUri(resource, LinkRelation.Self));
+            }
+
+            return fetch;
         } else {
-            log.debug('Fetch resource not required: %s', LinkUtil.getUri(resource, LinkRelation.Self));
+            log.warn('status not found (on state)');
+            return true;
         }
-
-        return fetch;
     }
 
     /**

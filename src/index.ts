@@ -21,7 +21,8 @@ export * from './http/httpRequest';
 export * from './http/httpRequestFactory';
 // sync
 export * from './sync/differencer';
-export * from './sync/index';
+export * from './sync/sync';
+export * from './sync/syncResource';
 export * from './sync/pooledResource';
 export * from './sync/pooledResourceUtil';
 export * from './sync/syncUtil';
@@ -82,7 +83,7 @@ export * from './interfaces/resourceLinkOptions';
 export * from './interfaces/resourceQueryOptions';
 export * from './interfaces/resourceResolver';
 export * from './interfaces/resourceUpdateOptions';
-// sync
+// sync interfaces
 export * from './interfaces/sync/syncComparator';
 export * from './interfaces/sync/namedResourceSync';
 export * from './interfaces/sync/syncResourceResolver';

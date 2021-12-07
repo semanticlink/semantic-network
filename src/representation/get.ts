@@ -13,7 +13,6 @@ import { ResourceUpdateOptions } from '../interfaces/resourceUpdateOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { Nullable, TrackedRepresentation } from '../types/types';
 import { LinkRelation } from '../linkRelation';
-import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { LoaderJobOptions } from '../interfaces/loader';
 
 const log = anylogger('get');
@@ -91,35 +90,43 @@ export async function get<TReturn extends LinkedRepresentation,
         where = undefined,
     } = { ...options };
 
+    const relIsNotSelfOrEmpty = rel && rel !== LinkRelation.Self;
+
     // look at the context resource and ensure that it is first hydrated before loading sub resources
-    if (rel && rel !== LinkRelation.Self && TrackedRepresentationUtil.needsFetchFromState(resource as TrackedRepresentation)) {
-        log.debug('load self context resource');
+    if (relIsNotSelfOrEmpty) {
+        log.debug('get context resource on \'self\'');
         await TrackedRepresentationFactory.load(resource, { ...options, rel: LinkRelation.Self });
     }
 
     // find specific item in collection
     if (where) {
 
+        log.debug('using \'where\' to locate resource on get')
+
         // when combined with rel, the sub resource should be the collection
-        if (rel && rel !== LinkRelation.Self) {
+        if (relIsNotSelfOrEmpty) {
             const namedSubResource = await NamedRepresentationFactory.load(resource, options);
             if (namedSubResource) {
+                log.warn('named resource found on \'%s\' found', rel)
                 resource = namedSubResource as TrackedRepresentation<T>;
                 // now that sub resource is loaded, re-contextualise to this resource (ie will become 'self')
                 delete options?.rel;
+            } else {
+                log.warn('named resource not found on \'%s\'', rel)
             }
         }
 
         if (instanceOfCollection(resource)) {
+            log.debug('get collection resource (with items: %s)', options?.includeItems || false)
             // synchronise collection by applying all current rules (eg includeItems)
             const collection = await TrackedRepresentationFactory.load(resource, options);
             // then check for existence
             const item = RepresentationUtil.findInCollection(collection, options);
             if (item) {
-                log.debug('Item found in collection');
+                log.debug('item in collection found');
                 return await TrackedRepresentationFactory.load(item, options) as TrackedRepresentation<TResult>;
             } else {
-                log.debug('Item not found in collection');
+                log.debug('item in collection not found ');
                 return undefined;
             }
         } else {
@@ -130,10 +137,12 @@ export async function get<TReturn extends LinkedRepresentation,
 
     // named resources
     // do not add 'self' as sub resource
-    if (rel && rel !== LinkRelation.Self) {
+    if (relIsNotSelfOrEmpty) {
+        log.debug('get named singleton resource')
         return await NamedRepresentationFactory.load(resource, options);
     }
 
     // otherwise all resources
+    log.debug('get resource')
     return await TrackedRepresentationFactory.load(resource, options) as unknown as TResult;
 }

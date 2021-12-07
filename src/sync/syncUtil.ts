@@ -47,8 +47,14 @@ export class SyncUtil {
             if (result) {
                 const uri = LinkUtil.getUri(deleteResource, LinkRelation.Self);
                 if (uri) {
+                    log.debug('sync delete on collection \'%s\' %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uri);
                     resolver.remove(uri);
                 }
+            } else {
+                log.debug(
+                    'sync not deleted on collection \'%s\' %s',
+                    LinkUtil.getUri(collectionResource, LinkRelation.Self),
+                    LinkUtil.getUri(deleteResource, LinkRelation.Self));
             }
         };
 
@@ -62,12 +68,15 @@ export class SyncUtil {
             if (result) {
                 const update = await ApiUtil.update(result, updateDataDocument, options);
                 if (update) {
+                    log.debug('sync update on %s', LinkUtil.getUri(update, LinkRelation.Self))
                     const uri = LinkUtil.getUri(updateDataDocument, LinkRelation.Self);
                     const uri1 = LinkUtil.getUri(updateResource, LinkRelation.Self);
                     if (uri && uri1) {
                         resolver.update(uri, uri1);
                     }
                 }
+            } else {
+                log.warn('sync not updated on %s', LinkUtil.getUri(updateResource, LinkRelation.Self))
             }
         };
 
@@ -83,8 +92,11 @@ export class SyncUtil {
                 const uri = LinkUtil.getUri(createDataDocument, LinkRelation.Self);
                 const uri1 = LinkUtil.getUri(result, LinkRelation.Self);
                 if (uri && uri1) {
+                    log.debug('sync create on collection \'%s\' %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uri1);
                     resolver.add(uri, uri1);
                 }
+            } else {
+                log.warn('sync on collection not created %s', LinkUtil.getUri(collectionResource, LinkRelation.Self));
             }
             // TODO: returning undefined changes the interface T | undefined on the CreateStrategy
             return result as unknown as T;
@@ -100,6 +112,7 @@ export class SyncUtil {
         const deleteReadonlyResourceAndUpdateResolver: DeleteStrategy = async <T extends LinkedRepresentation>(collectionResourceItem: T) => {
             const uri = LinkUtil.getUri(collectionResourceItem, LinkRelation.Self);
             if (uri) {
+                log.debug('sync remove %s', uri);
                 resolver.remove(uri);
             }
         };
@@ -135,9 +148,12 @@ export class SyncUtil {
             const result = await ApiUtil.delete(collectionResource, { ...options, where: deleteResource });
             if (result) {
                 const uri = LinkUtil.getUri(deleteResource, LinkRelation.Self);
+                log.debug('sync on collection delete \'%s\' %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uri);
                 if (uri) {
                     resolver.remove(uri);
                 }
+            } else {
+                log.debug('sync delete \'%s\' %s', LinkUtil.getUri(deleteResource, LinkRelation.Self));
             }
         };
 
@@ -162,7 +178,7 @@ export class SyncUtil {
 
         const makeOptions = (): SyncResolverOptions => {
             if (contributeonly) {
-                log.debug(`[Sync] contribute-only collection '${LinkUtil.getUri(collectionResource, LinkRelation.Self)}'`);
+                log.debug(`contribute-only collection '${LinkUtil.getUri(collectionResource, LinkRelation.Self)}'`);
                 return {
                     createStrategy: addContributeOnlyResourceAndUpdateResolver,
                     updateStrategy: updateContributeOnlyResourceAndUpdateResolver,
@@ -173,7 +189,7 @@ export class SyncUtil {
                 // if missing a 'create-form' representation then we assume that the NOD can
                 // not be changed.
             } else if (readonly || !LinkUtil.matches(collectionResource, /create-form/)) {
-                log.debug(`[Sync] read-only collection '${LinkUtil.getUri(collectionResource, LinkRelation.Self)}'`);
+                log.debug(`read-only collection '${LinkUtil.getUri(collectionResource, LinkRelation.Self)}'`);
                 return {
                     createStrategy: createReadonlyResourceAndUpdateResolver,
                     updateStrategy: updateReadonlyResourceAndUpdateResolver,
@@ -181,7 +197,7 @@ export class SyncUtil {
                 };
 
             } else {
-                log.debug(`[Sync] updatable collection '${LinkUtil.getUri(collectionResource, LinkRelation.Self)}'`);
+                log.debug(`updatable collection '${LinkUtil.getUri(collectionResource, LinkRelation.Self)}'`);
                 return {
                     createStrategy: createResourceAndUpdateResolver,
                     updateStrategy: updateResourceAndUpdateResolver,
@@ -255,11 +271,14 @@ export class SyncUtil {
             if (result) {
                 const resource = await ApiUtil.update(result, document, options);
                 if (resource) {
+                    log.debug('sync resource \'update\' in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
                     return {
                         resource: resource,
                         document: document,
                         action: 'update',
                     } as SyncInfo;
+                } else {
+                    log.warn('sync resource \'update\' failed in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
                 }
             }
         } else {
@@ -268,12 +287,15 @@ export class SyncUtil {
             if (result) {
                 const resource = await ApiUtil.get(result, options);
                 if (resource) {
+                    log.debug('sync resource \'create\' in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
                     return {
                         resource: resource,
                         document: document,
                         action: 'create',
                     } as SyncInfo;
                 }
+            }else {
+                log.warn('sync resource \'create\' failed in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
             }
         }
     }

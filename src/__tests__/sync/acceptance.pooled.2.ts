@@ -21,7 +21,6 @@ import { LinkRelation } from '../../linkRelation';
 import { Step } from '../domain/step';
 import { uriMappingResolver } from '../../sync/uriMappingResolver';
 import { PooledOrganisation } from '../domain/pooledOrganisation';
-import { sync } from '../../sync';
 import { CustomLinkRelation } from '../domain/customLinkRelation';
 import { HttpRequestFactory } from '../../http/httpRequestFactory';
 import { assertThat } from 'mismatched';
@@ -29,6 +28,7 @@ import { StepRepresentation } from '../domain/interfaces/stepRepresentation';
 import { PooledCollectionOptions } from '../../interfaces/pooledCollectionOptions';
 import { SyncOptions } from '../../interfaces/sync/syncOptions';
 import { bottleneckLoader } from '../../http/bottleneckLoader';
+import { sync } from '../../sync/sync';
 
 const log = anylogger('Steps Test');
 
@@ -177,11 +177,11 @@ describe('Steps with pooled (new) resources', () => {
                 // ['self', 'https://api.example.com/choice/form/edit'],
             ];
 
-            verifyMocks(9, 2, 0, 0);
-
             const actualUris = get.mock.calls.map(x => LinkUtil.getUri(x[0], x[1]));
             assertThat(actualUris).is(uris.map(x => x[1]));
             assertThat(actualPostUris).is(postUris);
+
+            verifyMocks(9, 2, 0, 0);
 
         }, 100000);
     });

@@ -3,9 +3,9 @@ import { SyncOptions } from '../../interfaces/sync/syncOptions';
 import { LinkRelation } from '../../linkRelation';
 import { CustomLinkRelation } from './customLinkRelation';
 import { Differencer } from '../../sync/differencer';
-import { sync } from '../../sync';
 import anylogger from 'anylogger';
 import { emptyName } from '../../utils/comparators/emptyName';
+import { sync } from '../../sync/sync';
 
 const log = anylogger('Question');
 

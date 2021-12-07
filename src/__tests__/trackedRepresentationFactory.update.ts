@@ -55,13 +55,13 @@ describe('Tracked Representation Factory', () => {
         const uri = 'https://api.example.com';
 
         test.each([
-            [{} as TrackedRepresentation<ApiRepresentation>, 'No state on \'undefined\''],
+            [{} as TrackedRepresentation<ApiRepresentation>, 'update tracked representation has no state on \'undefined\''],
             [{
                 links: [{
                     rel: LinkRelation.Self,
                     href: uri,
                 }],
-            } as TrackedRepresentation<ApiRepresentation>, `No state on '${uri}'`],
+            } as TrackedRepresentation<ApiRepresentation>, `update tracked representation has no state on '${uri}'`],
         ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>, err: string) => {
             await expect(async () => await TrackedRepresentationFactory.update(representation, document as unknown as DocumentRepresentation)).rejects.toEqual(err);
             expect(put).not.toHaveBeenCalled();

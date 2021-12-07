@@ -56,37 +56,49 @@ export class TrackedRepresentationFactory {
 
         const uri = getUri(resource, rel);
 
+        log.debug('tracked representation create: start');
+
         if (uri) {
 
             try {
                 const response = await HttpRequestFactory.Instance().create(resource, document, options);
 
-                if (!response.headers) {
-                    // realistically only for tests
-                    log.error('response does not like an http request');
-                }
-
-                // create 201 should have a header and be populated
-                if (response.status === 201 || !response.status) {
-                    if (!response.status) {
-                        // cater for tests not return status headers
-                        log.warn('server not returning status code');
-                    }
-                    const uri = response.headers?.location;
-                    if (!uri) {
-                        log.error('create: response no Location header for \'%s\'', uri);
-                        return undefined;
+                if (response) {
+                    const {headers = {}, status} = response;
+                    if (!headers) {
+                        // realistically only for tests
+                        log.error('response does not like an http request');
                     }
 
-                    // TODO: decide on pluggable hydration strategy
-                    const hydrated = await this.load(SparseRepresentationFactory.make({ uri }), options);
-                    return hydrated;
+                    // create 201 should have a header and be populated
+                    if (status === 201 || !status) {
+                        if (!status) {
+                            // cater for tests not return status headers
+                            log.warn('server not returning status code');
+                        }
+
+                        const uri = headers.location;
+                        if (uri) {
+                            // TODO: decide on pluggable hydration strategy
+                            const hydrated = await this.load(SparseRepresentationFactory.make({ uri }), options);
+                            log.debug('tracked representation created and loaded %s', uri)
+                            return hydrated;
+                        } else {
+                            log.error('create: response no Location header for \'%s\'', uri);
+                            // fall through to undefined
+                        }
+
+                    } else {
+                        // other response codes (200, 202) should be dealt with separately
+                        // see https://stackoverflow.com/a/29096228
+                        log.warn('response returned %s, no resource processed', status);
+                        // fall through to undefined
+                    }
+
                 } else {
-                    // other response codes (200, 202) should be dealt with separately
-                    // see https://stackoverflow.com/a/29096228
-                    log.debug('response returned %s, no resource processed', response.status);
-                    // fall through to undefined
+                    log.error('response not found on http request')
                 }
+
             } catch (e) {
                 if (isHttpRequestError(e)) {
                     // errors don't get attached back on the context resource, just log them
@@ -96,10 +108,11 @@ export class TrackedRepresentationFactory {
                 } else {
                     log.warn('TODO: re-throw??');
                     // throw(e);
+                    // fall through to undefined
                 }
             }
         } else {
-            return Promise.reject('No context to find uri to POST on');
+            return Promise.reject('create tracked representation has no context to find uri to POST on');
         }
 
         return undefined;
@@ -164,12 +177,12 @@ export class TrackedRepresentationFactory {
                     }
                 }
             } else {
-                log.error('Undefined returned on link \'%s\' (check stack trace)', rel);
+                log.error('undefined returned on link \'%s\' (check stack trace)', rel);
             }
 
         } else {
             // TODO: decide if we want to make a locationOnly resource if possible and then continue
-            return Promise.reject(`No state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
+            return Promise.reject(`delete tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
         }
         return resource;
 
@@ -228,7 +241,7 @@ export class TrackedRepresentationFactory {
 
             return resource;
         } else {
-            return Promise.reject(`No state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
+            return Promise.reject(`update tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
         }
 
     }
@@ -307,11 +320,12 @@ export class TrackedRepresentationFactory {
                     log.debug('return cached resource: \'%s\'', uri);
                 }
             } else {
-                log.error('Undefined returned on link \'%s\' (check stack trace)', rel);
+                log.error('undefined returned on link \'%s\' (check stack trace)', rel);
             }
         } else {
+            log.trace('load tracked representation: %o %o', resource, options)
             // TODO: decide if we want to make a locationOnly resource if possible and then continue
-            return Promise.reject(`No state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
+            return Promise.reject(`load tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
         }
 
         return resource;

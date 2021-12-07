@@ -6,7 +6,7 @@ import { assertThat } from 'mismatched';
 import { HttpRequestOptions } from '../../interfaces/httpRequestOptions';
 import { LinkRelation } from '../../linkRelation';
 import { AxiosResponse } from 'axios';
-import { syncResource } from '../../sync';
+import { syncResource } from '../../sync/syncResource';
 
 describe('Synchroniser', () => {
     /**

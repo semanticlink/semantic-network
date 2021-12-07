@@ -66,10 +66,15 @@ export abstract class PooledResource<T extends LinkedRepresentation> {
                  * process nested sync
                  */
                 if (resource) {
+                    log.debug('pooled resource nested sync: %s', LinkUtil.getUri(resource, LinkRelation.Self));
                     pooledResolver?.(resource, document, options);
+                } else {
+                    log.debug('pooled resource nested sync not found')
                 }
 
                 return resource as T;
+            } else {
+                log.warn('context resource not found');
             }
 
         };
@@ -93,6 +98,7 @@ export abstract class PooledResource<T extends LinkedRepresentation> {
             log.debug('resolving resource pool type: %s', type);
             return this.resolvers[type];
         } else {
+            log.debug('resolving resource pool type not found: %s', type);
             return noopUndefined;
         }
     }

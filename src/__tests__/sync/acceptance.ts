@@ -22,8 +22,8 @@ import { Step } from '../domain/step';
 import { ApiOptions } from '../../interfaces/apiOptions';
 import { SyncOptions } from '../../interfaces/sync/syncOptions';
 import { uriMappingResolver } from '../../sync/uriMappingResolver';
-import { sync } from '../../sync';
 import { assertThat } from 'mismatched';
+import { sync } from '../../sync/sync';
 
 
 /**

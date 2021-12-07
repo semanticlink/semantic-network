@@ -1,28 +1,22 @@
-import { CollectionRepresentation, LinkedRepresentation, LinkType, LinkUtil } from 'semantic-link';
-import { instanceOfResourceSync } from '../utils/instanceOf/instanceOfResourceSync';
-import { StrategyType, SyncType } from '../interfaces/sync/types';
-import { ResourceSync } from '../interfaces/sync/resourceSync';
-import { SyncOptions } from '../interfaces/sync/syncOptions';
-import { NamedResourceSync } from '../interfaces/sync/namedResourceSync';
-import { LinkRelConvertUtil } from '../utils/linkRelConvertUtil';
-import anylogger from 'anylogger';
-import { RepresentationUtil } from '../utils/representationUtil';
-import { instanceOfUriList } from '../utils/instanceOf/instanceOfUriList';
-import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
+import { CollectionRepresentation, LinkedRepresentation, LinkUtil } from 'semantic-link';
 import { TrackedRepresentation } from '../types/types';
 import { DocumentRepresentation } from '../interfaces/document';
+import { StrategyType } from '../interfaces/sync/types';
+import { SyncOptions } from '../interfaces/sync/syncOptions';
 import { ResourceFetchOptions } from '../interfaces/resourceFetchOptions';
 import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
 import { NamedRepresentationFactory } from '../representation/namedRepresentationFactory';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
-import { LinkRelation } from '../linkRelation';
 import { ApiUtil } from '../apiUtil';
+import { LinkRelation } from '../linkRelation';
+import { SyncUtil } from './syncUtil';
+import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { instanceOfDocumentCollection } from '../utils/instanceOf/instanceOfDocumentCollection';
 import { instanceOfDocumentSingleton } from '../utils/instanceOf/instanceOfDocumentSingleton';
-import { SyncUtil } from './syncUtil';
+import { RepresentationUtil } from '../utils/representationUtil';
+import anylogger from 'anylogger';
 
-const log = anylogger('Sync');
-
+const log = anylogger('syncResource');
 
 /**
  * Sync resources between two networks of data
@@ -204,9 +198,9 @@ export async function syncResource<T extends LinkedRepresentation>(
     options = { ...options, rel: undefined, name: undefined, relOnDocument: undefined, nameOnDocument: undefined };
 
     if (!rel && !relOnDocument && instanceOfSingleton(resource) && instanceOfSingleton(document)) {
-        log.debug('sync resource %s', LinkUtil.getUri(resource, LinkRelation.Self));
         const result = await ApiUtil.get(resource, options);
         if (result) {
+            log.debug('sync singleton on rel \'%s\' %s', rel, LinkUtil.getUri(resource, LinkRelation.Self));
             const update = await ApiUtil.update(resource, document, options);
             if (update) {
                 await (await SyncUtil.syncResources(resource, document, strategies, options))();
@@ -274,144 +268,4 @@ export async function syncResource<T extends LinkedRepresentation>(
     }
     return resource;
 
-}
-
-/**
- * Retrieves a resource (singleton or collection, either directly or through a link relation) and synchronises from
- * the given document. It then will recurse through all provides `strategies`.
- *
- * @example
- *
- *      ```sync({resource, document})```
- *
- *     Resource               Document
- *
- *                  sync
- *     +-----+                +-----+
- *     |     |  <-----------+ |     |
- *     |     |                |     |
- *     +-----+                +-----+
- *
- * @example
- *
- *  ```sync({resource: collection, document})```
- *
- *     resource
- *     Collection         Document
- *
- *     +-----+
- *     |     |
- *     |     |
- *     +-----+    sync
- *         X                +---+
- *         X  <-----------+ | x |
- *         X                +---+
- *           items
- *
- *  @example
- *
- *      ```sync(resource: parentResource, rel, document})```
- *
- *      parent      resource
- *      Resource    Collection        Document
- *
- *      +----------+
- *      |          |
- *      |          +-----+
- *      |     Named|     |
- *      |          |     |
- *      |          +-----+    sync
- *      |          |   X                +---+
- *      |          |   X  <-----------+ | x |
- *      +----------+   X                +---+
- *                       items
- *
- * @example
- *
- *  ```sync({resource: parentResource, rel, document: parentDocument})
- *
- *     parent     singleton           singleton   parent
- *     Resource    Resource            Document   Document
- *
- *     +----------+                            +---------+
- *     |          |            sync            |         |
- *     |          +-----+                +-----+         |
- *     |     Named|     |  <-----------+ |     |Named    |
- *     |          |     |                |     |         |
- *     |          +-----+                +-----+         |
- *     |          |                            |         |
- *     |          |                       ^    |         |
- *     +----------+                       |    +---------+
- *                                        |
- *                                        +
- *                                        looks for
- *
- * @example
- *
- *  ```sync({resource: parentResource, rel, document: parentDocument})```
- *
- *     parent      resource             document    parent
- *     Resource    Collection           Collection  Document
- *
- *     +----------+                            +----------+
- *     |          |            sync            |          |
- *     |          +-----+                +-----+          |
- *     |     Named|     |  <-----------+ |     |          |
- *     |          |     |                |     |          |
- *     |          +-----+                +-----+          |
- *     |          |   X                     X  |          |
- *     |          |   X items         items X  |          |
- *     +----------+   X                     X  +----------+
- *
- *
- * @param syncAction
- */
-export async function sync<T extends LinkedRepresentation>(syncAction: SyncType<T>): Promise<void> {
-    // shared configuration
-    const resourceSync: ResourceSync<T> = syncAction;
-    const { resource, document, strategies = [], options = <SyncOptions>{} } = resourceSync;
-
-    // resource or collection (directly). This means that no rel is specified
-    if (instanceOfResourceSync(syncAction)) {
-        if (instanceOfCollection(resource)) {
-            await syncResource(resource, document, strategies, options);
-        } else {
-            if (instanceOfCollection(document)) {
-                throw new Error('Not Implement: a document collection cannot be synchronised onto a singleton');
-            }
-            await syncResource(resource, document, strategies, options);
-        }
-        return;
-    }
-
-    // resource as named on a resource or collection
-    // recast and extract the rel/name values
-    const namedCfg = <NamedResourceSync<T>>syncAction;
-    const { rel, name = LinkRelConvertUtil.relTypeToCamel(namedCfg.rel) } = namedCfg;
-
-    if (!rel) {
-        throw new Error('Sync of a named resource must have a rel specified in the options');
-    }
-
-    if (instanceOfUriList(document)) {
-        if (strategies) {
-            log.warn('Strategies not available for uri-list');
-        }
-        throw new Error('Not implemented');
-    }
-
-    if (!document) {
-        log.warn('Matching document does not exist on rel \'%s\' for %s', rel, LinkUtil.getUri(resource as LinkType, 'self'));
-        return;
-    }
-
-    const collection = RepresentationUtil.getProperty(document, name);
-    if (instanceOfCollection(collection)) {
-        await syncResource(resource, collection as unknown as T, strategies, { ...options, rel });
-        return;
-    }
-
-    instanceOfCollection(resource) ?
-        await syncResource(resource, document, strategies, { ...options, rel }) :
-        await syncResource(resource, document, strategies, { ...options, rel, relOnDocument: rel });
 }

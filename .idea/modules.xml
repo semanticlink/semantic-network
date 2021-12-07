@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/semantic-network.iml" filepath="$PROJECT_DIR$/.idea/semantic-network.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../semanticlink-js/.idea/semanticLink.iml" filepath="$PROJECT_DIR$/../../semanticlink-js/.idea/semanticLink.iml" />
     </modules>
   </component>
 </project>

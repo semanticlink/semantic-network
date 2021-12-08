@@ -285,16 +285,15 @@ export class SyncUtil {
             // add the document to the collection a
             const result = await ApiUtil.create(document, { ...options, on: resource });
             if (result) {
-                const resource = await ApiUtil.get(result, options);
-                if (resource) {
-                    log.debug('sync resource \'create\' in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
+                if (result) {
+                    log.debug('sync resource \'create\' in collection %s', LinkUtil.getUri(result, LinkRelation.Self));
                     return {
-                        resource: resource,
+                        resource: result,
                         document: document,
                         action: 'create',
                     } as SyncInfo;
                 }
-            }else {
+            } else {
                 log.warn('sync resource \'create\' failed in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
             }
         }

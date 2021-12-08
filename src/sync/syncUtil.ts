@@ -68,7 +68,7 @@ export class SyncUtil {
             if (result) {
                 const update = await ApiUtil.update(result, updateDataDocument, options);
                 if (update) {
-                    log.debug('sync update on %s', LinkUtil.getUri(update, LinkRelation.Self))
+                    log.debug('sync update on %s', LinkUtil.getUri(update, LinkRelation.Self));
                     const uri = LinkUtil.getUri(updateDataDocument, LinkRelation.Self);
                     const uri1 = LinkUtil.getUri(updateResource, LinkRelation.Self);
                     if (uri && uri1) {
@@ -76,7 +76,7 @@ export class SyncUtil {
                     }
                 }
             } else {
-                log.warn('sync not updated on %s', LinkUtil.getUri(updateResource, LinkRelation.Self))
+                log.warn('sync not updated on %s', LinkUtil.getUri(updateResource, LinkRelation.Self));
             }
         };
 

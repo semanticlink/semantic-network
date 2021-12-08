@@ -13,7 +13,7 @@
     "test-coverage": "jest --config jest.config.js --coverage",
     "test-clear-cache": "jest --clearCache",
     "build": "tsc && tsc -p ./tsconfig-es5.json",
-    "format": "eslint . --ext .ts --fix",
+    "lint-fix": "eslint . --ext .ts --fix",
     "lint": "eslint . --ext .ts",
     "prepare": "yarn clean && yarn build",
     "prepublishOnly": "yarn test && yarn run lint",

@@ -73,7 +73,7 @@ export abstract class PooledResource<T extends LinkedRepresentation> {
                     log.debug('pooled resource nested sync: %s', LinkUtil.getUri(resource, LinkRelation.Self));
                     pooledResolver?.(resource, document, options);
                 } else {
-                    log.debug('pooled resource nested sync not found')
+                    log.debug('pooled resource nested sync not found');
                 }
 
                 log.debug('pooled resource resolve on \'%s\': end', rel);

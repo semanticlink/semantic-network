@@ -1,9 +1,70 @@
 # Semantic Network
+
+Update December 2021, version 0.5 has interface breaking changes (previous 0.3.x).
+
+# Overview usage...
+
+The resource is the primary unit of work with semantic network. Let's start with an example of loading a collection (in the context of the root of the api from the link relation '`todos`'). The resources below inherit the base classes from [`semantic link`](https://github.com/semanticlink/semanticlink-js/blob/master/src/interfaces.ts#L102).
+
+```typescript
+import { LinkedRepresentation, CollectionRepresentation } from 'semantic-link';
+
+export interface ApiRepresentation extends LinkedRepresentation {
+    // note in the links is the link relation 'todos' for the TodoCollection
+}
+
+export interface TodoRepresentation extends LinkedRepresentation {
+    /**
+     * A todo item name
+     */
+    name: string;
+    /**
+     * Each todo is either completed or not
+     */ 
+    completed: boolean;
+}
+
+export interface TodoCollection extends CollectionRepresentation<TodoRepresentation> {}
+// or (depending on linting rules about empty interfaces 
+export type TodoCollection = CollectionRepresentation<TodoRepresentation>
+```
+
+The next step is to synchronise the current state of the todo collection.
+
+```typescript
+// assuming the context $api is already loaded and has a link relation 'todos'
+
+import { ApiUtil } from 'semantic-network'; 
+import { LinkUtil } from 'semantic-link';
+import anylogger from 'anylogger';
+
+const log = anylogger('Todos');
+
+// $api as a sparsely populated root
+const $api: ApiRepresentation = {
+    links: [
+        { rel: 'Self', href: 'https://api.example.com'}
+    ]   
+}
+
+// sparsely populated collections
+// option one
+const todos = await ApiUtil.get<TodoCollection>($api, { rel:  'todos' })
+// option two
+const todos: TodoCollection = await ApiUtil.get($api, { rel:  'todos' })
+
+log.debug(LinkUtil.getUri(todos, LinkRelation.Self))
+todos.items.forEach(item => log.debug(LinkUtil.get(item, LinkRelation.Self)));
+
+// hydrated collections
+await ApiUtil.get<TodoCollection>($api, { rel:  'todos', includeItems: true })
+```
+
+### Overview
+
 Semantic network is a set of query and synchronisation utilities based on link relations through a client-side application cache when writing hypermedia clients
 
-Semantic Network is hypermedia-API client library acting as a data mapper to application cache. Its primary purpose to allow clients to follow a trail of resources making it easy to data bind for UI-framework libraries (eg Vue, React, Angular). 
-
-
+Semantic Network is hypermedia-API client library acting as a data mapper to application cache. Its primary purpose to allow clients to follow a trail of resources making it easy to data bind for UI-framework libraries (eg Vue, React, Angular).
 
 Written for [level-3 HATEOUS](https://restfulapi.net/hateoas/) hypermedia-based resources, it is the equivalent of an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping) relational-based entities.
 
@@ -36,66 +97,3 @@ Some key features:
 * produced code is performant, flexible, clean and maintainable
 * follows all possible best practices
 
-# Quickly...
-
-The resource is the primary unit of work with semantic network. Let's start with an example of loading a collection (in the context of the root of the api from the link relation '`todos`'). The resources below inherit the base classes from [`semantic link`](https://github.com/semanticlink/semanticlink-js/blob/master/src/interfaces.ts#L102).
-
-```typescript
-import { LinkedRepresentation, CollectionRepresentation } from 'semantic-link';
-
-export interface ApiRepresentation extends LinkedRepresentation {
-    // note in the links is the link relation 'todos' for the TodoCollection
-}
-
-export interface TodoRepresentation extends LinkedRepresentation {
-    /**
-     * A todo item name
-     */
-    name: string;
-    /**
-     * Each todo is either completed or not
-     */ 
-    completed: boolean;
-}
-
-export interface TodoCollection extends CollectionRepresentation<TodoRepresentation> {
-}
-```
-
-The next step is to synchronise the current state of the todo collection. 
-
-```typescript
-// assuming the context $api is already loaded and has a link relation 'todos'
-
-import { ApiUtil } from 'semantic-network'; 
-import { LinkUtil } from 'semantic-link';
-import anylogger from 'anylogger';
-
-const log = anylogger('Todos');
-
-// $api as a sparsely populated root
-const $api: ApiRepresentation = {
-    links: [
-        { rel: 'Self', href: 'https://api.example.com'}
-    ]   
-}
-
-// sparsely populated collections
-// option one
-const todos = await ApiUtil.get<ApiRepresentation, TodoCollection>($api, { rel:  'todos' })
-// option two
-const todos: TodoCollection = await ApiUtil.get($api, { rel:  'todos' })
-// option three
-const todos = await ApiUtil.get($api).$get<TodoCollection>({ rel:  'todos' })
-
-log.debug(LinkUtil.get(todos, LinkRelation.Self))
-todos.items.forEach(item => log.debug(LinkUtil.get(item, LinkRelation.Self)));
-
-// hydrated collections
-await ApiUtil.get<ApiRepresentation, TodoCollection>($api, { rel:  'todos', includeItems: true })
-
-// child collections
-const todos = ApiUtil.get($api).get<TodoCollection>('todos')  // problem 'link' can conflict with attribute names
-
-```
-# Step-by-step

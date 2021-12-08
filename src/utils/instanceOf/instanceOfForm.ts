@@ -37,7 +37,7 @@ export function instanceOfForm(object: unknown | LinkedRepresentation): object i
              */
             const uri = LinkUtil.getUri(object as LinkedRepresentation, LinkRelation.Self);
             if (uri) {
-                return uri.includes('form')
+                return uri.includes('form');
             }
             return false;
         }

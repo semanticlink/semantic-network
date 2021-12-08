@@ -7,7 +7,7 @@ describe('instance of collection', () => {
         ['nothing', undefined, false],
         ['empty', null, false],
         ['empty', {}, false],
-        ['linked representation', { links: [], }, true],
+        ['linked representation', { links: [] }, true],
         ['collection, no match', { links: [], items: [] }, false],
         ['instance of form, edit', { links: [], items: [{ type: 'text' }] }, false],
     ])('%s', (title: string, obj: any, expected: boolean) => {

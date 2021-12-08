@@ -81,7 +81,7 @@ export class TrackedRepresentationFactory {
                         if (uri) {
                             // TODO: decide on pluggable hydration strategy
                             const hydrated = await this.load(SparseRepresentationFactory.make({ uri }), options);
-                            log.debug('tracked representation created and loaded %s', uri)
+                            log.debug('tracked representation created and loaded %s', uri);
                             return hydrated;
                         } else {
                             log.error('create: response no Location header for \'%s\'', uri);
@@ -96,7 +96,7 @@ export class TrackedRepresentationFactory {
                     }
 
                 } else {
-                    log.error('response not found on http request')
+                    log.error('response not found on http request');
                 }
 
             } catch (e) {
@@ -324,7 +324,7 @@ export class TrackedRepresentationFactory {
             }
         } else {
             const uri = LinkUtil.getUri(resource, LinkRelation.Self);
-            log.warn('unknown status representation: %s', uri)
+            log.warn('unknown status representation: %s', uri);
             const unknown = SparseRepresentationFactory.make({ on: resource, status: Status.unknown });
             if (uri) {
                 return await TrackedRepresentationFactory.load(unknown, options) as T;

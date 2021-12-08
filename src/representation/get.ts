@@ -101,23 +101,23 @@ export async function get<TReturn extends LinkedRepresentation,
     // find specific item in collection
     if (where) {
 
-        log.debug('using \'where\' to locate resource on get')
+        log.debug('using \'where\' to locate resource on get');
 
         // when combined with rel, the sub resource should be the collection
         if (relIsNotSelfOrEmpty) {
             const namedSubResource = await NamedRepresentationFactory.load(resource, options);
             if (namedSubResource) {
-                log.warn('named resource found on \'%s\' found', rel)
+                log.warn('named resource found on \'%s\' found', rel);
                 resource = namedSubResource as Tracked<T>;
                 // now that sub resource is loaded, re-contextualise to this resource (ie will become 'self')
                 delete options?.rel;
             } else {
-                log.warn('named resource not found on \'%s\'', rel)
+                log.warn('named resource not found on \'%s\'', rel);
             }
         }
 
         if (instanceOfCollection(resource)) {
-            log.debug('get collection resource (with items: %s)', options?.includeItems || false)
+            log.debug('get collection resource (with items: %s)', options?.includeItems || false);
             // synchronise collection by applying all current rules (eg includeItems)
             const collection = await TrackedRepresentationFactory.load(resource, options);
             // then check for existence
@@ -138,11 +138,11 @@ export async function get<TReturn extends LinkedRepresentation,
     // named resources
     // do not add 'self' as sub resource
     if (relIsNotSelfOrEmpty) {
-        log.debug('get named singleton resource')
+        log.debug('get named singleton resource');
         return await NamedRepresentationFactory.load(resource, options);
     }
 
     // otherwise all resources
-    log.debug('get resource')
+    log.debug('get resource');
     return await TrackedRepresentationFactory.load(resource, options) as unknown as TResult;
 }

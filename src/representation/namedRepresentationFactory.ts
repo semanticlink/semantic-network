@@ -62,7 +62,7 @@ export class NamedRepresentationFactory {
             if (TrackedRepresentationUtil.isTracked(resource, name)) {
                 const namedResource = RepresentationUtil.getProperty(resource, name) as unknown as LinkedRepresentation;
                 if (namedResource) {
-                    log.debug('')
+                    log.debug('');
                     // don't just return value but ensure it has loading rules respected (eg expires)
                     return await TrackedRepresentationFactory.load(
                         namedResource,

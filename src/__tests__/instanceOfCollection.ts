@@ -6,10 +6,10 @@ describe('instance of collection', () => {
 
     test.each([
         ['nothing', {}, false],
-        ['linked representation', { links: [], }, false],
+        ['linked representation', { links: [] }, false],
         ['forms item (matches type but no href with form), no match', {
             links: [],
-            items: [{  type: 'text' }]
+            items: [{  type: 'text' }],
         }, true],
         ['empty', { links: [], items: [] }, true],
         ['instance of form, edit', {
@@ -18,7 +18,7 @@ describe('instance of collection', () => {
         }, false],
         ['forms item (matches type but no href with form at links level - nonsense data), no match', {
             links: [],
-            items: [{ links: [{ rel: LinkRelation.Self, href: 'https://api.example.com/create-form' }], type: 'text' }]
+            items: [{ links: [{ rel: LinkRelation.Self, href: 'https://api.example.com/create-form' }], type: 'text' }],
         }, true],
         ['form link, items', { links: [{ rel: LinkRelation.Self, href: 'collection' }], items: [] }, true],
         ['requires link and valid item', {

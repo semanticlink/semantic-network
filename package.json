@@ -1,7 +1,7 @@
 {
   "name": "semantic-network",
   "version": "0.5.0",
-  "description": "A utility library for manipulating a list of links that form a semantic interface to a resource.",
+  "description": "A utility library for manipulating a list of links that form a semantic interface to a network of resources.",
   "main": "lib/es5/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",

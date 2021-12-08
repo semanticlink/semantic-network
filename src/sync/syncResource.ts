@@ -218,7 +218,7 @@ export async function syncResource<T extends LinkedRepresentation>(
         }
     } else if (!rel && !relOnDocument && instanceOfCollection(resource) && instanceOfDocumentSingleton(document)) {
 
-        log.debug('[Sync] collection %s with \'%s\'', LinkUtil.getUri(resource, LinkRelation.Self));
+        log.debug('collection %s with \'%s\'', LinkUtil.getUri(resource, LinkRelation.Self));
 
         const result = await ApiUtil.get(resource, options);
         if (instanceOfCollection(result)) {
@@ -231,17 +231,17 @@ export async function syncResource<T extends LinkedRepresentation>(
         }
         return result as T;
     } else if (rel && !relOnDocument && instanceOfDocumentCollection(document)) {
-        log.debug('[Sync] collection (in named collection) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
+        log.debug('collection (in named collection) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
         const result = await ApiUtil.get(resource, { ...options, rel });
         if (instanceOfCollection(result)) {
             // in the context of the collection, synchronise the collection part of the document
             await syncResource(result, document, strategies, options);
         } else {
-            log.info('[Sync] No \'%s\' on resource %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
+            log.info('No \'%s\' on resource %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
         }
     } else if (rel && !relOnDocument && instanceOfDocumentSingleton(document)) {
 
-        log.debug('[Sync] resource (named collection) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
+        log.debug('resource (named collection) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
 
         const namedResource = await ApiUtil.get(resource, { ...options, rel });
         if (instanceOfCollection(namedResource)) {
@@ -256,14 +256,14 @@ export async function syncResource<T extends LinkedRepresentation>(
         const namedResource = await ApiUtil.get(resource, { ...options, rel });
 
         if (namedResource) {
-            log.debug('[Sync] resource (named singleton) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
+            log.debug('resource (named singleton) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
             const namedDocument = RepresentationUtil.getProperty(document, nameOnDocument) as DocumentRepresentation<T>;
             const updated = await ApiUtil.update(namedResource as T, namedDocument, options);
             if (updated) {
                 await (await SyncUtil.syncResources(updated, namedDocument as T, strategies, options))();
             }
         } else {
-            log.debug('[Sync] No update: singleton \'%s\' not found on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
+            log.debug('no update: singleton \'%s\' not found on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
         }
     }
     return resource;

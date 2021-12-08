@@ -356,18 +356,16 @@ export class FieldResolverUtil {
                         }
                     } // else fall through to return undefined
                 } else {
-                    throw new Error('Not implemented object to match against form items');
-                    /*
-                    if (formItem.items.some(item => item.value === fieldValue.name)) {
-                        return fieldValue;
-                    } // else fall through to return undefined
-                    */
+                    log.error('Field value type not found \'%s\'', typeof fieldValue);
+                    // else fall through to return undefined
                 }
             } else {
                 log.error('Field value type not found \'%s\'', typeof fieldValue);
+                // else fall through to return undefined
             }
         } else {
             log.warn('No items on form \'%s\'', formItem.name);
+            // else fall through to return undefined
         }
         log.warn('Value \'%s\' is not found on \'%s\' - still allowing value', fieldValue, formItem.name);
         return undefined;

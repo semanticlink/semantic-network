@@ -1,5 +1,5 @@
 import { CollectionRepresentation, LinkUtil } from 'semantic-link';
-import { Document, Representation, TrackedRepresentation } from '../types/types';
+import { Document, Representation, Tracked } from '../types/types';
 import { DocumentRepresentation } from '../interfaces/document';
 import { StrategyType } from '../interfaces/sync/types';
 import { SyncOptions } from '../interfaces/sync/syncOptions';
@@ -182,7 +182,7 @@ const log = anylogger('syncResource');
  * @param options
  */
 export async function syncResource<T extends Representation, U extends Document>(
-    resource: TrackedRepresentation<T> | T,
+    resource: Tracked<T> | T,
     document: DocumentRepresentation<U> | U,
     strategies: StrategyType[] = [],
     options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions

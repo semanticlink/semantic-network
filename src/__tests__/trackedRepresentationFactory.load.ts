@@ -2,7 +2,7 @@ import { LinkedRepresentation } from 'semantic-link';
 import { assertThat, match } from 'mismatched';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { Status } from '../representation/status';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
 import { LinkRelation } from '../linkRelation';
@@ -33,8 +33,8 @@ describe('Tracked Representation Factory', () => {
         const uri = 'https://api.example.com';
 
         xtest.each([
-            [{} as TrackedRepresentation<ApiRepresentation>, 'load tracked representation has no state on \'undefined\''],
-        ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>, err: string) => {
+            [{} as Tracked<ApiRepresentation>, 'load tracked representation has no state on \'undefined\''],
+        ])('no state', async (representation: Tracked<ApiRepresentation>, err: string) => {
             await expect(async () => await TrackedRepresentationFactory.load(representation)).rejects.toEqual(err);
             expect(get).not.toHaveBeenCalled();
         });
@@ -45,8 +45,8 @@ describe('Tracked Representation Factory', () => {
                     rel: LinkRelation.Self,
                     href: uri,
                 }],
-            } as TrackedRepresentation<ApiRepresentation>],
-        ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>) => {
+            } as Tracked<ApiRepresentation>],
+        ])('no state', async (representation: Tracked<ApiRepresentation>) => {
 
             const api = await TrackedRepresentationFactory.load(representation);
             expect(get).toHaveBeenCalled();
@@ -96,7 +96,7 @@ describe('Tracked Representation Factory', () => {
                         }
                     );
 
-                const api = await TrackedRepresentationFactory.load($api) as TrackedRepresentation<ApiRepresentation>;
+                const api = await TrackedRepresentationFactory.load($api) as Tracked<ApiRepresentation>;
                 expect(get).toHaveBeenCalled();
 
                 const {

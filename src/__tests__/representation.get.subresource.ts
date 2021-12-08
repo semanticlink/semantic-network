@@ -7,7 +7,7 @@ import { LinkRelation } from '../linkRelation';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 import { get as apiGet } from '../representation/get';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { ApiOptions } from '../interfaces/apiOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { bottleneckLoader } from '../http/bottleneckLoader';
@@ -143,7 +143,7 @@ describe('resource, get, on sub resource', () => {
                 collection,
                 retrieved,
                 singleton,
-            } = TrackedRepresentationUtil.getState(user as TrackedRepresentation);
+            } = TrackedRepresentationUtil.getState(user as Tracked);
             assertThat(user).is(match.predicate(instanceOfSingleton));
             assertThat(user.name).isNot(null);
             assertThat(status).is(Status.hydrated);

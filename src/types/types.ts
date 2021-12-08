@@ -82,12 +82,12 @@ export type Document = Representation | Partial<Representation>;
  * A representation that has the state tracking object attached onto it. The state object allows for an application
  * cache of the network of data.
  */
-export type TrackedRepresentation<T extends LinkedRepresentation = LinkedRepresentation> = T & LocalState;
+export type Tracked<T extends Representation = Representation> = T & LocalState;
 
 export type Unbox<T extends LinkedRepresentation = LinkedRepresentation> =
-    T extends TrackedRepresentation<CollectionRepresentation<infer U>> ?
+    T extends Tracked<CollectionRepresentation<infer U>> ?
     U :
-    T extends TrackedRepresentation<infer U> ?
+    T extends Tracked<infer U> ?
         U :
         T extends CollectionRepresentation<infer U> ?
             U :

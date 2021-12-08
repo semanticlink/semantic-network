@@ -13,7 +13,7 @@ import {
     SyncResolverOptions,
     UpdateStrategy,
 } from '../interfaces/sync/syncResolverOptions';
-import { Document, Representation, TrackedRepresentation } from '../types/types';
+import { Document, Representation, Tracked } from '../types/types';
 import { LinkRelation } from '../linkRelation';
 import { Differencer } from './differencer';
 import anylogger from 'anylogger';
@@ -40,7 +40,7 @@ export class SyncUtil {
          * Delete a resource from the local state cache
          */
         const deleteResourceAndUpdateResolver: DeleteStrategy = async <T extends LinkedRepresentation>(deleteResource: T) => {
-            const result = await ApiUtil.delete(deleteResource as TrackedRepresentation<T>, {
+            const result = await ApiUtil.delete(deleteResource as Tracked<T>, {
                 ...options,
                 on: collectionResource,
             });

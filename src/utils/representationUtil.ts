@@ -11,7 +11,7 @@ import { LinkRelation } from '../linkRelation';
 import anylogger from 'anylogger';
 import { NamedRepresentationFactory } from '../representation/namedRepresentationFactory';
 import { instanceOfCollection } from './instanceOf/instanceOfCollection';
-import { Nullable, TrackedRepresentation } from '../types/types';
+import { Nullable, Tracked } from '../types/types';
 
 const log = anylogger('RepresentationUtil');
 
@@ -176,7 +176,7 @@ export class RepresentationUtil {
      * Removes the item from the collection by matching its Self link. If not found, it returns undefined.
      */
     public static removeItemFromCollection<T extends LinkedRepresentation>(
-        collection: CollectionRepresentation<T> | TrackedRepresentation<CollectionRepresentation<T>>,
+        collection: CollectionRepresentation<T> | Tracked<CollectionRepresentation<T>>,
         item: T): T | undefined {
 
         const resourceUri = LinkUtil.getUri(item, LinkRelation.Self);

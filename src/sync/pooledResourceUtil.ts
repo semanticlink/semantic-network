@@ -2,7 +2,7 @@ import anylogger from 'anylogger';
 import { LinkedRepresentation, LinkUtil, RelationshipType } from 'semantic-link';
 import { ApiUtil } from '../apiUtil';
 import { LinkRelation } from '../linkRelation';
-import { Nullable, TrackedRepresentation } from '../types/types';
+import { Nullable, Tracked } from '../types/types';
 import { RepresentationUtil } from '../utils/representationUtil';
 import { noopResolver } from '../representation/resourceMergeFactory';
 import { PooledCollectionOptions } from '../interfaces/pooledCollectionOptions';
@@ -129,7 +129,7 @@ export class PooledResourceUtil {
      * @return {Promise<string>} containing the uri resource {@link LinkedRepresentation}
      */
     public static async get<T extends LinkedRepresentation, TResult extends LinkedRepresentation>(
-        resource: T | TrackedRepresentation<T>,
+        resource: T | Tracked<T>,
         collectionName: string,
         collectionRel: RelationshipType,
         resourceDocument: TResult,

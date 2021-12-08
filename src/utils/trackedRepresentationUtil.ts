@@ -1,5 +1,5 @@
 import { LinkedRepresentation, LinkUtil } from 'semantic-link';
-import { state, TrackedRepresentation } from '../types/types';
+import { state, Tracked } from '../types/types';
 import { State } from '../representation/state';
 import anylogger from 'anylogger';
 import { LinkRelation } from '../linkRelation';
@@ -13,7 +13,7 @@ import { instanceOfTrackedRepresentation } from './instanceOf/instanceOfTrackedR
 const log = anylogger('TrackedRepresentationUtil');
 
 export class TrackedRepresentationUtil {
-    public static getState<T extends LinkedRepresentation, U extends TrackedRepresentation<T>>(resource: U): State {
+    public static getState<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): State {
         const tracking = resource[state];
         if (!tracking) {
             const uri = LinkUtil.getUri(resource, LinkRelation.Self);
@@ -29,7 +29,7 @@ export class TrackedRepresentationUtil {
     /**
      * Checks the resource is currently tracked in either as a singleton or a collection
      */
-    public static isTracked<T extends TrackedRepresentation<LinkedRepresentation> | LinkedRepresentation | Partial<LinkedRepresentation>,
+    public static isTracked<T extends Tracked<LinkedRepresentation> | LinkedRepresentation | Partial<LinkedRepresentation>,
         K extends keyof T = keyof T>(
         resource: T,
         name: K | string): boolean {
@@ -50,7 +50,7 @@ export class TrackedRepresentationUtil {
     /**
      * Checks the resource is currently tracked in either as a singleton or a collection
      */
-    public static getTrackedFields<T extends TrackedRepresentation<LinkedRepresentation> | LinkedRepresentation,
+    public static getTrackedFields<T extends Tracked<LinkedRepresentation> | LinkedRepresentation,
         K extends keyof T>(
         resource: T): K[] {
 
@@ -70,7 +70,7 @@ export class TrackedRepresentationUtil {
      * cache bust on {@link Status.hydrated} resources. There is no time-based, refresh strategy at this point.
      *
      */
-    public static needsFetchFromState<T extends TrackedRepresentation<LinkedRepresentation>>(
+    public static needsFetchFromState<T extends Tracked<LinkedRepresentation>>(
         resource: T,
         options?: ResourceFetchOptions): boolean {
 
@@ -106,7 +106,7 @@ export class TrackedRepresentationUtil {
      *
      *       @see https://gertjans.home.xs4all.nl/javascript/cache-control.html
      */
-    public static needsFetchFromHeaders<T extends TrackedRepresentation<LinkedRepresentation>>(resource: T): boolean {
+    public static needsFetchFromHeaders<T extends Tracked<LinkedRepresentation>>(resource: T): boolean {
         const { headers = {} } = this.getState(resource);
         /*
          * The goal is to leave all heavy lifting up to the browser (ie implement caching rules). The key issue
@@ -176,7 +176,7 @@ export class TrackedRepresentationUtil {
     /**
      * Checks the resource is currently tracked as a singleton
      */
-    private static isSingletonTracked<T extends TrackedRepresentation<LinkedRepresentation>,
+    private static isSingletonTracked<T extends Tracked<LinkedRepresentation>,
         K extends keyof T>(
         resource: T,
         name: K): boolean {
@@ -186,7 +186,7 @@ export class TrackedRepresentationUtil {
     /**
      * Checks the resource is currently tracked as a collection
      */
-    private static isCollectionTracked<T extends TrackedRepresentation<LinkedRepresentation>,
+    private static isCollectionTracked<T extends Tracked<LinkedRepresentation>,
         K extends keyof T>(
         resource: T,
         name: K): boolean {

@@ -3,7 +3,7 @@ import { assertThat, match } from 'mismatched';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
 import { DocumentRepresentation } from '../interfaces/document';
@@ -55,14 +55,14 @@ describe('Tracked Representation Factory', () => {
         const uri = 'https://api.example.com';
 
         test.each([
-            [{} as TrackedRepresentation<ApiRepresentation>, 'update tracked representation has no state on \'undefined\''],
+            [{} as Tracked<ApiRepresentation>, 'update tracked representation has no state on \'undefined\''],
             [{
                 links: [{
                     rel: LinkRelation.Self,
                     href: uri,
                 }],
-            } as TrackedRepresentation<ApiRepresentation>, `update tracked representation has no state on '${uri}'`],
-        ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>, err: string) => {
+            } as Tracked<ApiRepresentation>, `update tracked representation has no state on '${uri}'`],
+        ])('no state', async (representation: Tracked<ApiRepresentation>, err: string) => {
             await expect(async () => await TrackedRepresentationFactory.update(representation, document as unknown as DocumentRepresentation)).rejects.toEqual(err);
             expect(put).not.toHaveBeenCalled();
         });
@@ -83,7 +83,7 @@ describe('Tracked Representation Factory', () => {
                         }
                     );
 
-                const api = await TrackedRepresentationFactory.update($api, document as unknown as DocumentRepresentation) as TrackedRepresentation<ApiRepresentation>;
+                const api = await TrackedRepresentationFactory.update($api, document as unknown as DocumentRepresentation) as Tracked<ApiRepresentation>;
                 expect(put).toHaveBeenCalled();
 
                 const {
@@ -141,7 +141,7 @@ describe('Tracked Representation Factory', () => {
                         };
                     }
                 });
-                const api = await TrackedRepresentationFactory.update($api, document as unknown as DocumentRepresentation) as TrackedRepresentation<ApiRepresentation>;
+                const api = await TrackedRepresentationFactory.update($api, document as unknown as DocumentRepresentation) as Tracked<ApiRepresentation>;
                 verifyMocks(getCount, postCount, putCount, deleteCount);
 
                 const { status } = TrackedRepresentationUtil.getState(api);

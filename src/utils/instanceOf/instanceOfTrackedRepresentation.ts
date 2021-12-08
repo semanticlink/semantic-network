@@ -1,5 +1,5 @@
 import { instanceOfLinkedRepresentation, LinkedRepresentation } from 'semantic-link';
-import { state, TrackedRepresentation } from '../../types/types';
+import { state, Tracked } from '../../types/types';
 
 /**
  * A guard to detect whether the object has {@link State} and is a {@link LinkedRepresentation}
@@ -7,6 +7,6 @@ import { state, TrackedRepresentation } from '../../types/types';
  * @param object
  * @returns whether the object is an instance on the interface
  */
-export function instanceOfTrackedRepresentation<T extends LinkedRepresentation>(object: unknown | LinkedRepresentation): object is TrackedRepresentation<T> {
-    return instanceOfLinkedRepresentation(object) && (object as TrackedRepresentation<T>)[state] !== undefined;
+export function instanceOfTrackedRepresentation<T extends LinkedRepresentation>(object: unknown | LinkedRepresentation): object is Tracked<T> {
+    return instanceOfLinkedRepresentation(object) && (object as Tracked<T>)[state] !== undefined;
 }

@@ -8,7 +8,7 @@ import anylogger from 'anylogger';
 import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SparseRepresentationFactory } from './sparseRepresentationFactory';
 import { RepresentationUtil } from '../utils/representationUtil';
-import { Document, Nullable, Representation, TrackedRepresentation } from '../types/types';
+import { Document, Nullable, Representation, Tracked } from '../types/types';
 import { LoaderJobOptions } from '../interfaces/loader';
 
 const log = anylogger('NamedRepresentationFactory');
@@ -52,7 +52,7 @@ export class NamedRepresentationFactory {
         T extends LinkedRepresentation | TReturn = LinkedRepresentation,
         TResult extends TReturn = T extends TReturn ? T : TReturn>(
         resource: T,
-        options?: ResourceQueryOptions & ResourceAssignOptions & LoaderJobOptions): Promise<Nullable<TrackedRepresentation<TResult>>> {
+        options?: ResourceQueryOptions & ResourceAssignOptions & LoaderJobOptions): Promise<Nullable<Tracked<TResult>>> {
         const {
             rel = undefined,
             name = NamedRepresentationFactory.defaultNameStrategy(rel, resource),
@@ -66,7 +66,7 @@ export class NamedRepresentationFactory {
                     // don't just return value but ensure it has loading rules respected (eg expires)
                     return await TrackedRepresentationFactory.load(
                         namedResource,
-                        { ...options, rel: LinkRelation.Self }) as TrackedRepresentation<TResult>;
+                        { ...options, rel: LinkRelation.Self }) as Tracked<TResult>;
                 } // else fall through to undefined
                 // if the resource is tracked it is very unlikely that this resource doesn't exist
                 log.warn('Named resource \'%s\' on %s is undefined', name, LinkUtil.getUri(resource, LinkRelation.Self));
@@ -80,7 +80,7 @@ export class NamedRepresentationFactory {
                     if (namedResource) {
                         TrackedRepresentationUtil.add(resource, name, namedResource, options);
                     }
-                    return namedResource as TrackedRepresentation<TResult>;
+                    return namedResource as Tracked<TResult>;
                 } // else fall through to undefined
             }
         } else {

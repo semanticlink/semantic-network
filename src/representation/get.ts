@@ -11,7 +11,7 @@ import { RepresentationUtil } from '../utils/representationUtil';
 import anylogger from 'anylogger';
 import { ResourceUpdateOptions } from '../interfaces/resourceUpdateOptions';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
-import { Nullable, TrackedRepresentation } from '../types/types';
+import { Nullable, Tracked } from '../types/types';
 import { LinkRelation } from '../linkRelation';
 import { LoaderJobOptions } from '../interfaces/loader';
 
@@ -75,7 +75,7 @@ async function f() {
 export async function get<TReturn extends LinkedRepresentation,
     T extends LinkedRepresentation | TReturn = LinkedRepresentation,
     TResult extends TReturn = T extends TReturn ? T : TReturn>(
-    resource: T | TrackedRepresentation<T>,
+    resource: T | Tracked<T>,
     options?: ResourceFactoryOptions &
         ResourceQueryOptions &
         ResourceLinkOptions &
@@ -83,7 +83,7 @@ export async function get<TReturn extends LinkedRepresentation,
         ResourceMergeOptions &
         ResourceFetchOptions &
         ResourceUpdateOptions &
-        LoaderJobOptions): Promise<Nullable<TResult | TrackedRepresentation<TResult>>> {
+        LoaderJobOptions): Promise<Nullable<TResult | Tracked<TResult>>> {
 
     const {
         rel = undefined,
@@ -108,7 +108,7 @@ export async function get<TReturn extends LinkedRepresentation,
             const namedSubResource = await NamedRepresentationFactory.load(resource, options);
             if (namedSubResource) {
                 log.warn('named resource found on \'%s\' found', rel)
-                resource = namedSubResource as TrackedRepresentation<T>;
+                resource = namedSubResource as Tracked<T>;
                 // now that sub resource is loaded, re-contextualise to this resource (ie will become 'self')
                 delete options?.rel;
             } else {
@@ -124,7 +124,7 @@ export async function get<TReturn extends LinkedRepresentation,
             const item = RepresentationUtil.findInCollection(collection, options);
             if (item) {
                 log.debug('item in collection found');
-                return await TrackedRepresentationFactory.load(item, options) as TrackedRepresentation<TResult>;
+                return await TrackedRepresentationFactory.load(item, options) as Tracked<TResult>;
             } else {
                 log.debug('item in collection not found ');
                 return undefined;

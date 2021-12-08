@@ -5,7 +5,7 @@ import anylogger from 'anylogger';
 import { LinkRelation } from '../linkRelation';
 import { defaultEditFormStrategy } from './editFormMergeStrategy';
 import { get } from './get';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { DocumentRepresentation } from '../interfaces/document';
 import { TrackedRepresentationFactory } from './trackedRepresentationFactory';
 import { ResourceLinkOptions } from '../interfaces/resourceLinkOptions';
@@ -25,7 +25,7 @@ const log = anylogger('Update');
  * @param options
  */
 export async function update<T extends LinkedRepresentation>(
-    resource: T | TrackedRepresentation<T>,
+    resource: T | Tracked<T>,
     document: T | DocumentRepresentation<T>,
     options?: ResourceUpdateOptions &
         ResourceLinkOptions &
@@ -48,7 +48,7 @@ export async function update<T extends LinkedRepresentation>(
 }
 
 async function updateSingleton<T extends LinkedRepresentation>(
-    resource: T | TrackedRepresentation<T>,
+    resource: T | Tracked<T>,
     document: T | DocumentRepresentation<T>,
     options?: ResourceUpdateOptions &
         ResourceLinkOptions &

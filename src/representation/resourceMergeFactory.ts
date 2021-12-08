@@ -5,7 +5,7 @@ import { LinkRelation } from '../linkRelation';
 import { ResourceResolver } from '../interfaces/resourceResolver';
 import anylogger from 'anylogger';
 import { DocumentRepresentation } from '../interfaces/document';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { Resolver } from '../interfaces/resolver';
 import { FormUtil } from '../utils/formUtil';
 import { FieldResolverUtil } from '../utils/fieldResolverUtil';
@@ -52,7 +52,7 @@ export class ResourceMergeFactory {
      * @param form required to specify the merge fields
      * @param options
      */
-    public static async editMerge<T extends TrackedRepresentation | LinkedRepresentation,
+    public static async editMerge<T extends Tracked | LinkedRepresentation,
         TForm extends FormRepresentation,
         TField extends Extract<keyof Omit<T, 'links'>, string>>(
         resource: T,

@@ -12,7 +12,7 @@ import { resource as info } from '../fixtures/1/organisation/a65/information/101
 import { LinkedRepresentation, LinkUtil } from 'semantic-link';
 import { fakeResponseFactory } from '../fixtures/1/fakeResponseFactory';
 import { SparseRepresentationFactory } from '../../representation/sparseRepresentationFactory';
-import { TrackedRepresentation } from '../../types/types';
+import { Tracked } from '../../types/types';
 import { LinkRelation } from '../../linkRelation';
 import { TrackedRepresentationUtil } from '../../utils/trackedRepresentationUtil';
 import { Status } from '../../representation/status';
@@ -29,7 +29,7 @@ import { sync } from '../../sync/sync';
 /**
  * Helper to create a {@link LinkedRepresentation} with {@link State}
  */
-const makeFromFixture = <T extends LinkedRepresentation>(document: T): TrackedRepresentation<T> =>
+const makeFromFixture = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
     // note: clone the document for multiple uses
     SparseRepresentationFactory.make({ on: { ...document } });
 
@@ -40,7 +40,7 @@ describe('Steps', () => {
         expect(TrackedRepresentationUtil.getState(step).status).toStrictEqual(Status.hydrated);
     });
     describe('root', () => {
-        let resource: TrackedRepresentation<StepRepresentation>;
+        let resource: Tracked<StepRepresentation>;
 
         /*
           * Mock factories will swap resources based on the uri requested and provide a

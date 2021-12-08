@@ -1,7 +1,7 @@
 import { SparseRepresentationFactory } from '../../representation/sparseRepresentationFactory';
 import { Status } from '../../representation/status';
 import { LinkedRepresentation, LinkUtil, RelationshipType } from 'semantic-link';
-import { TrackedRepresentation } from '../../types/types';
+import { Tracked } from '../../types/types';
 import { assertThat } from 'mismatched';
 import { HttpRequestOptions } from '../../interfaces/httpRequestOptions';
 import { LinkRelation } from '../../linkRelation';
@@ -33,11 +33,11 @@ describe('Synchroniser', () => {
     /**
      * Helper to create a {@link LinkedRepresentation} with {@link State}
      */
-    const makeHydratedResource = <T extends LinkedRepresentation>(document: T): TrackedRepresentation<T> =>
+    const makeHydratedResource = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
         // note: clone the document for multiple uses
         SparseRepresentationFactory.make({ on: { ...document } });
 
-    const makeUnknownResource = <T extends LinkedRepresentation>(document: T): TrackedRepresentation<T> =>
+    const makeUnknownResource = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
         // note: clone the document for multiple uses
         SparseRepresentationFactory.make({ status: Status.unknown, on: { ...document } });
 

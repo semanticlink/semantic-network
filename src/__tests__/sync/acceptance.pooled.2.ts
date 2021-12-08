@@ -14,7 +14,7 @@ import { LinkedRepresentation, LinkUtil, Uri } from 'semantic-link';
 import anylogger from 'anylogger';
 import { AxiosResponse } from 'axios';
 import { fakeResponseFactory } from '../fixtures/2/fakeResponseFactory';
-import { TrackedRepresentation } from '../../types/types';
+import { Tracked } from '../../types/types';
 import { SparseRepresentationFactory } from '../../representation/sparseRepresentationFactory';
 import { ResourceQueryOptions } from '../../interfaces/resourceQueryOptions';
 import { LinkRelation } from '../../linkRelation';
@@ -35,7 +35,7 @@ const log = anylogger('Steps Test');
 /**
  * Helper to create a {@link LinkedRepresentation} with {@link State}
  */
-const makeHydratedResource = <T extends LinkedRepresentation>(document: T): T | TrackedRepresentation<T> =>
+const makeHydratedResource = <T extends LinkedRepresentation>(document: T): T | Tracked<T> =>
     SparseRepresentationFactory.make({ on: document });
 
 describe('Steps with pooled (new) resources', () => {

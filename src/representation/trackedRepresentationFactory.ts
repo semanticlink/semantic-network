@@ -1,5 +1,5 @@
 import { CollectionRepresentation, FeedRepresentation, LinkedRepresentation, LinkUtil, Uri } from 'semantic-link';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { Status } from './status';
 import { ResourceLinkOptions } from '../interfaces/resourceLinkOptions';
 import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
@@ -40,14 +40,14 @@ export class TrackedRepresentationFactory {
      * @returns a 201 returns a representation whereas the 200 and 202 return undefined
      */
     public static async create<T extends LinkedRepresentation, TResult extends LinkedRepresentation>(
-        resource: T | TrackedRepresentation<T> | FormRepresentation,
+        resource: T | Tracked<T> | FormRepresentation,
         document: DocumentRepresentation,
         options?: ResourceFactoryOptions &
             ResourceQueryOptions &
             ResourceLinkOptions &
             HttpRequestOptions &
             ResourceFetchOptions &
-            LoaderJobOptions): Promise<TResult | TrackedRepresentation<TResult> | undefined> {
+            LoaderJobOptions): Promise<TResult | Tracked<TResult> | undefined> {
 
         const {
             rel = LinkRelation.Self,
@@ -119,12 +119,12 @@ export class TrackedRepresentationFactory {
     }
 
     public static async del<T extends LinkedRepresentation>(
-        resource: T | TrackedRepresentation<T>,
+        resource: T | Tracked<T>,
         options?: ResourceLinkOptions &
             HttpRequestOptions &
             ResourceMergeOptions &
             ResourceQueryOptions &
-            LoaderJobOptions): Promise<T | TrackedRepresentation<T>> {
+            LoaderJobOptions): Promise<T | Tracked<T>> {
 
         if (instanceOfTrackedRepresentation(resource)) {
 
@@ -189,7 +189,7 @@ export class TrackedRepresentationFactory {
     }
 
     public static async update<T extends LinkedRepresentation>(
-        resource: T | TrackedRepresentation<T>,
+        resource: T | Tracked<T>,
         document: T | DocumentRepresentation<T>,
         options?: ResourceLinkOptions &
             HttpRequestOptions &
@@ -258,12 +258,12 @@ export class TrackedRepresentationFactory {
      * @param options
      */
     public static async load<T extends LinkedRepresentation>(
-        resource: T | TrackedRepresentation<T>,
+        resource: T | Tracked<T>,
         options?: ResourceLinkOptions &
             HttpRequestOptions &
             ResourceMergeOptions &
             ResourceFetchOptions &
-            LoaderJobOptions): Promise<T | TrackedRepresentation<T>> {
+            LoaderJobOptions): Promise<T | Tracked<T>> {
 
         if (instanceOfTrackedRepresentation(resource)) {
 
@@ -340,7 +340,7 @@ export class TrackedRepresentationFactory {
      * If an items is removed from a collection, it is marked as 'stale'
      */
     public static removeCollectionItem<T extends LinkedRepresentation>(
-        collection: CollectionRepresentation<T> | TrackedRepresentation<CollectionRepresentation<T>>,
+        collection: CollectionRepresentation<T> | Tracked<CollectionRepresentation<T>>,
         item: T): T | undefined {
 
         const itemFromCollection = RepresentationUtil.removeItemFromCollection(collection, item);

@@ -3,7 +3,7 @@ import { assertThat, match } from 'mismatched';
 import { HttpRequestFactory } from '../http/httpRequestFactory';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
 import { LinkRelation } from '../linkRelation';
@@ -54,14 +54,14 @@ describe('Tracked Representation Factory', () => {
         const uri = 'https://api.example.com';
 
         test.each([
-            [{} as TrackedRepresentation<ApiRepresentation>, 'delete tracked representation has no state on \'undefined\''],
+            [{} as Tracked<ApiRepresentation>, 'delete tracked representation has no state on \'undefined\''],
             [{
                 links: [{
                     rel: LinkRelation.Self,
                     href: uri,
                 }],
-            } as TrackedRepresentation<ApiRepresentation>, `delete tracked representation has no state on '${uri}'`],
-        ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>, err: string) => {
+            } as Tracked<ApiRepresentation>, `delete tracked representation has no state on '${uri}'`],
+        ])('no state', async (representation: Tracked<ApiRepresentation>, err: string) => {
             await expect(async () => await TrackedRepresentationFactory.del(representation)).rejects.toEqual(err);
             expect(del).not.toHaveBeenCalled();
         });
@@ -81,7 +81,7 @@ describe('Tracked Representation Factory', () => {
                     }
                 );
 
-                const api = await TrackedRepresentationFactory.del($api) as TrackedRepresentation<LinkedRepresentation>;
+                const api = await TrackedRepresentationFactory.del($api) as Tracked<LinkedRepresentation>;
                 expect(del).toHaveBeenCalled();
 
                 const {
@@ -117,7 +117,7 @@ describe('Tracked Representation Factory', () => {
                 postCount: number,
                 putCount: number,
                 deleteCount: number) => {
-                const $api = SparseRepresentationFactory.make<ApiRepresentation>({ uri }) as TrackedRepresentation;
+                const $api = SparseRepresentationFactory.make<ApiRepresentation>({ uri }) as Tracked;
 
                 del.mockImplementation(async () => {
                     if (statusCode >= 400) {
@@ -137,7 +137,7 @@ describe('Tracked Representation Factory', () => {
                         };
                     }
                 });
-                const api = await TrackedRepresentationFactory.del($api) as TrackedRepresentation;
+                const api = await TrackedRepresentationFactory.del($api) as Tracked;
                 verifyMocks(getCount, postCount, putCount, deleteCount);
 
                 const { status } = TrackedRepresentationUtil.getState(api);

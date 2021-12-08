@@ -7,7 +7,7 @@ import { LinkRelation } from '../linkRelation';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 import { get as apiGet } from '../representation/get';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { bottleneckLoader } from '../http/bottleneckLoader';
 
 
@@ -100,7 +100,7 @@ describe('resource, get, on sparse', () => {
                 collection,
                 retrieved,
                 singleton,
-            } = TrackedRepresentationUtil.getState(me as TrackedRepresentation);
+            } = TrackedRepresentationUtil.getState(me as Tracked);
             assertThat(me).is(match.predicate(instanceOfSingleton));
             assertThat(me.name).is('me');
             assertThat(status).is(Status.hydrated);

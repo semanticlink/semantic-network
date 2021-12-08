@@ -2,7 +2,7 @@ import { resource, selfUri as workflowUri } from '../fixtures/1/organisation/a65
 import { LinkedRepresentation, LinkUtil } from 'semantic-link';
 import { fakeResponseFactory } from '../fixtures/1/fakeResponseFactory';
 import { SparseRepresentationFactory } from '../../representation/sparseRepresentationFactory';
-import { TrackedRepresentation } from '../../types/types';
+import { Tracked } from '../../types/types';
 import { LinkRelation } from '../../linkRelation';
 import { assertThat } from 'mismatched';
 import { ApiUtil } from '../../apiUtil';
@@ -10,7 +10,7 @@ import { ApiUtil } from '../../apiUtil';
 /**
  * Helper to create a {@link LinkedRepresentation} with {@link State}
  */
-const makeFromFixture = <T extends LinkedRepresentation>(document: T): TrackedRepresentation<T> =>
+const makeFromFixture = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
     // note: clone the document for multiple uses
     SparseRepresentationFactory.make({ on: { ...document } });
 

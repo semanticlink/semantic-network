@@ -1,5 +1,5 @@
 import { CollectionRepresentation, FeedRepresentation, LinkedRepresentation } from 'semantic-link';
-import { SingletonRepresentation, state, TrackedRepresentation } from '../types/types';
+import { SingletonRepresentation, state, Tracked } from '../types/types';
 import { State } from './state';
 import { Status } from './status';
 import anylogger from 'anylogger';
@@ -19,7 +19,7 @@ export class SparseRepresentationFactory {
      * be at worst sparse with a state ({@link Status.locationOnly}, {@link Status.virtual}). At best, the representation
      * is {@link Status.hydrated} when a resource is presented that has been retrieved across the wire.
      */
-    public static make<T extends LinkedRepresentation | CollectionRepresentation>(options?: ResourceFactoryOptions): TrackedRepresentation<T> {
+    public static make<T extends LinkedRepresentation | CollectionRepresentation>(options?: ResourceFactoryOptions): Tracked<T> {
 
         const { on } = { ...options };
 
@@ -40,7 +40,7 @@ export class SparseRepresentationFactory {
 
     private static makeHydrated<T extends LinkedRepresentation>(
         resource: LinkedRepresentation,
-        options?: ResourceFactoryOptions): TrackedRepresentation<T> {
+        options?: ResourceFactoryOptions): Tracked<T> {
         const {
             sparseType = 'singleton',
             status = Status.hydrated,
@@ -59,7 +59,7 @@ export class SparseRepresentationFactory {
 
         if (!instanceOfCollection(resource)) {
             // make a singleton (or form)
-            return tracked as TrackedRepresentation<T>;
+            return tracked as Tracked<T>;
         } else {
             // create collection
 
@@ -85,12 +85,12 @@ export class SparseRepresentationFactory {
                 ...tracked,
                 items: [...items],
                 // TODO: struggling with typing on CollectionRepresentation<T> where the items are a TrackedRepresentation<T>
-            } as unknown as TrackedRepresentation<T>;
+            } as unknown as Tracked<T>;
 
         }
     }
 
-    private static makeSparse<T extends LinkedRepresentation>(options?: ResourceFactoryOptions): TrackedRepresentation<T> {
+    private static makeSparse<T extends LinkedRepresentation>(options?: ResourceFactoryOptions): Tracked<T> {
         let { status, uri } = { ...options };
         const { title = undefined, mappedTitle = this.mappedTitleAttributeName } = { ...options };
 
@@ -111,7 +111,7 @@ export class SparseRepresentationFactory {
                 rel: LinkRelation.Self,
                 href: uri,
             }],
-        } as TrackedRepresentation<T>;
+        } as Tracked<T>;
 
         const { sparseType = 'singleton' } = { ...options };
 

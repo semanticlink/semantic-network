@@ -5,14 +5,14 @@ import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from '../representation/status';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { NamedRepresentationFactory } from '../representation/namedRepresentationFactory';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 import { RepresentationUtil } from '../utils/representationUtil';
 import { bottleneckLoader } from '../http/bottleneckLoader';
 
-const makeHydratedResource = <T extends LinkedRepresentation>(document: T): TrackedRepresentation<T> =>
+const makeHydratedResource = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
     // note: clone the document for multiple uses
     SparseRepresentationFactory.make({ on: { ...document } });
 
@@ -58,8 +58,8 @@ describe('Named Representation Factory', () => {
         const uri = 'https://api.example.com';
 
         test.each([
-            [{} as TrackedRepresentation<ApiRepresentation>, 'No named resource (or rel) specified'],
-        ])('no rel or name, throws', async (representation: TrackedRepresentation<ApiRepresentation>, err: string) => {
+            [{} as Tracked<ApiRepresentation>, 'No named resource (or rel) specified'],
+        ])('no rel or name, throws', async (representation: Tracked<ApiRepresentation>, err: string) => {
             await expect(async () => await NamedRepresentationFactory.load(representation, {})).rejects.toEqual(err);
             expect(post).not.toHaveBeenCalled();
         });

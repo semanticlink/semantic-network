@@ -6,7 +6,7 @@ import {
     LinkUtil,
     RelationshipType,
 } from 'semantic-link';
-import { TrackedRepresentation } from '../types/types';
+import { Tracked } from '../types/types';
 import { TrackedRepresentationFactory } from './trackedRepresentationFactory';
 import { ResourceQueryOptions } from '../interfaces/resourceQueryOptions';
 import { ResourceLinkOptions } from '../interfaces/resourceLinkOptions';
@@ -32,7 +32,7 @@ const log = anylogger('create');
  * TODO: accept but don't require TrackedRepresentation interface
  */
 export async function create<T extends LinkedRepresentation, TResult extends LinkedRepresentation = T>(
-    document: DocumentRepresentation<T> | TrackedRepresentation<T> | LinkType,
+    document: DocumentRepresentation<T> | Tracked<T> | LinkType,
     options?: ResourceFactoryOptions &
         ResourceQueryOptions &
         ResourceLinkOptions &
@@ -86,7 +86,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
         formRel = [LinkRelation.CreateForm, LinkRelation.SearchForm] as RelationshipType,
     } = { ...options };
 
-    const form = await ApiUtil.get(resource as unknown as TrackedRepresentation<T>, {
+    const form = await ApiUtil.get(resource as unknown as Tracked<T>, {
         ...options,
         rel: formRel,
     }) /*as FormRepresentation*/;
@@ -107,7 +107,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
                 const rel = hasSubmitRel ? LinkRelation.Submit : LinkRelation.Self;
 
                 const item = await TrackedRepresentationFactory.create(
-                    contextResource as unknown as TrackedRepresentation<T>,
+                    contextResource as unknown as Tracked<T>,
                     merged,
                     { ...options, rel });
 

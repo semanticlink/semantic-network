@@ -64,7 +64,7 @@ export class TrackedRepresentationFactory {
                 const response = await HttpRequestFactory.Instance().create(resource, document, options);
 
                 if (response) {
-                    const {headers = {}, status} = response;
+                    const { headers = {}, status } = response;
                     if (!headers) {
                         // realistically only for tests
                         log.error('response does not like an http request');
@@ -323,11 +323,15 @@ export class TrackedRepresentationFactory {
                 log.error('undefined returned on link \'%s\' (check stack trace)', rel);
             }
         } else {
-            log.trace('load tracked representation: %o %o', resource, options)
-            // TODO: decide if we want to make a locationOnly resource if possible and then continue
-            return Promise.reject(`load tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
+            const uri = LinkUtil.getUri(resource, LinkRelation.Self);
+            log.warn('unknown status representation: %s', uri)
+            const unknown = SparseRepresentationFactory.make({ on: resource, status: Status.unknown });
+            if (uri) {
+                return await TrackedRepresentationFactory.load(unknown, options) as T;
+            } else {
+                log.error('load tracked representation has no processable state on %s', uri);
+            }
         }
-
         return resource;
     }
 

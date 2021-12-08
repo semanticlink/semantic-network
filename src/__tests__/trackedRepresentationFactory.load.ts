@@ -32,17 +32,25 @@ describe('Tracked Representation Factory', () => {
 
         const uri = 'https://api.example.com';
 
-        test.each([
+        xtest.each([
             [{} as TrackedRepresentation<ApiRepresentation>, 'load tracked representation has no state on \'undefined\''],
+        ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>, err: string) => {
+            await expect(async () => await TrackedRepresentationFactory.load(representation)).rejects.toEqual(err);
+            expect(get).not.toHaveBeenCalled();
+        });
+
+        test.each([
             [{
                 links: [{
                     rel: LinkRelation.Self,
                     href: uri,
                 }],
-            } as TrackedRepresentation<ApiRepresentation>, `load tracked representation has no state on '${uri}'`],
-        ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>, err: string) => {
-            await expect(async () => await TrackedRepresentationFactory.load(representation)).rejects.toEqual(err);
-            expect(get).not.toHaveBeenCalled();
+            } as TrackedRepresentation<ApiRepresentation>],
+        ])('no state', async (representation: TrackedRepresentation<ApiRepresentation>) => {
+
+            const api = await TrackedRepresentationFactory.load(representation);
+            expect(get).toHaveBeenCalled();
+            assertThat(api).isNot(undefined);
         });
 
         test.each([

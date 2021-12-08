@@ -36,6 +36,7 @@ export async function update<T extends LinkedRepresentation>(
     // PATCH
     if (instanceOfCollection(resource)) {
         if (!instanceOfUriList(document)) {
+            console.log(resource, document, options);
             throw new Error('To update a collection, a document of type UriList must be supplied');
         }
         throw new Error('Update collection not implemented');

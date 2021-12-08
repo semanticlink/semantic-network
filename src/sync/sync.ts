@@ -141,17 +141,21 @@ export async function sync<T extends LinkedRepresentation>(syncAction: SyncType<
 
         if (document) {
             const namedDocument = RepresentationUtil.getProperty(document, name);
-            if (instanceOfCollection(namedDocument)) {
-                log.debug('sync: named document collection');
-                await syncResource(resource, namedDocument as unknown as T, strategies, { ...options, rel });
-            } else {
-                if (instanceOfCollection(resource)) {
-                    log.debug('sync: collection');
-                    await syncResource(resource, document, strategies, { ...options, rel });
+            if (namedDocument){
+                if (instanceOfCollection(namedDocument)) {
+                    log.debug('sync: named document collection');
+                    await syncResource(resource, namedDocument as unknown as T, strategies, { ...options, rel });
                 } else {
-                    log.debug('sync: named singleton');
-                    await syncResource(resource, document, strategies, { ...options, rel, relOnDocument: rel });
+                    if (instanceOfCollection(resource)) {
+                        log.debug('sync: collection');
+                        await syncResource(resource, document, strategies, { ...options, rel });
+                    } else {
+                        log.debug('sync: named singleton');
+                        await syncResource(resource, document, strategies, { ...options, rel, relOnDocument: rel });
+                    }
                 }
+            } else {
+                log.debug('named document not found');
             }
         } else {
             log.warn('Matching document does not exist on rel \'%s\' for %s', rel, LinkUtil.getUri(resource as LinkType, 'self'));

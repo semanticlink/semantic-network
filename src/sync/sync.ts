@@ -140,10 +140,10 @@ export async function sync<T extends LinkedRepresentation>(syncAction: SyncType<
         }
 
         if (document) {
-            const documentCollection = RepresentationUtil.getProperty(document, name);
-            if (instanceOfCollection(documentCollection)) {
+            const namedDocument = RepresentationUtil.getProperty(document, name);
+            if (instanceOfCollection(namedDocument)) {
                 log.debug('sync: named document collection');
-                await syncResource(resource, documentCollection as unknown as T, strategies, { ...options, rel });
+                await syncResource(resource, namedDocument as unknown as T, strategies, { ...options, rel });
             } else {
                 if (instanceOfCollection(resource)) {
                     log.debug('sync: collection');

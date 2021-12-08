@@ -35,8 +35,10 @@ export abstract class PooledResource<T extends LinkedRepresentation> {
             log.error('empty resource for pooled resources');
         }
 
+        log.debug('pooled resource on %s', LinkUtil.getUri(resource, LinkRelation.Self));
         this.contextResource = resource;
 
+        log.debug('make resolvers on pooled resource');
         this.resolvers = this.makeResolvers();
     }
 
@@ -53,6 +55,8 @@ export abstract class PooledResource<T extends LinkedRepresentation> {
 
         // initialise on entry as resolver is not scoped on inner function
         const { pooledResolver } = { ...options };
+
+        log.debug('pooled resource resolve on \'%s\': start', rel);
 
         return async <T extends LinkedRepresentation>(document: T, options?: PooledCollectionOptions): Promise<T | undefined> => {
             log.debug('resolve pooled %s %s', rel, LinkUtil.getUri(document, LinkRelation.Self));
@@ -72,6 +76,7 @@ export abstract class PooledResource<T extends LinkedRepresentation> {
                     log.debug('pooled resource nested sync not found')
                 }
 
+                log.debug('pooled resource resolve on \'%s\': end', rel);
                 return resource as T;
             } else {
                 log.warn('context resource not found');

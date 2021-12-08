@@ -7,10 +7,19 @@ describe('instance of form', () => {
     test.each([
         ['nothing', {}, false],
         ['empty', { links: [], items: [] }, false],
-        ['valid link, no item', { links: [{ rel: LinkRelation.Self, href: 'create-form' }], items: [] }, false],
+        ['valid link, no item', { links: [{ rel: LinkRelation.Self, href: 'create-form' }] }, false],
+        ['valid link, empty item', { links: [{ rel: LinkRelation.Self, href: 'create-form' }], items: [] }, false],
         ['valid item, no link', { links: [], items: [{ type: 'text' }] }, false],
-        ['requires link and valid item', {
+        ['requires link with form and valid item, create', {
             links: [{ rel: LinkRelation.Self, href: 'create-form' }],
+            items: [{ type: 'text' }],
+        }, true],
+        ['requires link with form and valid item, edit', {
+            links:  [{ rel: LinkRelation.Self, href: 'edit-form' }],
+            items: [{ type: 'text' }],
+        }, true],
+        ['requires link with form and valid item, search', {
+            links: [{ rel: LinkRelation.Self, href: 'search-form' }],
             items: [{ type: 'text' }],
         }, true],
         ['requires form in self link href', {

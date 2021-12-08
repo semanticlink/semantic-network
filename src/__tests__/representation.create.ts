@@ -56,7 +56,8 @@ describe('resource, create', () => {
 
         trackedRepresentationFactory.create.mockResolvedValue({ links: [], version: '1' } as SingletonRepresentation);
 
-        await create(SparseRepresentationFactory.make({ uri }), options);
+        const resource = SparseRepresentationFactory.make({ uri });
+        await create(resource, options);
 
         expect(factory).toBeCalledTimes(calledTimes);
 

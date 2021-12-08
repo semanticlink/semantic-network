@@ -30,8 +30,16 @@ export function instanceOfForm(object: unknown | LinkedRepresentation): object i
              * that the items have id/title loaded as attributes rather than a link relations
              *
              * TODO: work out a better type strategy
+             *  @see {@link LinkRelation.CreateForm}
+             *  @see {@link LinkRelation.EditForm}
+             *  @see {@link LinkRelation.SearchForm}
+             *  @see {@link LinkRelation.ApplyForm}
              */
-            return LinkUtil.getUri(object as LinkedRepresentation, LinkRelation.Self)?.includes('form') || false;
+            const uri = LinkUtil.getUri(object as LinkedRepresentation, LinkRelation.Self);
+            if (uri) {
+                return uri.includes('form')
+            }
+            return false;
         }
     }
     return false;

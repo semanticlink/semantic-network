@@ -12,9 +12,13 @@ import { instanceOfForm } from './instanceOfForm';
 export function instanceOfCollection<T extends LinkedRepresentation>(object: unknown | CollectionRepresentation<T>): object is CollectionRepresentation<T> {
 
     if (instanceOfLinkedRepresentation(object)) {
-        const asObject = object as CollectionRepresentation;
-        return !!(asObject && Array.isArray(asObject.items) && !instanceOfForm(object));
-    } else {
-        return false;
+        if ('items' in object) {
+            const anObject = object as CollectionRepresentation;
+            if (Array.isArray(anObject.items)) {
+                return !instanceOfForm(object);
+            }
+        }
     }
+    return false;
+
 }

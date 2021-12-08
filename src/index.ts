@@ -85,7 +85,6 @@ export * from './interfaces/resourceResolver';
 export * from './interfaces/resourceUpdateOptions';
 // sync interfaces
 export * from './interfaces/sync/syncComparator';
-export * from './interfaces/sync/namedResourceSync';
 export * from './interfaces/sync/syncResourceResolver';
 export * from './interfaces/sync/resourceSync';
 export * from './interfaces/sync/syncInfo';

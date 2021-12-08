@@ -13,7 +13,7 @@ import {
     SyncResolverOptions,
     UpdateStrategy,
 } from '../interfaces/sync/syncResolverOptions';
-import { TrackedRepresentation } from '../types/types';
+import { Document, Representation, TrackedRepresentation } from '../types/types';
 import { LinkRelation } from '../linkRelation';
 import { Differencer } from './differencer';
 import anylogger from 'anylogger';
@@ -209,9 +209,9 @@ export class SyncUtil {
         return await Differencer.difference(collectionResource, collectionDocument, { ...options, ...makeOptions() });
     };
 
-    public static async syncResources<T extends LinkedRepresentation>(
+    public static async syncResources<T extends Representation, U extends Document>(
         resource: T,
-        document: T,
+        document: U,
         strategies: StrategyType[] = [],
         options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions): Promise<() => Promise<void[]>> {
 

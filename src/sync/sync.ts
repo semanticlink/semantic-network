@@ -1,15 +1,14 @@
-import { LinkedRepresentation, LinkType, LinkUtil } from 'semantic-link';
-import { SyncType } from '../interfaces/sync/types';
+import { LinkType, LinkUtil } from 'semantic-link';
 import { ResourceSync } from '../interfaces/sync/resourceSync';
 import { SyncOptions } from '../interfaces/sync/syncOptions';
 import { instanceOfResourceSync } from '../utils/instanceOf/instanceOfResourceSync';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { syncResource } from './syncResource';
-import { NamedResourceSync } from '../interfaces/sync/namedResourceSync';
 import { LinkRelConvertUtil } from '../utils/linkRelConvertUtil';
 import { instanceOfUriList } from '../utils/instanceOf/instanceOfUriList';
 import { RepresentationUtil } from '../utils/representationUtil';
 import anylogger from 'anylogger';
+import { Representation, Document } from '../types/types';
 
 const log = anylogger('sync');
 
@@ -103,10 +102,9 @@ const log = anylogger('sync');
  *
  * @param syncAction
  */
-export async function sync<T extends LinkedRepresentation>(syncAction: SyncType<T>): Promise<void> {
+export async function sync<T extends Representation = Representation, U extends Document = Document>(syncAction: ResourceSync<T, U>): Promise<void> {
     // shared configuration
-    const resourceSync: ResourceSync<T> = syncAction;
-    const { resource, document, strategies = [], options = <SyncOptions>{} } = resourceSync;
+    const { resource, document, strategies = [], options = <SyncOptions>{}, rel } = syncAction;
 
     log.debug('sync: start');
 
@@ -125,8 +123,7 @@ export async function sync<T extends LinkedRepresentation>(syncAction: SyncType<
     } else {
         // resource as named on a resource or collection
         // recast and extract the rel/name values
-        const namedCfg = <NamedResourceSync<T>>syncAction;
-        const { rel, name = LinkRelConvertUtil.relTypeToCamel(namedCfg.rel) } = namedCfg;
+        const { name = LinkRelConvertUtil.relTypeToCamel(rel) } = syncAction;
 
         if (!rel) {
             throw new Error('Sync of a named resource must have a rel specified in the options');
@@ -141,7 +138,7 @@ export async function sync<T extends LinkedRepresentation>(syncAction: SyncType<
 
         if (document) {
             const namedDocument = RepresentationUtil.getProperty(document, name);
-            if (namedDocument){
+            if (namedDocument) {
                 if (instanceOfCollection(namedDocument)) {
                     log.debug('sync: named document collection');
                     await syncResource(resource, namedDocument as unknown as T, strategies, { ...options, rel });

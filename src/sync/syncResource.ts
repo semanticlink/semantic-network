@@ -1,5 +1,5 @@
-import { CollectionRepresentation, LinkedRepresentation, LinkUtil } from 'semantic-link';
-import { TrackedRepresentation } from '../types/types';
+import { CollectionRepresentation, LinkUtil } from 'semantic-link';
+import { Document, Representation, TrackedRepresentation } from '../types/types';
 import { DocumentRepresentation } from '../interfaces/document';
 import { StrategyType } from '../interfaces/sync/types';
 import { SyncOptions } from '../interfaces/sync/syncOptions';
@@ -181,9 +181,9 @@ const log = anylogger('syncResource');
  * @param strategies
  * @param options
  */
-export async function syncResource<T extends LinkedRepresentation>(
+export async function syncResource<T extends Representation, U extends Document>(
     resource: TrackedRepresentation<T> | T,
-    document: DocumentRepresentation<T> | T,
+    document: DocumentRepresentation<U> | U,
     strategies: StrategyType[] = [],
     options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions
 ): Promise<T> {
@@ -192,7 +192,7 @@ export async function syncResource<T extends LinkedRepresentation>(
         rel = undefined,
         relOnDocument = undefined,
         name = NamedRepresentationFactory.defaultNameStrategy(rel, resource),
-        nameOnDocument = NamedRepresentationFactory.defaultNameStrategy(relOnDocument, document as T),
+        nameOnDocument = NamedRepresentationFactory.defaultNameStrategy(relOnDocument, document),
     } = { ...options };
     // do not pass down
     options = { ...options, rel: undefined, name: undefined, relOnDocument: undefined, nameOnDocument: undefined };

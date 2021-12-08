@@ -8,7 +8,7 @@ import anylogger from 'anylogger';
 import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SparseRepresentationFactory } from './sparseRepresentationFactory';
 import { RepresentationUtil } from '../utils/representationUtil';
-import { Nullable, TrackedRepresentation } from '../types/types';
+import { Document, Nullable, Representation, TrackedRepresentation } from '../types/types';
 import { LoaderJobOptions } from '../interfaces/loader';
 
 const log = anylogger('NamedRepresentationFactory');
@@ -16,17 +16,16 @@ const log = anylogger('NamedRepresentationFactory');
 /**
  *
  */
-type NameStrategy = (rel: RelationshipType | undefined, representation?: LinkedRepresentation) => string;
+type NameStrategy = (rel: RelationshipType | undefined, representation?: Representation | Document | undefined) => string;
 
 /**
  * Where the rel is multiple pick the first matched link to be converted as the name, otherwise use the given rel
  * @param rel
  * @param representation
  */
-function firstLinkNameStrategy(rel: RelationshipType | undefined, representation?: LinkedRepresentation): string {
+function firstLinkNameStrategy(rel: RelationshipType | undefined, representation: Representation | Document | undefined): string {
     if (representation && Array.isArray(rel)) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [first, _] = LinkUtil.filter(representation, rel);
+        const [first] = LinkUtil.filter(representation as LinkedRepresentation, rel);
         if (first) {
             return LinkRelConvertUtil.relTypeToCamel(first);
         }

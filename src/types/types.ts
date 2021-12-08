@@ -71,7 +71,12 @@ export type SingletonRepresentation = LinkedRepresentation;
  *
  * @remarks this is used rarely
  */
-export type Representation = SingletonRepresentation | CollectionRepresentation | FormRepresentation
+export type Representation = SingletonRepresentation | CollectionRepresentation | FormRepresentation;
+
+/**
+ * A {@link Representation} that may be from across the wire or JSON file, or even constructed from memory
+ */
+export type Document = Representation | Partial<Representation>;
 
 /**
  * A representation that has the state tracking object attached onto it. The state object allows for an application

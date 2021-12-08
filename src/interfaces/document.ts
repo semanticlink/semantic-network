@@ -19,4 +19,3 @@ type IndexType = { [key: string]: unknown };
 export type DocumentRepresentation<T extends LinkedRepresentation | Partial<T> | Extract<T, T> = LinkedRepresentation> =
     (T & IndexType) |
     IndexType;
-

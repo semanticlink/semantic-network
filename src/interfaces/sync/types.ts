@@ -1,11 +1,9 @@
 import { LinkedRepresentation } from 'semantic-link';
-import { Representation } from '../../types/types';
+import { Document, Representation } from '../../types/types';
 import { SyncResult } from './syncResult';
 import { SyncInfo } from './syncInfo';
-import { ResourceSync } from './resourceSync';
-import { NamedResourceSync } from './namedResourceSync';
 
-export type StrategyType = <T extends Representation>(syncResult: SyncResult<T>) => Promise<void>;
+export type StrategyType = <T extends Representation, U extends Document>(syncResult: SyncResult<T, U>) => Promise<void>;
 
 /**
  * Action to make on resource
@@ -47,7 +45,3 @@ export type SyncResultItem = {
     updated: UpdateType[],
     deleted: DeleteType[],
 };
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore resolve T
-export type SyncType<T> = ResourceSync<T> | NamedResourceSync<T>;

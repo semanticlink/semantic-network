@@ -95,7 +95,7 @@ export async function get<TReturn extends LinkedRepresentation,
     // look at the context resource and ensure that it is first hydrated before loading sub resources
     if (relIsNotSelfOrEmpty) {
         log.debug('get context resource on \'self\'');
-        await TrackedRepresentationFactory.load(resource, { ...options, rel: LinkRelation.Self });
+        resource = await TrackedRepresentationFactory.load(resource, { ...options, rel: LinkRelation.Self });
     }
 
     // find specific item in collection

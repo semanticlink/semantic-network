@@ -79,7 +79,7 @@ export class NamedRepresentationFactory {
                         sparse,
                         { ...options, rel: LinkRelation.Self });
                     if (namedResource) {
-                        TrackedRepresentationUtil.add(resource, name, namedResource);
+                        TrackedRepresentationUtil.add(resource, name, namedResource, options);
                     }
                     return namedResource as TrackedRepresentation<TResult>;
                 } // else fall through to undefined

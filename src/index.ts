@@ -32,6 +32,7 @@ export * from './sync/uriMappingResolver';
 export * from './utils/fieldLinksResolverUtil';
 export * from './utils/fieldResolverUtil';
 export * from './utils/formUtil';
+export * from './utils/formRepresentationUtil';
 export * from './utils/instanceOf';
 export * from './utils/jsonSerialiser';
 export * from './utils/linkRelConvertUtil';

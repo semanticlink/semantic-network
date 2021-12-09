@@ -155,7 +155,7 @@ export function findInCollection<T extends LinkedRepresentation>(
         .items
         .find(item =>
             // strategy 1: Self link of item matches
-            LinkUtil.getUri(item, LinkRelation.Self) === resourceIdentifier ||
+            LinkUtil.getUri(item, rel || LinkRelation.Self) === resourceIdentifier ||
             // strategy 2: the attribute on the resource is a uri that matches
             (name && getResourceTitle(item, name) === resourceIdentifier) ||
             // strategy 3: fallback to mapped title values matching (not uris but titles)

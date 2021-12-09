@@ -18,6 +18,10 @@ describe('Representation utils', () => {
                     href: 'http://api.example.com/role/2',
                 },
                 {
+                    rel: 'via',
+                    href: 'http://api.example.com/role/6',
+                },
+                {
                     rel: 'alt-no-match',
                     href: 'http://api.example.com/role/2',
                 },
@@ -44,8 +48,10 @@ describe('Representation utils', () => {
             [collection, { where: { name: 'Admin' } as unknown as LinkedRepresentation }, true],
             [collection, { where: { name: 'No Match' } as unknown as LinkedRepresentation }, false],
             [collection, { where: resource, rel: 'alt' }, true],
+            [collection, { where: 'http://api.example.com/role/6', rel: 'via' }, true],
             [collection, { where: resource, rel: 'alt-no-match' }, true], // find on name
-            [collection, { where: { ...resource, name: '' }, rel: 'alt-no-match' }, false], // remove name, rel has wrong value
+            [collection, { where: { ...resource, name: '' }, rel: 'alt-no-match' }, true],
+            // [collection, { where: { ...resource, name: '' }, rel: 'alt-no-match' }, false], // remove name, rel has wrong value
         ])('findResourceInCollection %#', (collection, options, found) => {
 
             const actual = RepresentationUtil.findInCollection(collection, options);

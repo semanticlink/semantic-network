@@ -324,12 +324,12 @@ export class TrackedRepresentationFactory {
             }
         } else {
             const uri = LinkUtil.getUri(resource, LinkRelation.Self);
-            log.warn('unknown status representation: %s', uri);
-            const unknown = SparseRepresentationFactory.make({ on: resource, status: Status.unknown });
             if (uri) {
+                log.debug('tracked representation created: unknown on \'%s\'', uri);
+                const unknown = SparseRepresentationFactory.make({ on: resource, status: Status.unknown });
                 return await TrackedRepresentationFactory.load(unknown, options) as T;
             } else {
-                log.error('load tracked representation has no processable state on %s', uri);
+                log.error('load tracked representation has no processable uri');
             }
         }
         return resource;

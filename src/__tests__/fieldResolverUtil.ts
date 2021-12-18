@@ -174,13 +174,13 @@ describe('Form util, resolve', () => {
         };
 
         const formItem = {
-            'type': '//types/select',
+            'type': '//types/form/select',
             'name': 'field',
             'label': 'Type',
             'items': [
                 {
                     'id': 'https://api.example.com/organisation/a656927b0f/question',
-                    'type': '//types/collection',
+                    'type': '//types/form/collection',
                     'multiple': true,
                     'name': relName,  // <-- this field is matched against
                     'label': 'Questions',

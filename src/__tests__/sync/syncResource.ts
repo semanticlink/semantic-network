@@ -107,16 +107,16 @@ describe('Synchroniser', () => {
             ],
             items: [
                 {
-                    type: 'http://types/text',
+                    type: '//types/form/text',
                     name: 'code',
                     required: true,
                 },
                 {
-                    type: 'http://types/text',
+                    type: '//types/form/text',
                     name: 'name',
                 },
                 {
-                    type: 'http://types/text',
+                    type: '//types/form/text',
                     name: 'description',
                 },
             ],
@@ -190,9 +190,9 @@ describe('Synchroniser', () => {
                     // { rel: 'submit', href: 'https://api.example.com/tenant' },
                 ],
                 items: [
-                    { type: 'http://types/text', name: 'code', required: true },
-                    { type: 'http://types/text', name: 'name' },
-                    { type: 'http://types/text', name: 'description' },
+                    { type: '//types/form/text', name: 'code', required: true },
+                    { type: '//types/form/text', name: 'name' },
+                    { type: '//types/form/text', name: 'description' },
                 ],
             };
             const tenantXXXX = 'https://api.example.com/tenant/XXXX';
@@ -268,25 +268,25 @@ describe('Synchroniser', () => {
 
         const formItems = [
             {
-                type: 'http://types/text',
+                type: '//types/form/text',
                 name: 'name',
                 required: true,
                 description: 'The title of the page',
             },
             {
-                type: 'http://types/select',
+                type: '//types/form/select',
                 name: 'state',
                 description: 'A todo can only toggle between open and complete.',
                 items: [
                     {
-                        type: 'http://types/enum',
+                        type: '//types/form/enum',
                         value: 'http://example.com/todo/state/complete',
                         label: 'Completed',
                         name: 'completed',
                         description: 'The todo has been completed',
                     },
                     {
-                        type: 'http://types/enum',
+                        type: '//types/form/enum',
                         value: 'http://example.com/todo/state/open',
                         label: 'Open',
                         name: 'open',
@@ -295,7 +295,7 @@ describe('Synchroniser', () => {
                 ],
             },
             {
-                type: 'http://types/datetime',
+                type: '//types/form/datetime',
                 name: 'due',
                 description: 'The UTC date the todo is due',
             },
@@ -548,19 +548,19 @@ describe('Synchroniser', () => {
                 ],
                 items: [
                     {
-                        type: 'http://types/text/email',
+                        type: '//types/form/text/email',
                         name: 'email',
                         required: true,
                         description: 'The email address of the user',
                     },
                     {
-                        type: 'http://types/text',
+                        type: '//types/form/text',
                         name: 'name',
                         required: true,
                         description: 'The name of the user to be shown on the screen',
                     },
                     {
-                        type: 'http://types/select',
+                        type: '//types/form/select',
                         multiple: true,
                         name: 'externalId',
                         description: 'The third-party id fo the user (eg \'auth0|xxxxx\')',

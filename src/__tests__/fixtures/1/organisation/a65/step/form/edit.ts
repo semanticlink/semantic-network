@@ -10,21 +10,21 @@ export const resource =
             ],
         items: [
             {
-                type: '//types/text',
+                type: '//types/form/text',
                 name: 'name',
                 label: 'Field Two',
                 description: 'Usage depends on type',
                 maxlength: 255,
             },
             {
-                type: '//types/text',
+                type: '//types/form/text',
                 name: 'description',
                 label: 'Field One',
                 description: 'Usage depends on type',
                 maxlength: 255,
             },
             {
-                type: '//types/number',
+                type: '//types/form/number',
                 name: 'order',
                 label: 'Order',
                 description: 'Left empty this is added to the end of the collection—others will be inserted',

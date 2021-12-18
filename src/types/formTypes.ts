@@ -18,29 +18,29 @@
  */
 export enum FieldType {
     // html field types
-    Text = 'http://types/text',
-    TextArea = 'http://types/text/area',
-    TextHtml = 'http://types/text/html',
-    Password = 'http://types/text/password',
-    Address = 'http://types/text/address',
-    Email = 'http://types/text/email',
-    EmailList = 'http://types/text/email/list',
-    Uri = 'http://types/text/uri',
-    Tel = 'http://types/text/tel',
-    Currency = 'http://types/text/currency',
-    Number = 'http://types/number',
-    Height = 'http://types/number/height',
-    Checkbox = 'http://types/check',
-    Date = 'http://types/date',
-    DateTime = 'http://types/datetime',
-    Select = 'http://types/select',
-    Hidden = 'http://types/hidden',
-    Signature = 'http://types/signature',
+    Text = '//types/form/text',
+    TextArea = '//types/form/text/area',
+    TextHtml = '//types/form/text/html',
+    Password = '//types/form/text/password',
+    Address = '//types/form/text/address',
+    Email = '//types/form/text/email',
+    EmailList = '//types/form/text/email/list',
+    Uri = '//types/form/text/uri',
+    Tel = '//types/form/text/tel',
+    Currency = '//types/form/text/currency',
+    Number = '//types/form/number',
+    Height = '//types/form/number/height',
+    Checkbox = '//types/form/check',
+    Date = '//types/form/date',
+    DateTime = '//types/form/datetime',
+    Select = '//types/form/select',
+    Hidden = '//types/form/hidden',
+    Signature = '//types/form/signature',
     // Non-html field types
-    Collection = 'http://types/collection',
-    Group = 'http://types/group',
+    Collection = '//types/form/collection',
+    Group = '//types/form/group',
     //
-    Enum = 'http://types/enum'
+    Enum = '//types/form/enum'
 }
 
 /**

@@ -11,7 +11,7 @@ export const resource =
         ],
         items: [
             {
-                type: '//types/select',
+                type: '//types/form/select',
                 name: 'field',
                 label: 'Type',
                 description: 'Choose only one type and then potentially many from there where there is a list (eg declarations, questions)',
@@ -19,7 +19,7 @@ export const resource =
                 items: [
                     {
                         id: questionFeedUri,
-                        type: '//types/collection',
+                        type: '//types/form/collection',
                         multiple: true,
                         name: 'question',
                         label: 'Questions',
@@ -28,7 +28,7 @@ export const resource =
                     },
                     {
                         id: 'https://api.example.com/organisation/a656927b0f/information/template',
-                        type: '//types/collection',
+                        type: '//types/form/collection',
                         multiple: true,
                         name: 'information',
                         label: 'Information',
@@ -37,7 +37,7 @@ export const resource =
                     },
                     {
                         id: 'https://api.example.com/organisation/a656927b0f/template',
-                        type: '//types/collection',
+                        type: '//types/form/collection',
                         multiple: true,
                         name: 'template',
                         label: 'Document Template',
@@ -45,7 +45,7 @@ export const resource =
                         items: null,
                     },
                     {
-                        type: '//types/enum',
+                        type: '//types/form/enum',
                         value: '//enum/step/section/page',
                         label: 'Page',
                         name: 'sectionPage',
@@ -53,7 +53,7 @@ export const resource =
                         order: 5,
                     },
                     {
-                        type: '//types/enum',
+                        type: '//types/form/enum',
                         value: '//enum/step/section/heading',
                         label: 'Section Heading',
                         name: 'sectionHeading',
@@ -61,7 +61,7 @@ export const resource =
                         order: 6,
                     },
                     {
-                        type: '//types/enum',
+                        type: '//types/form/enum',
                         value: '//enum/step/section/image',
                         label: 'Section Image',
                         name: 'sectionImage',
@@ -69,7 +69,7 @@ export const resource =
                         order: 7,
                     },
                     {
-                        type: '//types/enum',
+                        type: '//types/form/enum',
                         value: '//enum/step/section/video',
                         label: 'Section Video',
                         name: 'sectionVideo',
@@ -79,21 +79,21 @@ export const resource =
                 ],
             },
             {
-                type: '//types/text',
+                type: '//types/form/text',
                 name: 'name',
                 label: 'Field Two',
                 description: 'Usage depends on type',
                 maxlength: 255,
             },
             {
-                type: '//types/text',
+                type: '//types/form/text',
                 name: 'description',
                 label: 'Field One',
                 description: 'Usage depends on type',
                 maxlength: 255,
             },
             {
-                type: '//types/number',
+                type: '//types/form/number',
                 name: 'order',
                 label: 'Order',
                 description: 'Left empty this is added to the end of the collection—others will be inserted',

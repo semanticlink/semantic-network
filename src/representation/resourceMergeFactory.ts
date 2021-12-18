@@ -138,7 +138,7 @@ export class ResourceMergeFactory {
      * The resolver will match against fields and return a value. This is used
      * for example with the 'relates' attribute to return a href reference to the parent resource
      *
-     * Example Two: 'http://types/collection'
+     * Example Two: '//types/form/collection'
      *
      * form fields:
      *   {
@@ -151,12 +151,12 @@ export class ResourceMergeFactory {
      *    ],
      *    "items": [
      *        {
-     *            "type": "http://types/text",
+     *            "type": "//types/form/text",
      *            "name": "title",
      *            "description": "The title of the survey"
      *        },
      *        {
-     *            "type": "http://types/collection",
+     *            "type": "//types/form/collection",
      *            "name": "role",
      *            "description": "An optional list of roles to be granted access to the page"
      *        }
@@ -178,7 +178,7 @@ export class ResourceMergeFactory {
      *      role: ['http://example.com/role/1', 'http://example.com/role2']
      *      name: 'this',
      *  }
-     * Example Three: 'http://types/group'
+     * Example Three: '//types/form/group'
      *
      * form fields:
      *   {
@@ -191,22 +191,22 @@ export class ResourceMergeFactory {
      *    ],
      *    "items": [
      *        {
-     *            "type": "http://types/text",
+     *            "type": "//types/form/text",
      *            "name": "title",
      *            "description": "The title of the survey"
      *        },
      *        {
      *
-     *           "type": "http://types/group",
+     *           "type": "//types/form/group",
      *           "name": "textBox",
      *           "items": [
      *               {
-     *                   "type": "http://types/text",
+     *                   "type": "//types/form/text",
      *                   "name": "height",
      *                   "description": "The height of the text box in lines"
      *               },
      *               {
-     *                   "type": "http://types/text",
+     *                   "type": "//types/form/text",
      *                   "name": "width",
      *                   "description": "The width of the text box in characters"
      *               }

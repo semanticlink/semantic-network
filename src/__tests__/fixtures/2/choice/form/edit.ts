@@ -8,7 +8,7 @@ export const resource = {
     ],
     items: [
         {
-            type: '//types/text',
+            type: '//types/form/text',
             name: 'name',
             label: '',
             description: '',

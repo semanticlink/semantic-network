@@ -259,7 +259,7 @@ export class FieldResolverUtil {
                 return fieldValue;
 
             /**
-             * Type: http://types/select, moves through the structure
+             * Type: //types/form/select, moves through the structure
              */
             case FieldValueType.multiple:
 
@@ -286,9 +286,9 @@ export class FieldResolverUtil {
                 }
 
             /**
-             * Type: http://types/group, recursively moves through the structure
+             * Type: //types/form/group, recursively moves through the structure
              *
-             * note: groups have an items (but unlike http://types/select) it is dealt with as part
+             * note: groups have an items (but unlike //types/form/select) it is dealt with as part
              *       of the recursion structure of a form item
              */
             case FieldValueType.group:

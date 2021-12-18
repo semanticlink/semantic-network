@@ -22,7 +22,7 @@ export class FormRepresentationUtil {
      *     ],
      *     "items": [
      *       {
-     *         "type": "http://types/select",
+     *         "type": "//types/form/select",
      *         "name": "field",
      *         "label": "Template Field",
      *         "required": true,
@@ -30,7 +30,7 @@ export class FormRepresentationUtil {
      *           {
      *             id: "http://localhost:5000/organisation/4ed8e42224/information/listing/template"
      *             label: "Listing"
-     *             type: "http://types/collection"
+     *             type: "//types/form/collection"
      *             items: null -->
      *                [
      *                    "links": [{
@@ -81,6 +81,6 @@ export class FormRepresentationUtil {
         }
 
 
-        return form
+        return form;
     }
 }

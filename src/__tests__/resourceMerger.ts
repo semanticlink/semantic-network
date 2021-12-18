@@ -101,11 +101,11 @@ describe('Resource Merger', () => {
         const form = {
             items: [
                 {
-                    type: 'http://types/text',
+                    type: '//types/form/text',
                     name: 'title',
                 },
                 {
-                    type: 'http://types/select',
+                    type: '//types/form/select',
                     name: 'type',
                 },
             ],
@@ -139,7 +139,7 @@ describe('Resource Merger', () => {
         const form = {
             items: [
                 {
-                    type: 'http://types/text',
+                    type: '//types/form/text',
                     name: 'name',
                 },
             ],
@@ -269,38 +269,38 @@ describe('Resource Merger', () => {
                     links: [{ rel: 'self', href: 'http://api.example.com/question/logic/item/form/edit' }],
                     items: [
                         {
-                            type: 'http://types/text',
+                            type: '//types/form/text',
                             name: 'order',
                             description: '',
                         },
                         {
-                            type: 'http://types/text',
+                            type: '//types/form/text',
                             name: 'type',
                             description: 'The rule type',
                         },
                         {
-                            type: 'http://types/group',
+                            type: '//types/form/group',
                             name: 'expression',
                             items: [
                                 {
-                                    type: 'http://types/text',
+                                    type: '//types/form/text',
                                     name: 'type',
                                     description: 'The expression type (not, and, or)',
                                 },
                                 {
-                                    type: 'http://types/group',
+                                    type: '//types/form/group',
                                     multiple: true,
                                     name: 'items',
                                     description: 'The expressions',
                                     items: [
                                         {
-                                            type: 'http://types/select',
+                                            type: '//types/form/select',
                                             name: 'question',
                                             multiple: false,
                                             description: 'The question',
                                         },
                                         {
-                                            type: 'http://types/select',
+                                            type: '//types/form/select',
                                             name: 'questionItem',
                                             multiple: true,
                                             description: 'The question items',
@@ -311,7 +311,7 @@ describe('Resource Merger', () => {
                             description: 'The logic rule as an expression (c.f. a \'##\' style string)',
                         },
                         {
-                            type: 'http://types/select',
+                            type: '//types/form/select',
                             name: 'waitQuestion',
                         },
                     ],
@@ -351,7 +351,7 @@ describe('Resource Merger', () => {
 
     describe('merge, create', () => {
         describe('fields only', () => {
-            it('should look for field in link relations returning undefined in http://types/select returns original value', async () => {
+            it('should look for field in link relations returning undefined in //types/form/select returns original value', async () => {
                 const document = {
                     links: [{ rel: 'self', href: 'http://example.com/survey/4199' }],
                     name: 'Simplest Survey',
@@ -363,12 +363,12 @@ describe('Resource Merger', () => {
                 const form = {
                     items: [
                         {
-                            type: 'http://types/text',
+                            type: '//types/form/text',
                             name: 'title',
                             description: 'The name of the survey',
                         },
                         {
-                            type: 'http://types/select',
+                            type: '//types/form/select',
                             name: 'state',
                             description: 'The type of the resource',
                             items: [
@@ -387,7 +387,7 @@ describe('Resource Merger', () => {
             });
         });
 
-        describe('fields http://types/group', () => {
+        describe('fields //types/form/group', () => {
 
             test.each([
                 ['single to multiple', { singleMultiple: 'http://api.example.com/question/item/55555' }],
@@ -396,7 +396,7 @@ describe('Resource Merger', () => {
                         'http://api.example.com/question/item/572444', 'http://api.example.com/question/item/572445'],
                 }],
                 ['single to single', { question: 'http://api.example.com/question/87869' }],
-            ])('http://types/select, value not in form, %s', async (test: string, expected: any) => {
+            ])('//types/form/select, value not in form, %s', async (test: string, expected: any) => {
 
                 const document = {
                     expression: {
@@ -413,27 +413,27 @@ describe('Resource Merger', () => {
                 const form = {
                     items: [
                         {
-                            type: 'http://types/group',
+                            type: '//types/form/group',
                             name: 'expression',
                             items: [
                                 {
-                                    type: 'http://types/text',
+                                    type: '//types/form/text',
                                     name: 'type',
                                     description: 'The expression type (not, and, or)',
                                 },
                                 {
-                                    type: 'http://types/select',
+                                    type: '//types/form/select',
                                     name: 'question',
                                     description: 'The expression type (not, and, or)',
                                 },
                                 {
-                                    type: 'http://types/select',
+                                    type: '//types/form/select',
                                     multiple: true,
                                     name: 'questionItem',
                                     description: 'The question items',
                                 },
                                 {
-                                    type: 'http://types/select',
+                                    type: '//types/form/select',
                                     multiple: true,
                                     name: 'singleMultiple',
                                     description: 'The question items',
@@ -448,27 +448,27 @@ describe('Resource Merger', () => {
                 assertThat(actual.expression).is(match.obj.has(expected));
             });
 
-            describe('http://types/group, deep recursion', () => {
-                it('resolve all http://types/select', async () => {
+            describe('//types/form/group, deep recursion', () => {
+                it('resolve all //types/form/select', async () => {
                     const form = {
                         items: [
                             {
-                                type: 'http://types/group',
+                                type: '//types/form/group',
                                 multiple: true,
                                 name: 'dataSources',
                                 items: [
                                     {
-                                        type: 'http://types/text',
+                                        type: '//types/form/text',
                                         name: 'id',
                                         description: 'A unique identifier for this resource',
                                     },
                                     {
-                                        type: 'http://types/group',
+                                        type: '//types/form/group',
                                         multiple: true,
                                         name: 'items',
                                         items: [
                                             {
-                                                type: 'http://types/select',
+                                                type: '//types/form/select',
                                                 name: 'question',
                                                 description: 'The mandatory question',
                                                 items: [
@@ -477,13 +477,13 @@ describe('Resource Merger', () => {
                                                 ],
                                             },
                                             {
-                                                type: 'http://types/select',
+                                                type: '//types/form/select',
                                                 multiple: true,
                                                 name: 'includeQuestionItems',
                                                 description: 'The mandatory question',
                                             },
                                             {
-                                                type: 'http://types/text',
+                                                type: '//types/form/text',
                                                 name: 'offset',
                                                 description: 'A optional numberic offset to be applied to the the question item value',
                                             },
@@ -527,7 +527,7 @@ describe('Resource Merger', () => {
 
         describe('link relations, mapping to field', () => {
 
-            it('http://types/select, single', async () => {
+            it('//types/form/select, single', async () => {
                 const document = {
                     links: [{ rel: 'role', href: 'http://example.com/role/1' }],
                 };
@@ -535,7 +535,7 @@ describe('Resource Merger', () => {
                 const form = {
                     items: [
                         {
-                            type: 'http://types/select',
+                            type: '//types/form/select',
                             multiple: false,
                             name: 'role',
                             description: 'An optional list of roles to be granted access to the page',
@@ -548,7 +548,7 @@ describe('Resource Merger', () => {
 
             });
 
-            it('http://types/select, multiple returns array', async () => {
+            it('//types/form/select, multiple returns array', async () => {
                 const document = {
                     links: [{ rel: 'role', href: 'http://example.com/role/1' }],
                 };
@@ -556,7 +556,7 @@ describe('Resource Merger', () => {
                 const form = {
                     items: [
                         {
-                            type: 'http://types/select',
+                            type: '//types/form/select',
                             multiple: true,
                             name: 'role',
                             description: 'An optional list of roles to be granted access to the page',
@@ -568,7 +568,7 @@ describe('Resource Merger', () => {
                 assertThat(actual).is({ role: ['http://example.com/role/1'] });
             });
 
-            it('http://types/collection, multiple', async () => {
+            it('//types/form/collection, multiple', async () => {
                 const document = {
                     links: [
                         { rel: 'role', href: 'http://example.com/role/1' },
@@ -579,7 +579,7 @@ describe('Resource Merger', () => {
                 const form = {
                     items: [
                         {
-                            type: 'http://types/collection',
+                            type: '//types/form/collection',
                             name: 'role',
                             multiple: true,
                             description: 'An optional list of roles to be granted access to the page',
@@ -593,7 +593,7 @@ describe('Resource Merger', () => {
 
             });
 
-            it('http://types/collection, single', async () => {
+            it('//types/form/collection, single', async () => {
                 const document = {
                     links: [
                         { rel: 'role', href: 'http://example.com/role/1' },
@@ -603,7 +603,7 @@ describe('Resource Merger', () => {
                 const form = {
                     items: [
                         {
-                            type: 'http://types/collection',
+                            type: '//types/form/collection',
                             name: 'role',
                             multiple: false,
                             description: 'An optional role to be granted access to the page',
@@ -625,7 +625,7 @@ describe('Resource Merger', () => {
                 const form = {
                     items: [
                         {
-                            type: 'http://types/select',
+                            type: '//types/form/select',
                             name: 'questionItem',
                         },
                     ],

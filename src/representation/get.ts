@@ -17,54 +17,6 @@ import { LoaderJobOptions } from '../interfaces/loader';
 
 const log = anylogger('get');
 
-
-/*
-export async function t<TReturn extends LinkedRepresentation,
-    T extends LinkedRepresentation | TReturn = LinkedRepresentation,
-    TResult extends TReturn = T extends TReturn ? T : TReturn>(
-    resource: T | TrackedRepresentation<T>):
-    Promise<Nullable<TResult | TrackedRepresentation<TResult>>> {
-    if (resource) {
-        return await TrackedRepresentationFactory.load(resource) as unknown as TResult;
-    }
-    // return undefined;
-}
-
-interface F extends LinkedRepresentation {
-    name: string;
-}
-
-interface Z extends LinkedRepresentation {
-    name: string;
-}
-
-interface FColl extends CollectionRepresentation<F> {
-}
-
-async function f() {
-
-    const newVar: Z = { name: 'dfdf', links: [] };
-    const j = await t(newVar);
-    const h = await t<Z>(newVar);
-    const l = await t<F>(newVar);
-    const i = await t<FColl>(newVar);
-    const k = await t<FColl, Z>(newVar);
-    const m = await t<FColl, F>(newVar);
-
-    console.log(j, h , i, k, l, m);
-
-    const newColl: FColl = {
-        links: [],
-        items: []
-    }
-
-    const a = await t<FColl>(newColl);
-    const a1 = await t(newColl);
-    const a2 = await t(newColl) as Unbox<FColl>;
-
-}
-*/
-
 /**
  * Retrieve a resource based on its context and options, and its current state (ie hydrated or not)
  *
@@ -107,12 +59,12 @@ export async function get<TReturn extends LinkedRepresentation,
         if (relIsNotSelfOrEmpty) {
             const namedSubResource = await NamedRepresentationFactory.load(resource, options);
             if (namedSubResource) {
-                log.warn('named resource found on \'%s\' found', rel);
+                log.debug('named sub resource found on \'%s\'', rel);
                 resource = namedSubResource as Tracked<T>;
                 // now that sub resource is loaded, re-contextualise to this resource (ie will become 'self')
                 delete options?.rel;
             } else {
-                log.warn('named resource not found on \'%s\'', rel);
+                log.warn('named sub resource not found on \'%s\'', rel);
             }
         }
 
@@ -138,7 +90,7 @@ export async function get<TReturn extends LinkedRepresentation,
     // named resources
     // do not add 'self' as sub resource
     if (relIsNotSelfOrEmpty) {
-        log.debug('get named singleton resource');
+        log.debug('get named singleton sub resource');
         return await NamedRepresentationFactory.load(resource, options);
     }
 

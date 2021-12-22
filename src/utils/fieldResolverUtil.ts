@@ -153,7 +153,7 @@ export class FieldResolverUtil {
             }
         }
 
-        log.warn('Field type unknown - returning default');
+        log.debug('Field type unknown - returning default value');
         return fieldValue;
     }
 
@@ -230,7 +230,7 @@ export class FieldResolverUtil {
             }
         }
 
-        log.warn('Field type unknown - returning default');
+        log.debug('Field type unknown - returning default value');
         return fieldValue;
     }
 
@@ -248,13 +248,12 @@ export class FieldResolverUtil {
         switch (formType(formItem)) {
             case FieldValueType.single: // could have checks to ensure this is a 'text' or 'uri' only
                 if (fieldValue && !instanceOfSimpleValue(fieldValue)) {
-                    log.error('Unexpected type \'%s\' on form type %s with \'%s\'', typeof fieldValue, formItem.type, formItem.name);
+                    log.warn('Unexpected type \'%s\' on form type %s with \'%s\'', typeof fieldValue, formItem.type, formItem.name);
                     return undefined;
-                    // throw new Error('Not implemented. Resource on simple field');
                 }
                 if (formItem.multiple) {
-                    log.error('Unexpected attribute \'multiple\' on form type %s with \'%s\'', formItem.type, formItem.name);
-                }    /**/  // return await sequentialMapWaitAll(fieldValue as CollectionRepresentation, (text: string) => text);
+                    log.warn('Unexpected attribute \'multiple\' on form type %s with \'%s\'', formItem.type, formItem.name);
+                }
 
                 return fieldValue;
 
@@ -367,7 +366,7 @@ export class FieldResolverUtil {
             log.warn('No items on form \'%s\'', formItem.name);
             // else fall through to return undefined
         }
-        log.warn('Value \'%s\' is not found on \'%s\' - still allowing value', fieldValue, formItem.name);
+        log.debug('Value \'%s\' is not found on \'%s\' - still allowing value', fieldValue, formItem.name);
         return undefined;
     }
 

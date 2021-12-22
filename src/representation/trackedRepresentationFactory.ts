@@ -102,12 +102,10 @@ export class TrackedRepresentationFactory {
             } catch (e) {
                 if (isHttpRequestError(e)) {
                     // errors don't get attached back on the context resource, just log them
-                    log.error(`Request error: '${e.message}'}`);
-                    log.debug(e.stack);
+                    log.warn(`Request error returning undefined: '${e.message}'}`);
                     // fall through to undefined
                 } else {
-                    log.warn('TODO: re-throw??');
-                    // throw(e);
+                    log.warn(`Request error returning undefined`);
                     // fall through to undefined
                 }
             }

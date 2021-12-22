@@ -73,7 +73,7 @@ export class ResourceMergeFactory {
             const fieldsToUpdate = FormUtil.fieldsRequiringUpdate<T, TForm>(resource, newDocument, form, defaultFields as TField[]);
 
             if (fieldsToUpdate?.length > 0) {
-                log.info(
+                log.debug(
                     'Update required on \'%s\': [different fields \'%s\']',
                     (newDocument as any).name || LinkUtil.getUri(document as LinkedRepresentation, LinkRelation.Self),
                     fieldsToUpdate.join(',')

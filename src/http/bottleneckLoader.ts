@@ -110,7 +110,7 @@ export class BottleneckLoader implements Loader {
      *
      */
     async schedule<T>(id: string, action: () => Promise<T>, options?: LoaderJobOptions | undefined): Promise<T> {
-        log.debug('pending requests (%s total)', this.requests.size);
+        log.debug('request queue pending (%s total)', this.requests.size);
 
         const request = this.requests.get(id);
         if (!request) {
@@ -123,6 +123,7 @@ export class BottleneckLoader implements Loader {
 
                     // Do this before request is resolved,
                     // so a request with the same id must now resolve to a new request
+                    log.debug('request queue remove \'%s\'', id);
                     this.requests.delete(id);
 
                     // resolving with chain through to the pending requests
@@ -138,7 +139,7 @@ export class BottleneckLoader implements Loader {
 
             this.requests.set(id, { request: p, promises: [] });
 
-            log.debug('add \'%s\' (%s in queue)', id);
+            log.debug('request queue add \'%s\'', id);
 
             return p;
         } else {
@@ -152,7 +153,7 @@ export class BottleneckLoader implements Loader {
                 }
             });
             request.promises.push(p);
-            log.debug('queued \'%s\' (%s in queue)', id, request.promises.length);
+            log.debug('request queue resolved \'%s\' (%s in queue)', id, request.promises.length);
             return p;
         }
     }
@@ -186,7 +187,7 @@ export class BottleneckLoader implements Loader {
             // unfortunately, we still need one! TODO: ask library for update to be able to clear queues and keep running
             this._limiter = BottleneckLoader.limiterFactory(this._currentOptions);
         } catch (e) {
-            log.warn('Stopping loader failure');
+            log.warn('stopping loader failure');
         }
     }
 

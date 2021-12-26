@@ -84,7 +84,7 @@ export class TrackedRepresentationUtil {
                 (forceLoad && status === Status.hydrated);
 
             if (fetch) {
-                log.debug('fetch resource %s \'s\': %s', status.toString, fetch, LinkUtil.getUri(resource, LinkRelation.Self));
+                log.debug('fetch resource %s \'s\': %s', status.toString(), fetch, LinkUtil.getUri(resource, LinkRelation.Self));
             } else {
                 log.debug('fetch resource not required: %s', LinkUtil.getUri(resource, LinkRelation.Self));
             }

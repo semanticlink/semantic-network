@@ -60,7 +60,7 @@ export class TrackedRepresentationUtil {
     }
 
     /**
-     * Checks whether or not the resource requires an across-the-wire fetch based on the state flags.
+     * Checks whether the resource requires an across-the-wire fetch based on the state flags.
      *
      * We can only do a fetch when we actually have a potentially valid uri and that we haven't already
      * got the resource. Currently, the forceLoad allows an override which is an initial cache busting
@@ -84,14 +84,14 @@ export class TrackedRepresentationUtil {
                 (forceLoad && status === Status.hydrated);
 
             if (fetch) {
-                log.debug('fetch resource %s \'s\': %s', status.toString(), fetch, LinkUtil.getUri(resource, LinkRelation.Self));
+                log.debug('fetch resource \'%s\': %s', status.toString(), LinkUtil.getUri(resource, LinkRelation.Self));
             } else {
-                log.debug('fetch resource not required: %s', LinkUtil.getUri(resource, LinkRelation.Self));
+                log.debug('fetch resource \'%s\' not required: %s', status.toString(), LinkUtil.getUri(resource, LinkRelation.Self));
             }
 
             return fetch;
         } else {
-            log.warn('status not found (on state)');
+            log.warn('status not found (on state): %s', LinkUtil.getUri(resource, LinkRelation.Self));
             return true;
         }
     }

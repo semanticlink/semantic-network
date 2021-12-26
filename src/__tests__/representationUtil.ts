@@ -32,7 +32,10 @@ describe('Representation utils', () => {
         };
 
         const collection = {
-            links: [{ rel: 'self', href: 'http://api.example.com/role/' }],
+            links: [
+                { rel: 'self', href: 'http://api.example.com/role/' },
+                { rel: 'current', href: 'http://api.example.com/role/1' },
+            ],
             items: [resource],
         };
 
@@ -51,6 +54,8 @@ describe('Representation utils', () => {
             [collection, { where: 'http://api.example.com/role/6', rel: 'via' }, true],
             [collection, { where: resource, rel: 'alt-no-match' }, true], // find on name
             [collection, { where: { ...resource, name: '' }, rel: 'alt-no-match' }, true],
+            [collection, { where: { rel: 'first' } }, false],
+            [collection, { where: { rel: 'current' } }, true],
             // [collection, { where: { ...resource, name: '' }, rel: 'alt-no-match' }, false], // remove name, rel has wrong value
         ])('findResourceInCollection %#', (collection, options, found) => {
 

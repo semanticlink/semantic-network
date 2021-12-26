@@ -1,4 +1,4 @@
-import { LinkedRepresentation, RelationshipType, Uri } from 'semantic-link';
+import { LinkedRepresentation, LinkSelector, RelationshipType, Uri } from 'semantic-link';
 
 export interface ResourceQueryOptions {
     /**
@@ -8,7 +8,7 @@ export interface ResourceQueryOptions {
     /**
      * Identifies the child resource in a collection by its identity (either as 'Self' link rel or a `Uri`)
      */
-    where?: LinkedRepresentation | Uri | (<T extends LinkedRepresentation>() => T);
+    where?: LinkedRepresentation | Uri | (<T extends LinkedRepresentation>() => T) | LinkSelector;
     /**
      * Identifies the link rel to follow to add {@link LinkedRepresentation} onto the resource.
      *

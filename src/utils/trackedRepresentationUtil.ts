@@ -109,7 +109,7 @@ export class TrackedRepresentationUtil {
     public static needsFetchFromHeaders<T extends Tracked<LinkedRepresentation>>(resource: T): boolean {
         const { headers = {} } = this.getState(resource);
         /*
-         * The goal is to leave all heavy lifting up to the browser (ie implement caching rules). The key issue
+         * The goal is to leave all heavy lifting to the browser (ie implement caching rules). The key issue
          * here is whether to return the in-memory resource or push through to the browser request (ie xhr).
          *
          * The main issue is whether "time" is up and a potential refresh is required. This calculation is the

@@ -5,6 +5,7 @@
  * can be rendered (input not select at this stage)
  *
  * @see https://bootstrap-vue.js.org/docs/components/form-input
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
  *
  *      Caveats with input types:
  *      - Not all browsers support all input types, nor do some types render in the same format across browser types/version.
@@ -19,24 +20,33 @@
 export enum FieldType {
     // html field types
     Text = '//types/form/text',
-    TextArea = '//types/form/text/area',
-    TextHtml = '//types/form/text/html',
     Password = '//types/form/text/password',
-    Address = '//types/form/text/address',
     Email = '//types/form/text/email',
     EmailList = '//types/form/text/email/list',
     Uri = '//types/form/text/uri',
     Tel = '//types/form/text/tel',
     Currency = '//types/form/text/currency',
+    Color = '//types/form/color',
     Number = '//types/form/number',
     Height = '//types/form/number/height',
     Checkbox = '//types/form/check',
     Date = '//types/form/date',
     DateTime = '//types/form/datetime',
+    Week = '//types/form/date/week',
+    Month = '//types/form/date/month',
+    Range = '//types/form/range',
+    Time = '//types/form/time',
     Select = '//types/form/select',
     Hidden = '//types/form/hidden',
-    Signature = '//types/form/signature',
+    File = '//types/form/file',
+    Image = '//types/form/image',
     // Non-html field types
+    TextArea = '//types/form/text/area',
+    TextHtml = '//types/form/text/html',
+    Address = '//types/form/text/address',
+    AddressPostal = '//types/form/text/address/postal',
+    Signature = '//types/form/signature',
+    // grouping field types
     Collection = '//types/form/collection',
     Group = '//types/form/group',
     //
@@ -56,6 +66,7 @@ export type FormType =
     | FieldType.TextHtml
     | FieldType.Password
     | FieldType.Address
+    | FieldType.AddressPostal
     | FieldType.Email
     | FieldType.EmailList
     | FieldType.Uri
@@ -65,6 +76,7 @@ export type FormType =
     | FieldType.Checkbox
     | FieldType.Date
     | FieldType.DateTime
+    | FieldType.Time
     | FieldType.Select
     | FieldType.Collection
     | FieldType.Group

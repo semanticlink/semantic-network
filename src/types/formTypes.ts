@@ -39,7 +39,6 @@ export enum FieldType {
     Select = '//types/form/select',
     Hidden = '//types/form/hidden',
     File = '//types/form/file',
-    Image = '//types/form/image',
     // Non-html field types
     TextArea = '//types/form/text/area',
     TextHtml = '//types/form/text/html',

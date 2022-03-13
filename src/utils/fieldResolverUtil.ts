@@ -54,7 +54,6 @@ function formType(formItem: FormItem): FieldValueType {
         case FieldType.Password:
         case FieldType.Address:
         case FieldType.Email:
-        case FieldType.EmailList:
         case FieldType.Uri:
         case FieldType.Currency:
         case FieldType.Number:
@@ -63,7 +62,9 @@ function formType(formItem: FormItem): FieldValueType {
         case FieldType.Date:
         case FieldType.DateTime:
         case FieldType.Tel:
+        case FieldType.EmailList:
         case FieldType.Signature:
+        case FieldType.AddressPostal:
         default:
             return FieldValueType.single;
     }
@@ -246,8 +247,9 @@ export class FieldResolverUtil {
         options?: MergeOptions): Promise<T | undefined> {
 
         switch (formType(formItem)) {
-            case FieldValueType.single: // could have checks to ensure this is a 'text' or 'uri' only
-                if (fieldValue && !instanceOfSimpleValue(fieldValue)) {
+            case FieldValueType.single: // could have checks to ensure this is a 'text' or 'uri' or object (but not array)
+                if (fieldValue && !instanceOfSimpleValue(fieldValue) && !(typeof fieldValue === 'object')) {
+
                     log.warn('Unexpected type \'%s\' on form type %s with \'%s\'', typeof fieldValue, formItem.type, formItem.name);
                     return undefined;
                 }

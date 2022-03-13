@@ -22,7 +22,6 @@ export enum FieldType {
     Text = '//types/form/text',
     Password = '//types/form/text/password',
     Email = '//types/form/text/email',
-    EmailList = '//types/form/text/email/list',
     Uri = '//types/form/text/uri',
     Tel = '//types/form/text/tel',
     Currency = '//types/form/text/currency',
@@ -40,11 +39,12 @@ export enum FieldType {
     Hidden = '//types/form/hidden',
     File = '//types/form/file',
     // Non-html field types
-    TextArea = '//types/form/text/area',
-    TextHtml = '//types/form/text/html',
     Address = '//types/form/text/address',
     AddressPostal = '//types/form/text/address/postal',
+    EmailList = '//types/form/text/email/list',
     Signature = '//types/form/signature',
+    TextArea = '//types/form/text/area',
+    TextHtml = '//types/form/text/html',
     // grouping field types
     Collection = '//types/form/collection',
     Group = '//types/form/group',

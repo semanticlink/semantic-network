@@ -93,7 +93,7 @@ describe('Form util, resolve', () => {
                     name: '',
                     type: FieldType.Select,
                     multiple: true,
-                    // items: [],
+                    items: [],
                 } as FormItem,
                 [],
             ],
@@ -107,6 +107,17 @@ describe('Form util, resolve', () => {
                     // items: [],
                 } as FormItem,
                 [],
+            ],
+            [
+                'multiple (address postal), multi select, no values in form returns empty array (2)',
+                { label: 'a', postalCode: '0624' },
+                {
+                    name: 'text',
+                    type: FieldType.AddressPostal,
+                    multiple: false,
+                    // items: [],
+                } as FormItem,
+                { label: 'a', postalCode: '0624' },
             ],
         ])('%s', async (title: string, fieldValue: FieldValue, formItem: FormItem, expected: FieldValue) => {
             const actual = await FieldResolverUtil.resolveByType(fieldValue, formItem);

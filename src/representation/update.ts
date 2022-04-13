@@ -18,11 +18,10 @@ import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 const log = anylogger('Update');
 
 /**
- *
- * TODO: accept but don't require TrackedRepresentation interface
- * @param resource
- * @param document
- * @param options
+ * Update on existing resource
+ *      TODO: accept but don't require TrackedRepresentation interface
+ *      TODO: always returns resource but hard to know if error. Either throw or return undefined
+ *            Note: underlying TrackedRepresentationFactory.update has this strategy
  */
 export async function update<T extends LinkedRepresentation>(
     resource: T | Tracked<T>,
@@ -36,7 +35,7 @@ export async function update<T extends LinkedRepresentation>(
     // PATCH
     if (instanceOfCollection(resource)) {
         if (!instanceOfUriList(document)) {
-            console.log(resource, document, options);
+            log.debug(resource, document, options);
             throw new Error('To update a collection, a document of type UriList must be supplied');
         }
         throw new Error('Update collection not implemented');
@@ -47,6 +46,13 @@ export async function update<T extends LinkedRepresentation>(
     return updateSingleton(resource, document, options);
 }
 
+/**
+ *  Update a singleton.
+ *
+ *  If the singleton has a form relation (default: edit-form) then construction the across-the-wire
+ *  PUT representation from only the form attributes. Otherwise, take the incoming documentation as given.
+ *  @throws
+ */
 async function updateSingleton<T extends LinkedRepresentation>(
     resource: T | Tracked<T>,
     document: T | DocumentRepresentation<T>,
@@ -61,31 +67,41 @@ async function updateSingleton<T extends LinkedRepresentation>(
         return resource;
     }
 
-    const {
-        mergeStrategy = defaultEditFormStrategy,
-        formRel = LinkRelation.EditForm,
-    } = { ...options };
+    const { formRel = LinkRelation.EditForm } = { ...options };
 
-    const form = await get(resource, { ...options, rel: formRel });
+    if (LinkUtil.matches(resource, formRel)) {
+        const form = await get(resource, { ...options, rel: formRel });
+        if (instanceOfForm(form)) {
 
-    if (instanceOfForm(form)) {
-        try {
-            const merged = await mergeStrategy(resource, document, form, options);
+            const { makePutRepresentationStrategy = defaultEditFormStrategy } = { ...options };
+            const representation = await makePutRepresentationStrategy(resource, document, form, options);
 
-            if (merged) {
-                await TrackedRepresentationFactory.update(resource, document, options);
+            if (representation) {
+                // WARNING: this has under-baked error reporting and does not throw errors
+                await TrackedRepresentationFactory.update(resource, representation, options);
+                return resource;
             } else {
-                log.info('No update required %s', LinkUtil.getUri(resource, LinkRelation.Self));
+                log.debug(
+                    'No update required based on form for \'%s\'',
+                    LinkUtil.getUri(resource, LinkRelation.Self));
+                return resource;
             }
-        } catch (e) {
-            if (typeof e === 'string') {
-                log.error('Unknown (merge) update error %s', e);
-            } else {
-                log.error('Unknown (merge) update error %o', e);
-            }
+
+        } else {
+            log.warn(
+                'Update link \'%s\' on \'%s\' is not a form',
+                formRel,
+                LinkUtil.getUri(resource, LinkRelation.Self));
+            // drop through to use handed in document
         }
     } else {
-        log.info('Update not possible - resource has no edit form %s', LinkUtil.getUri(resource, LinkRelation.Self));
+        log.debug(
+            'Update without form - resource has no \'%s\' form on  \'%s\'',
+            formRel,
+            LinkUtil.getUri(resource, LinkRelation.Self));
     }
+
+    // WARNING: this has under-baked error reporting and does not throw errors
+    await TrackedRepresentationFactory.update(resource, document, options);
     return resource;
 }

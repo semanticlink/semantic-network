@@ -186,6 +186,10 @@ export class TrackedRepresentationFactory {
 
     }
 
+    /**
+     *
+     * @throws
+     */
     public static async update<T extends LinkedRepresentation>(
         resource: T | Tracked<T>,
         document: T | DocumentRepresentation<T>,
@@ -226,6 +230,7 @@ export class TrackedRepresentationFactory {
                     return await this.processResource(resource, document, options) as T;
 
                 } catch (e) {
+                    // TODO: add options error type detection factory
                     if (isHttpRequestError(e)) {
                         this.processError(e, uri, resource, trackedState);
                     } else {
@@ -234,7 +239,7 @@ export class TrackedRepresentationFactory {
                     }
                 }
             } else {
-                log.error(`No link rel`);
+                log.error(`No link rel found for '${rel}'`);
             }
 
             return resource;
@@ -351,6 +356,15 @@ export class TrackedRepresentationFactory {
         return undefined;
     }
 
+    /**
+     * Updates the state object based on the error
+     *
+     * TODO: add client status errors to state for surfacing field validations errors
+     *          - this will require an error processing factory given most system
+     *            present these errors differently
+     *
+     * TODO: add onErrorHandling strategy (eg throw or quiet)
+     */
     private static processError<T extends LinkedRepresentation>(e: HttpRequestError, uri: Uri, resource: T, trackedState: State): void {
         const { response } = e;
         if (response) {

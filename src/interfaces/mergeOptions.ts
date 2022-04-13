@@ -35,6 +35,12 @@ export interface MergeOptions {
      */
     readonly undefinedWhenNoUpdateRequired?: boolean;
 
+    /**
+     * The link relation on the resource used to determine the edit form
+     * resource.
+     *
+     * @default: {@see LinkRelation.EditForm}
+     */
     readonly formRel?: RelationshipType;
 
 }

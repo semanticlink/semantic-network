@@ -109,7 +109,10 @@ export class FieldResolverUtil {
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore TS2538: Type 'Omit ' cannot be used as an index type.
                     document[field] = fieldValue;
-                    log.warn('Field \'%s\' is not resolved', field);
+                    // catering 'false' which would log this error (probably do !! on if)
+                    if (fieldValue === undefined || fieldValue === null) {
+                        log.warn('Field \'%s\' is not resolved', field);
+                    }
                 }
             } else {
                 log.info('Field \'%s\' is not matched in form', field);

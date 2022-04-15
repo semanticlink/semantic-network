@@ -432,24 +432,35 @@ describe('Synchroniser', () => {
 
         describe('getCollectionInNamedCollection', () => {
             it('should not update when the collections (all items) are the same', async () => {
+                // hydrated collection in-memory to sync
                 const noChangeCollection = {
                     ...todosCollection,
                     items: [todo1, todo2],
                 };
 
-                get
-                    .mockResolvedValueOnce({ data: { ...todosCollection } })
-                    .mockResolvedValueOnce({ data: todo1 })
-                    .mockResolvedValueOnce({ data: todo2 })
-                    .mockResolvedValueOnce({ data: editForm });
-
-                const result = await syncResource(makeHydratedResource(parent), noChangeCollection, [], {
-                    ...options,
-                    rel: 'todos',
+                get.mockImplementation((resource, rel) => {
+                    switch (LinkUtil.getUri(resource, rel)) {
+                        case todosCollectionUri:
+                            return { data: { ...todosCollection } };
+                        case  todo2Uri:
+                            return { data: todo2 };
+                        case  todo1Uri:
+                            return { data: todo1 };
+                        case  todoEditFormUri:
+                            return { data: editForm };
+                        default:
+                            throw new Error('unknown uri');
+                    }
                 });
 
+                const result = await syncResource(
+                    makeHydratedResource(parent),
+                    noChangeCollection,
+                    [],
+                    { ...options, rel: 'todos' });
+
                 expect(result).toBeDefined();
-                verifyMocks(4, 0, 0, 0);
+                verifyMocks(5, 0, 0, 0);
 
             });
 

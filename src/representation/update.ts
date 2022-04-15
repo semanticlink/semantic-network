@@ -77,31 +77,28 @@ async function updateSingleton<T extends LinkedRepresentation>(
             const representation = await makePutRepresentationStrategy(resource, document, form, options);
 
             if (representation) {
-                // WARNING: this has under-baked error reporting and does not throw errors
+                // WARNING: update has under-baked error reporting and does not throw errors
                 await TrackedRepresentationFactory.update(resource, representation, options);
-                return resource;
             } else {
                 log.debug(
                     'No update required based on form for \'%s\'',
                     LinkUtil.getUri(resource, LinkRelation.Self));
-                return resource;
             }
 
         } else {
             log.warn(
-                'Update link \'%s\' on \'%s\' is not a form',
+                'Update link \'%s\' on \'%s\' is not a form - no update made',
                 formRel,
                 LinkUtil.getUri(resource, LinkRelation.Self));
-            // drop through to use handed in document
         }
     } else {
         log.debug(
             'Update without form - resource has no \'%s\' form on  \'%s\'',
             formRel,
             LinkUtil.getUri(resource, LinkRelation.Self));
+        // WARNING: update has under-baked error reporting and does not throw errors
+        await TrackedRepresentationFactory.update(resource, document, options);
     }
 
-    // WARNING: this has under-baked error reporting and does not throw errors
-    await TrackedRepresentationFactory.update(resource, document, options);
     return resource;
 }

@@ -19,17 +19,20 @@ export interface MergeOptions {
     readonly defaultFields?: Extract<keyof Omit<LinkedRepresentation, 'links'>, string> | string[];
     readonly resolver?: Resolver;
     readonly resourceResolver?: ResourceResolver;
+
     /**
      * Default strategy {@see FieldResolverUtil.resourceResolverRelNameStrategy}
      */
     readonly resourceResolverRelNameStrategy?: RelNameResolver;
     readonly fieldResolver?: FieldResolver;
+
     /**
      * On resource state, there are fields that are added by the cache - these are tracked fields. This overrides the
      * default implementation when needed which overwrites all fields.
      * @deprecated
      */
     readonly isTracked?: IsTrackedResolver;
+
     /**
      * When 'true' return 'undefined' from the edit merge rather than the merged document.
      */
@@ -42,6 +45,4 @@ export interface MergeOptions {
      * @default: {@see LinkRelation.EditForm}
      */
     readonly formRel?: RelationshipType;
-
 }
-

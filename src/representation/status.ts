@@ -10,13 +10,13 @@ export enum Status {
      * in-memory form. Although it might be attached as an attribute on an existing
      * resource. We know we want a resource but are still trying to work it out.
      */
-        unknown,
+    unknown,
+
     /**
      * The resource only has a link relation 'Self' with the URI
      * of the resource. None of the attribute values will be known.
      *
      * @example
-     *
      * {
      *   links: {
      *      Self: 'http://example.com/item/1'
@@ -24,6 +24,7 @@ export enum Status {
      * }
      */
     locationOnly,
+
     /**
      * This state is **only** available for a **feedItem** resource (ie on a
      * collection `items` attribute that has been
@@ -45,8 +46,7 @@ export enum Status {
      * }
      *
      *
-     *  Becomes two resources (a collection resource with resource):
-     *
+     * Becomes two resources (a collection resource with resource):
      * {
      *   links: {
      *      Self: 'http://example.com/collection/'
@@ -65,16 +65,19 @@ export enum Status {
      *
      */
     feedOnly,
+
     /**
      * The resource has been retrieved from the server (and is synchronised). At
      * this point, there is over-the-wire response headers in {@link headers}
      */
     hydrated,
+
     /**
      * The resource has been marked as ready to be deleted. At this point, updates
      * should not be made
      */
     deleteInProgress,
+
     /**
      * The resource has successfully been deleted on the server and is ready for
      * garbage collection
@@ -85,13 +88,15 @@ export enum Status {
      * The resource has been tried to be accessed and is disallowed
      */
     forbidden,
+
     /**
      * This resource is a client-side artifact which is a place holder for other resources. As such, there
      * is no server-side resource to be retrieved. It is used rarely and is more of the group of
-     * {@link unknown}, {@link locationOnly} - however, we know that we will never retrieve it unlike {@link unknown} where it may
-     * or may not be update with a location.
+     * {@link unknown}, {@link locationOnly} - however, we know that we will never retrieve it
+     * unlike {@link unknown} where it may or may not be update with a location.
      */
     virtual,
+
     /**
      * The client-side artifact has been marked as stale and next time should be retrieved. This is likely
      * to happen when collection item has been deleted, the collection should be marked as stale.

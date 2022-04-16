@@ -1,4 +1,4 @@
-import { CollectionRepresentation, FeedRepresentation, LinkedRepresentation } from 'semantic-link';
+import { CollectionRepresentation, FeedRepresentation, LinkedRepresentation, LinkUtil, Uri } from 'semantic-link';
 import { SingletonRepresentation, state, Tracked } from '../types/types';
 import { State } from './state';
 import { Status } from './status';
@@ -7,45 +7,62 @@ import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
 import { instanceOfFeed } from '../utils/instanceOf/instanceOfFeed';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { LinkRelation } from '../linkRelation';
+import { FeedItemRepresentation } from 'semantic-link/lib/interfaces';
+import { CanonicalOrSelf } from '../utils/comparators/canonicalOrSelf';
 
 const log = anylogger('SparseRepresentationFactory');
 
+/**
+ * A factory for performing the initial construction of tracked resources.
+ *
+ * This factory is responsible for performing a logical 'new' of the in memory object
+ * used to represent resources. These objects have a 'state' object of type {@link State}
+ * that is used to track and manage the resources.
+ *
+ * If the across the wire representation is available it can be provided via
+ * the {@link ResourceFactoryOptions.on} property to provide an initial values
+ * for the resource. If the values are not provided then the resource is marked
+ * as being in the {@link Status.locationOnly} state (i.e. sparely populated).
+ *
+ * This factory is a pluggable strategy via the {@link ResourceFactoryOptions.makeSparseStrategy}. By
+ * default, the strategy is to create new instances for every instance of a resource. Implementations
+ * are provided to allowed pooled instances.
+ */
 export class SparseRepresentationFactory {
 
     public static mappedTitleAttributeName = 'name' as const;
+
+    /**
+     * A simple facade to allow the make() method to be provided by an alternative strategy.
+     *
+     * @see {defaultMakeStrategy}
+     */
+    public static make<T extends LinkedRepresentation | CollectionRepresentation>(
+        options?: ResourceFactoryOptions): Tracked<T> {
+        // Get the optional makeSparse strategy defaulting to the standard default implementation below.
+        const { makeSparseStrategy = SparseRepresentationFactory.defaultMakeStrategy } = { ...options };
+        return makeSparseStrategy(options) as Tracked<T>;
+    }
 
     /**
      * Returns a {@link LinkedRepresentation} with {@link State} initialised. An initialised representation will
      * be at worst sparse with a state ({@link Status.locationOnly}, {@link Status.virtual}). At best, the representation
      * is {@link Status.hydrated} when a resource is presented that has been retrieved across the wire.
      */
-    public static make<T extends LinkedRepresentation | CollectionRepresentation>(options?: ResourceFactoryOptions): Tracked<T> {
-
+    public static defaultMakeStrategy<T extends LinkedRepresentation | CollectionRepresentation>(
+        options?: ResourceFactoryOptions): Tracked<T> {
         const { on } = { ...options };
-
-        // create a sparse resource
-        if (!on) {
-            return SparseRepresentationFactory.makeSparse(options);
-        }
-
-        const existingResource = on;
-        // attach state to existing representation
-        if (!existingResource) {
-            // still need to create a sparse resource!
-            return SparseRepresentationFactory.makeSparse({ ...options, on: undefined });
+        if (on) {
+            return SparseRepresentationFactory.makeHydrated<T>(on, options);
         } else {
-            return SparseRepresentationFactory.makeHydrated(existingResource, options);
+            return SparseRepresentationFactory.makeSparse<T>({ ...options, on: undefined });
         }
     }
 
     private static makeHydrated<T extends LinkedRepresentation>(
         resource: LinkedRepresentation,
         options?: ResourceFactoryOptions): Tracked<T> {
-        const {
-            sparseType = 'singleton',
-            status = Status.hydrated,
-        } = { ...options };
-
+        const { sparseType = 'singleton', status = Status.hydrated } = { ...options };
         if (sparseType === 'feed') {
             throw new Error('Feed type not implemented. Sparse representation must be singleton or collection');
         }
@@ -57,10 +74,7 @@ export class SparseRepresentationFactory {
             [state]: new State(status),
         };
 
-        if (!instanceOfCollection(resource)) {
-            // make a singleton (or form)
-            return tracked as Tracked<T>;
-        } else {
+        if (instanceOfCollection(resource)) {
             // create collection
 
             // collection requires feed items to be sparsely populated
@@ -86,24 +100,24 @@ export class SparseRepresentationFactory {
                 items: [...items],
                 // TODO: struggling with typing on CollectionRepresentation<T> where the items are a TrackedRepresentation<T>
             } as unknown as Tracked<T>;
-
+        } else { // a singleton, a form (but not a collection)
+            // make a singleton (or form)
+            return tracked as Tracked<T>;
         }
     }
 
+    /**
+     *  The resource is to be made as a sparse resource as there is no data provided via
+     *  the {@link ResourceFactoryOptions.on} property.
+     */
     private static makeSparse<T extends LinkedRepresentation>(options?: ResourceFactoryOptions): Tracked<T> {
-        let { status, uri } = { ...options };
-        const { title = undefined, mappedTitle = this.mappedTitleAttributeName } = { ...options };
-
-        if (!status) {
-            if (uri) {
-                status = Status.locationOnly;
-            } else {
-                status = Status.virtual;
-            }
-        }
-
-        /** rather than populate with undefined, default to empty string */
-        uri = uri ?? '';
+        const {
+            uri = '', // rather than populate with undefined, default to empty string (unclear why this is a good idea)
+            title = undefined,
+            status = options?.uri ? Status.locationOnly : Status.virtual,
+            mappedTitle = this.mappedTitleAttributeName,
+            sparseType = 'singleton',
+        } = { ...options };
 
         const sparseResource = {
             [state]: new State(status),
@@ -112,8 +126,6 @@ export class SparseRepresentationFactory {
                 href: uri,
             }],
         } as Tracked<T>;
-
-        const { sparseType = 'singleton' } = { ...options };
 
         if (sparseType === 'singleton') {
 
@@ -124,7 +136,6 @@ export class SparseRepresentationFactory {
             }
             return sparseResource;
         } else if (sparseType === 'collection') {
-
             const { defaultItems = [] } = { ...options };
 
             const items = defaultItems.map(item => {
@@ -136,7 +147,7 @@ export class SparseRepresentationFactory {
             });
 
             return { ...sparseResource, items };
-        } else /* feedItem */ {
+        } else if (sparseType === 'feed') /* feedItem */ {
             // note: sparseType: 'feed' is an internal type generated from {@link makeHydrated} to populate items
             const { feedItem } = { ...options };
             if (feedItem) {
@@ -145,7 +156,180 @@ export class SparseRepresentationFactory {
                 log.error('Cannot create resource of type \'feedItem\' should be set - returning unknown');
                 return this.makeSparse({ status: Status.unknown });
             }
+        } else {
+            log.error('Unsupported type %s', sparseType);
+            return this.makeSparse({ status: Status.unknown });
         }
     }
 
+    /**
+     * Create sparse items from a 'pool'. The pool is a single collection resource, which is used
+     * as both a source of items and a location to store new (sparse) items.
+     *
+     * This strategy allows the caching of resources in a memory conservative way so that the same
+     * resource is not loaded twice. More importantly this also means that if the application/user
+     * has a view of those resources then the view will be the same.
+     *
+     * It is assumed that the pooled collection is logically backed/represented by the set of all
+     * possible items, whereas the specific collection is a subset of those items.
+     */
+    public static pooledCollectionMakeStrategy<T extends LinkedRepresentation | CollectionRepresentation>(
+        pool: CollectionRepresentation, options?: ResourceFactoryOptions): Tracked<T> {
+        const { on } = { ...options };
+        if (on) {
+            return SparseRepresentationFactory.makeHydratedPoolCollection(on, pool, options);
+        } else {
+            return SparseRepresentationFactory.makeSparse({ ...options, on: undefined });
+        }
+    }
+
+    /**
+     * Make a collection (that is not pools) from members that are pools.
+     */
+    private static makeHydratedPoolCollection<T extends LinkedRepresentation>(
+        resource: LinkedRepresentation,
+        pool: CollectionRepresentation,
+        options?: ResourceFactoryOptions): Tracked<T> {
+        const { sparseType = 'singleton', status = Status.hydrated } = { ...options };
+        if (sparseType === 'feed') {
+            throw new Error('Feed type not implemented. Sparse representation must be singleton or collection');
+        }
+
+        // make up a tracked resource for both singleton and collection (and forms)
+        // this will include links
+        const tracked = <Tracked<T>>{
+            ...resource,
+            [state]: new State(status),
+        };
+
+        if (instanceOfCollection(resource)) {
+            // collection requires feed items to be sparsely populated
+            // should be able to know from feedOnly state
+            const items = this.onAsFeedRepresentation(resource)
+                .items
+                .map(x => this.makePooledFeedItemResource(pool, x, options));
+
+            // Make the collection, with the pooled items
+            return {
+                ...tracked,
+                items: [...items],
+            };
+        } else { // the resource is a singleton (or a feed, ...)
+            // make a singleton (or form)
+            return tracked as Tracked<T>;
+        }
+    }
+
+    /**
+     * Make an item for a collection using a pool as the source for items.
+     */
+    private static makePooledFeedItemResource(
+        pool: CollectionRepresentation,
+        item: FeedItemRepresentation,
+        options: ResourceFactoryOptions | undefined) {
+        const firstMatchingItem = this.firstMatchingFeedItem(pool, item.id);
+        if (firstMatchingItem) {
+            return firstMatchingItem;
+        } else {
+            const newItem = this.makeSparse<SingletonRepresentation>({
+                ...options,
+                sparseType: 'feed',
+                feedItem: item,
+            });
+            pool.items.unshift(newItem); // put the item at the beginning of the pool
+            return newItem;
+        }
+    }
+
+    /**
+     * Find the first matching item in a collection. Match by URI.
+     */
+    public static firstMatchingFeedItem<T extends LinkedRepresentation>(
+        collection: CollectionRepresentation<T>, id: Uri): T | undefined {
+        return collection
+            .items
+            .find((anItem) => LinkUtil.getUri(anItem, CanonicalOrSelf) === id);
+    }
+
+    /**
+     * Create sparse item from a 'pool'. The pool is a single collection resource, which is used
+     * as both a source of items and a location to store new (sparse) items.
+     *
+     * This strategy allows the caching of resources in a memory conservative way so that the same
+     * resource is not loaded twice. More importantly this also means that if the application/user
+     * has a view of those resources then the view will be the same.
+     *
+     * It is assumed that the pooled collection is logically backed/represented by the set of all
+     * possible items, whereas the specific collection is a subset of those items.
+     */
+    public static pooledSingletonMakeStrategy<T extends LinkedRepresentation | CollectionRepresentation>(
+        pool: CollectionRepresentation, options?: ResourceFactoryOptions): Tracked<T> {
+        const { on } = { ...options };
+        if (on) {
+            return SparseRepresentationFactory.makeHydratedPoolSingleton(on, pool, options);
+        } else {
+            return SparseRepresentationFactory.makeSparsePooled(pool, { ...options, on: undefined });
+        }
+    }
+
+    /**
+     *  The resource is to be made as a sparse resource as there is no data provided via
+     *  the {@link ResourceFactoryOptions.on} property. Iff a link has been provided
+     *  can the item be fetched from or stored into the pool.
+     */
+    private static makeSparsePooled<T extends LinkedRepresentation>(
+        pool: CollectionRepresentation, options?: ResourceFactoryOptions): Tracked<T> {
+        const { uri } = { ...options };
+        if (uri) {
+            const firstMatchingItem = this.firstMatchingFeedItem(pool, uri);
+            if (firstMatchingItem) {
+                return firstMatchingItem as Tracked<T>; // item from the pool
+            } else {
+                const sparse = this.makeSparse<T>(options);
+                pool.items.unshift(sparse);   // add item to the pool
+                return sparse;
+            }
+        } else {
+            // the URI is not known, so return a 'new' sparse item and do not store it in the pool
+            return this.makeSparse<T>(options); // not eligible for the pool
+        }
+    }
+
+    /**
+     * Make a collection (that is not pools) from members that are pools.
+     */
+    private static makeHydratedPoolSingleton<T extends LinkedRepresentation>(
+        resource: LinkedRepresentation,
+        pool: CollectionRepresentation,
+        options?: ResourceFactoryOptions): Tracked<T> {
+        const uri = LinkUtil.getUri(resource, CanonicalOrSelf);
+        if (uri) {
+            const firstMatchingItem = this.firstMatchingFeedItem(pool, uri);
+            if (firstMatchingItem) {
+                return firstMatchingItem as Tracked<T>; // item from the pool
+            } else {
+                const hydrated =  this.makeHydrated<T>(resource, options);
+                pool.items.unshift(hydrated);   // add item to the pool
+                return hydrated;
+            }
+        } else {
+            return this.makeHydrated<T>(resource, options);
+        }
+    }
+
+    /**
+     * Get the {@link ResourceFactoryOptions.on} data as a {@link FeedRepresentation}.
+     */
+    private static onAsFeedRepresentation(resource: LinkedRepresentation): FeedRepresentation {
+        if (instanceOfFeed(resource)) {
+            return resource;
+        } else {
+            log.warn('Resource does not look like a feed');
+            return resource as unknown as FeedRepresentation; // return it anyway.
+        }
+    }
 }
+
+export const defaultMakeStrategy = SparseRepresentationFactory.defaultMakeStrategy;
+export const pooledCollectionMakeStrategy = SparseRepresentationFactory.pooledCollectionMakeStrategy;
+export const pooledSingletonMakeStrategy = SparseRepresentationFactory.pooledSingletonMakeStrategy;

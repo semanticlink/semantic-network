@@ -1,8 +1,11 @@
 import { Status } from '../representation/status';
 import { LinkedRepresentation, Uri } from 'semantic-link';
 import { FeedItemRepresentation } from 'semantic-link/lib/interfaces';
+import { Tracked } from '../types/types';
 
 export type ResourceType = 'singleton' | 'collection' | 'feed';
+
+export type MakeSparseStrategy = (options?: ResourceFactoryOptions) => Tracked<LinkedRepresentation>;
 
 export interface ResourceFactoryOptions {
 
@@ -44,13 +47,18 @@ export interface ResourceFactoryOptions {
      *
      * TODO: this isn't right and often requires `<T>on: () => x as unknown as T`
      */
-    on?: LinkedRepresentation;
+    readonly on?: LinkedRepresentation;
 
     /**
      * Internally used, to generate a items on a collection. Used in conjunction with {@link sparseType} 'feed'.
      */
-    feedItem?: FeedItemRepresentation;
+    readonly feedItem?: FeedItemRepresentation;
 
-    mappedTitle?: string;
+    readonly mappedTitle?: string;
 
+    /**
+     * The strategy used to create sparse {@link LinkedRepresentation} objects. This allows to caller
+     * to plug in an alternative implementation (say to implement a pooled resource strategy).
+     */
+    readonly makeSparseStrategy?: MakeSparseStrategy;
 }

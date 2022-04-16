@@ -10,6 +10,4 @@ export interface ResourceFetchOptions {
      * to do a force reload then also set the {@link noCache} or {@link cacheControl} headers.
      */
     readonly forceLoadFeedOnly?: boolean;
-
-
 }

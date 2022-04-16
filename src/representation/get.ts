@@ -52,7 +52,6 @@ export async function get<TReturn extends LinkedRepresentation,
 
     // find specific item in collection
     if (where) {
-
         log.debug('using \'where\' to locate resource on get');
 
         // when combined with rel, the sub resource should be the collection

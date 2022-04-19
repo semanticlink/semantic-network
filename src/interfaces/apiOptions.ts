@@ -7,8 +7,12 @@ import { ResourceUpdateOptions } from './resourceUpdateOptions';
 import { MergeOptions } from './mergeOptions';
 import { HttpRequestOptions } from './httpRequestOptions';
 import { LoaderJobOptions } from './loader';
+import { ResourceCreateOptions } from './resourceCreateOptions';
+import { ResourceDeleteOptions } from './resourceDeleteOptions';
 
 export type ApiOptions =
+    ResourceCreateOptions &
+    ResourceDeleteOptions &
     ResourceQueryOptions &
     ResourceFetchOptions &
     ResourceLinkOptions &

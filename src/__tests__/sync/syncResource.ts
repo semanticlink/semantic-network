@@ -35,11 +35,11 @@ describe('Synchroniser', () => {
      */
     const makeHydratedResource = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
         // note: clone the document for multiple uses
-        SparseRepresentationFactory.make({ on: { ...document } });
+        SparseRepresentationFactory.make({ addStateOn: { ...document } });
 
     const makeUnknownResource = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
         // note: clone the document for multiple uses
-        SparseRepresentationFactory.make({ status: Status.unknown, on: { ...document } });
+        SparseRepresentationFactory.make({ status: Status.unknown, addStateOn: { ...document } });
 
     const successPut: AxiosResponse = {
         data: undefined,
@@ -187,7 +187,6 @@ describe('Synchroniser', () => {
             const createForm = {
                 links: [
                     { rel: 'self', href: 'https://api.example.com/tenant/form/create' },
-                    // { rel: 'submit', href: 'https://api.example.com/tenant' },
                 ],
                 items: [
                     { type: '//types/form/text', name: 'code', required: true },

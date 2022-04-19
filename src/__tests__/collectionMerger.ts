@@ -23,14 +23,6 @@ function makeCollection(items: number[]) {
     }) as CollectionRepresentation;
 }
 
-/*function makeCollectionWithOn(items: number[]) {
-    return TrackedRepresentationFactory.make({
-        uri: uniqueUri(10),
-        sparseType: 'collection',
-        on: <T>() => makeItems(items),
-    }) as CollectionRepresentation;
-}*/
-
 describe('Collection Merger', () => {
 
     test.each(

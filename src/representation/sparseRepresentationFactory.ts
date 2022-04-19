@@ -20,7 +20,7 @@ const log = anylogger('SparseRepresentationFactory');
  * that is used to track and manage the resources.
  *
  * If the across the wire representation is available it can be provided via
- * the {@link ResourceFactoryOptions.on} property to provide an initial values
+ * the {@link ResourceFactoryOptions.addStateOn} property to provide an initial values
  * for the resource. If the values are not provided then the resource is marked
  * as being in the {@link Status.locationOnly} state (i.e. sparely populated).
  *
@@ -51,11 +51,11 @@ export class SparseRepresentationFactory {
      */
     public static defaultMakeStrategy<T extends LinkedRepresentation | CollectionRepresentation>(
         options?: ResourceFactoryOptions): Tracked<T> {
-        const { on } = { ...options };
-        if (on) {
-            return SparseRepresentationFactory.makeHydrated<T>(on, options);
+        const { addStateOn, ...opts } = { ...options };
+        if (addStateOn) {
+            return SparseRepresentationFactory.makeHydrated<T>(addStateOn, opts);
         } else {
-            return SparseRepresentationFactory.makeSparse<T>({ ...options, on: undefined });
+            return SparseRepresentationFactory.makeSparse<T>(opts);
         }
     }
 
@@ -108,7 +108,7 @@ export class SparseRepresentationFactory {
 
     /**
      *  The resource is to be made as a sparse resource as there is no data provided via
-     *  the {@link ResourceFactoryOptions.on} property.
+     *  the {@link ResourceFactoryOptions.addStateOn} property.
      */
     private static makeSparse<T extends LinkedRepresentation>(options?: ResourceFactoryOptions): Tracked<T> {
         const {
@@ -175,11 +175,11 @@ export class SparseRepresentationFactory {
      */
     public static pooledCollectionMakeStrategy<T extends LinkedRepresentation | CollectionRepresentation>(
         pool: CollectionRepresentation, options?: ResourceFactoryOptions): Tracked<T> {
-        const { on } = { ...options };
-        if (on) {
-            return SparseRepresentationFactory.makeHydratedPoolCollection(on, pool, options);
+        const { addStateOn } = { ...options };
+        if (addStateOn) {
+            return SparseRepresentationFactory.makeHydratedPoolCollection(addStateOn, pool, options);
         } else {
-            return SparseRepresentationFactory.makeSparse({ ...options, on: undefined });
+            return SparseRepresentationFactory.makeSparse({ ...options, addStateOn: undefined });
         }
     }
 
@@ -264,17 +264,17 @@ export class SparseRepresentationFactory {
      */
     public static pooledSingletonMakeStrategy<T extends LinkedRepresentation | CollectionRepresentation>(
         pool: CollectionRepresentation, options?: ResourceFactoryOptions): Tracked<T> {
-        const { on } = { ...options };
-        if (on) {
-            return SparseRepresentationFactory.makeHydratedPoolSingleton(on, pool, options);
+        const { addStateOn } = { ...options };
+        if (addStateOn) {
+            return SparseRepresentationFactory.makeHydratedPoolSingleton(addStateOn, pool, options);
         } else {
-            return SparseRepresentationFactory.makeSparsePooled(pool, { ...options, on: undefined });
+            return SparseRepresentationFactory.makeSparsePooled(pool, { ...options, addStateOn: undefined });
         }
     }
 
     /**
      *  The resource is to be made as a sparse resource as there is no data provided via
-     *  the {@link ResourceFactoryOptions.on} property. Iff a link has been provided
+     *  the {@link ResourceFactoryOptions.addStateOn} property. Iff a link has been provided
      *  can the item be fetched from or stored into the pool.
      */
     private static makeSparsePooled<T extends LinkedRepresentation>(
@@ -318,7 +318,7 @@ export class SparseRepresentationFactory {
     }
 
     /**
-     * Get the {@link ResourceFactoryOptions.on} data as a {@link FeedRepresentation}.
+     * Get the {@link ResourceFactoryOptions.addStateOn} data as a {@link FeedRepresentation}.
      */
     private static onAsFeedRepresentation(resource: LinkedRepresentation): FeedRepresentation {
         if (instanceOfFeed(resource)) {

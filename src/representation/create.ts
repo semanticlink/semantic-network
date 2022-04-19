@@ -24,6 +24,7 @@ import { defaultCreateFormStrategy } from './createFormMergeStrategy';
 import { ApiUtil } from '../apiUtil';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { instanceOfForm } from '../utils/instanceOf/instanceOfForm';
+import { ResourceCreateOptions } from '../interfaces/resourceCreateOptions';
 
 const log = anylogger('create');
 
@@ -33,7 +34,8 @@ const log = anylogger('create');
  */
 export async function create<T extends LinkedRepresentation, TResult extends LinkedRepresentation = T>(
     document: DocumentRepresentation<T> | Tracked<T> | LinkType,
-    options?: ResourceFactoryOptions &
+    options?: ResourceCreateOptions &
+        ResourceFactoryOptions &
         ResourceQueryOptions &
         ResourceLinkOptions &
         HttpRequestOptions &
@@ -45,14 +47,14 @@ export async function create<T extends LinkedRepresentation, TResult extends Lin
     }
 
     const {
-        on,
+        onCollection,
         rel = LinkRelation.Self,
     } = { ...options };
 
 
-    if (on) {
-        if (instanceOfCollection(on)) {
-            const newVar = await createCollectionItem(on, document as DocumentRepresentation, options);
+    if (onCollection) {
+        if (instanceOfCollection(onCollection)) {
+            const newVar = await createCollectionItem(onCollection, document as DocumentRepresentation, options);
             return newVar as TResult;
         } else {
             log.warn('option \'on\' options cannot be used outside of a collection, skipping');
@@ -65,7 +67,7 @@ export async function create<T extends LinkedRepresentation, TResult extends Lin
         if (!uri) {
             log.warn('no uri found on rel \'%s\' on resource create', rel);
         }
-        return SparseRepresentationFactory.make({ uri }) as TResult;
+        return SparseRepresentationFactory.make({ ...options, uri }) as TResult;
     }
 
 

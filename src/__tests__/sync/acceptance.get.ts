@@ -12,7 +12,7 @@ import { ApiUtil } from '../../apiUtil';
  */
 const makeFromFixture = <T extends LinkedRepresentation>(document: T): Tracked<T> =>
     // note: clone the document for multiple uses
-    SparseRepresentationFactory.make({ on: { ...document } });
+    SparseRepresentationFactory.make({ addStateOn: { ...document } });
 
 describe('get', () => {
 

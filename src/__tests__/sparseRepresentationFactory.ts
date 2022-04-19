@@ -35,18 +35,18 @@ describe('Sparse Representation Factory', () => {
             }, instanceOfCollection, Status.locationOnly, true],
             ['sparse, singleton, on (undefined)', {
                 uri: 'http://example.com/1',
-                on: undefined,
+                addStateOn: undefined,
             }, instanceOfSingleton, Status.locationOnly, true],
             ['sparse, singleton, on (returns undefined)', {
                 uri: 'http://example.com/1',
-                on: undefined,
+                addStateOn: undefined,
             }, instanceOfSingleton, Status.locationOnly, true],
             ['hydrated, singleton', {
-                on: ({ links: [] }),
+                addStateOn: ({ links: [] }),
             } as ResourceFactoryOptions, instanceOfSingleton, Status.hydrated, false],
             ['hydrated, collection', {
                 sparseType: 'collection',
-                on: ({ links: [], items: [] }),
+                addStateOn: ({ links: [], items: [] }),
             } as ResourceFactoryOptions, instanceOfCollection, Status.hydrated, false],
         ])
             .describe(
@@ -113,24 +113,24 @@ describe('Sparse Representation Factory', () => {
         each([
             [
                 'empty (undefined)',
-                { on: { links: [], items: [] } },
-                { on: { links: [], items: [] } },
+                { addStateOn: { links: [], items: [] } },
+                { addStateOn: { links: [], items: [] } },
                 0,
                 0,
             ],
 
             [
                 'A collection with one item, where that item is already in the pool',
-                { on: { links: [], items: [{ id: '//example.com/item/1' }] } },
-                { on: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/1' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
                 1,
                 1,
             ],
 
             [
                 'A collection with one item, where that item is **not** in the pool',
-                { on: { links: [], items: [{ id: '//example.com/item/99' }] } },
-                { on: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/99' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
                 1,
                 2,
             ],
@@ -189,42 +189,42 @@ describe('Sparse Representation Factory', () => {
             [
                 'empty sparse (undefined)',
                 { uri: undefined },
-                { on: { links: [], items: [] } },
+                { addStateOn: { links: [], items: [] } },
                 0,
             ],
 
             [
                 'empty hydrated (undefined)',
-                { on: { links: [{ rel: 'self', href: '//example.com/item/1' }] } },
-                { on: { links: [], items: [] } },
+                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] } },
+                { addStateOn: { links: [], items: [] } },
                 1,
             ],
 
             [
                 'A sparse item, where that item is already in the pool',
                 { uri: '//example.com/item/1' },
-                { on: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
                 1,
             ],
 
             [
                 'An sparse item, where that item is **not** in the pool',
                 { uri: '//example.com/item/99' },
-                { on: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
                 2,
             ],
 
             [
                 'A hydrated item, where that item is already in the pool',
-                { on: { links: [{ rel: 'self', href: '//example.com/item/1' }] } },
-                { on: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
+                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
                 1,
             ],
 
             [
                 'An hydrated item, where that item is **not** in the pool',
-                { on: { links: [{ rel: 'self', href: '//example.com/item/99' }] } },
-                { on: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
+                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/99' }] } },
+                { addStateOn: { links: [], items: [{ id: '//example.com/item/1', title: 'Pool item #1' }] } },
                 2,
             ],
 

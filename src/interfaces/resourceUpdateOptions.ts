@@ -8,15 +8,15 @@ export type ResourceUpdateOptions = EditMergeOptions
     /**
      * On resource updated, merge the new document into the existing resource.
      *
-     * @default: {@see defaultEditFormStrategy} - merge only values denoted in the form
+     * @default: {@link defaultEditFormStrategy} - merge only values denoted in the form
      */
-     readonly makePutRepresentationStrategy?: EditFormMergeStrategy;
+    readonly makePutRepresentationStrategy?: EditFormMergeStrategy;
 
     /**
-     * The link relation on the resource used to determine the edit form
-     * resource.
+     * The link relation on the resource used to determine the edit form resource.
      *
-     * @default: {@see LinkRelation.EditForm}
+     * @default: {@link LinkRelation.EditForm}
      */
     readonly formRel?: RelationshipType;
 };
+

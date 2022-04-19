@@ -36,7 +36,7 @@ describe('resource, create', () => {
         [
             'collection, on creates',
             {
-                on: SparseRepresentationFactory.make({ uri, sparseType: 'collection' }),
+                onCollection: SparseRepresentationFactory.make({ uri, sparseType: 'collection' }),
             } as ResourceFactoryOptions,
             trackedRepresentationFactory.create,
             1,

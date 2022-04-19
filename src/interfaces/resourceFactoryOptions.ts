@@ -41,13 +41,13 @@ export interface ResourceFactoryOptions {
     readonly defaultItems?: (Uri | FeedItemRepresentation)[];
 
     /**
-     * Set a state on this data if it exists rather than a sparsely populated representation
+     * Set a state on this data if it exists rather than a sparsely populated representation.
      *
-     * Note: use a functor to return the representation to use generics (don't want generic at interface level)
-     *
-     * TODO: this isn't right and often requires `<T>on: () => x as unknown as T`
+     * When set with a {@link LinkedRepresentation}, the {@link State} will be initialised on the representation.
+     * An initialised representation will be at worst sparse with a state ({@link Status.locationOnly}, {@link Status.virtual}).
+     * At best, the representation is {@link Status.hydrated} when a resource is presented that has been retrieved across the wire.
      */
-    readonly on?: LinkedRepresentation;
+    readonly addStateOn?: LinkedRepresentation;
 
     /**
      * Internally used, to generate a items on a collection. Used in conjunction with {@link sparseType} 'feed'.

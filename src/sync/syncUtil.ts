@@ -42,7 +42,8 @@ export class SyncUtil {
         const deleteResourceAndUpdateResolver: DeleteStrategy = async <T extends LinkedRepresentation>(deleteResource: T) => {
             const result = await ApiUtil.delete(deleteResource as Tracked<T>, {
                 ...options,
-                on: collectionResource,
+                // TODO: this is unlikely to be used 'on' doesn't exist in delete
+                addStateOn: collectionResource,
             });
             if (result) {
                 const uri = LinkUtil.getUri(deleteResource, LinkRelation.Self);
@@ -87,7 +88,7 @@ export class SyncUtil {
          */
         const createResourceAndUpdateResolver: CreateStrategy = async <T extends LinkedRepresentation>(createDataDocument: T) => {
 
-            const result = await ApiUtil.create(createDataDocument, { ...options, on: collectionResource });
+            const result = await ApiUtil.create(createDataDocument, { ...options, onCollection: collectionResource });
             if (result) {
                 const uri = LinkUtil.getUri(createDataDocument, LinkRelation.Self);
                 const uri1 = LinkUtil.getUri(result, LinkRelation.Self);
@@ -283,7 +284,7 @@ export class SyncUtil {
             }
         } else {
             // add the document to the collection a
-            const result = await ApiUtil.create(document, { ...options, on: resource });
+            const result = await ApiUtil.create(document, { ...options, onCollection: resource });
             if (result) {
                 if (result) {
                     log.debug('sync resource \'create\' in collection %s', LinkUtil.getUri(result, LinkRelation.Self));

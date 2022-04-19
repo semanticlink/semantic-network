@@ -73,7 +73,7 @@ export class NamedRepresentationFactory {
             } else {
                 const uri = LinkUtil.getUri(resource, rel);
                 if (uri) {
-                    const sparse = SparseRepresentationFactory.make({ uri });
+                    const sparse = SparseRepresentationFactory.make({ ...options, uri });
                     const namedResource = await TrackedRepresentationFactory.load(
                         sparse,
                         { ...options, rel: LinkRelation.Self });

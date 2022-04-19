@@ -58,6 +58,7 @@ export class FormRepresentationUtil {
                         if (field.type === FieldType.Collection && field.id) {
                             // set up a field ready to retrieved via semantic network
                             const sparseFieldCollection = SparseRepresentationFactory.make({
+                                ...options,
                                 uri: field.id,
                                 sparseType: 'collection',
                             });

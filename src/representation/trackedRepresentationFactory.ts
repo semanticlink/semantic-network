@@ -81,7 +81,7 @@ export class TrackedRepresentationFactory {
                         if (uri) {
                             // TODO: decide on pluggable hydration strategy
                             const hydrated = await this.load(
-                                SparseRepresentationFactory.make({ uri }),
+                                SparseRepresentationFactory.make({ ...options, uri }),
                                 { ...options, rel: LinkRelation.Self});
                             log.debug('tracked representation created and loaded %s', uri);
                             return hydrated;
@@ -331,7 +331,7 @@ export class TrackedRepresentationFactory {
             const uri = LinkUtil.getUri(resource, LinkRelation.Self);
             if (uri) {
                 log.debug('tracked representation created: unknown on \'%s\'', uri);
-                const unknown = SparseRepresentationFactory.make({ on: resource, status: Status.unknown });
+                const unknown = SparseRepresentationFactory.make({ ...options, addStateOn: resource, status: Status.unknown });
                 return await TrackedRepresentationFactory.load(unknown, options) as T;
             } else {
                 log.error('load tracked representation has no processable uri');
@@ -445,9 +445,10 @@ export class TrackedRepresentationFactory {
 
         // ensure that all the items are sparsely populated
         const fromFeed = SparseRepresentationFactory.make<CollectionRepresentation<T>>({
+            ...options,
             uri,
             sparseType: 'collection',
-            on: data,
+            addStateOn: data,
         });
 
         // merge the existing and the response such that

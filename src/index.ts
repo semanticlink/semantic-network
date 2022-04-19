@@ -84,6 +84,8 @@ export * from './interfaces/resourceLinkOptions';
 export * from './interfaces/resourceQueryOptions';
 export * from './interfaces/resourceResolver';
 export * from './interfaces/resourceUpdateOptions';
+export * from './interfaces/resourceCreateOptions';
+export * from './interfaces/resourceDeleteOptions';
 // sync interfaces
 export * from './interfaces/sync/syncComparator';
 export * from './interfaces/sync/syncResourceResolver';

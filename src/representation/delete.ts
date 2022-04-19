@@ -9,6 +9,7 @@ import { RepresentationUtil } from '../utils/representationUtil';
 import anylogger from 'anylogger';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { Tracked } from '../types/types';
+import { ResourceDeleteOptions } from '../interfaces/resourceDeleteOptions';
 
 const log = anylogger('delete');
 
@@ -21,7 +22,8 @@ const log = anylogger('delete');
  */
 export async function del<T extends LinkedRepresentation>(
     resource: T | Tracked<T>,
-    options?: ResourceFactoryOptions &
+    options?: ResourceDeleteOptions &
+        ResourceFactoryOptions &
         ResourceQueryOptions &
         ResourceLinkOptions &
         HttpRequestOptions &

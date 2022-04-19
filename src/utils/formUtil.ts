@@ -192,7 +192,7 @@ export class FormUtil {
             if (resourceResolver) {
 
                 const uri = resolver.resolve(item.id);
-                const representation = SparseRepresentationFactory.make({ uri });
+                const representation = SparseRepresentationFactory.make({ ...options, uri });
                 log.debug('matching items collection with resolver type \'%s\' on %s', item.name, item.id);
                 const resource = await resourceResolver(item.name)(representation, options);
 

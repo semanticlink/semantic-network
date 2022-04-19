@@ -88,7 +88,7 @@ export class SyncUtil {
          */
         const createResourceAndUpdateResolver: CreateStrategy = async <T extends LinkedRepresentation>(createDataDocument: T) => {
 
-            const result = await ApiUtil.create(createDataDocument, { ...options, onCollection: collectionResource });
+            const result = await ApiUtil.create(createDataDocument, { ...options, createContext: collectionResource });
             if (result) {
                 const uri = LinkUtil.getUri(createDataDocument, LinkRelation.Self);
                 const uri1 = LinkUtil.getUri(result, LinkRelation.Self);
@@ -284,7 +284,7 @@ export class SyncUtil {
             }
         } else {
             // add the document to the collection a
-            const result = await ApiUtil.create(document, { ...options, onCollection: resource });
+            const result = await ApiUtil.create(document, { ...options, createContext: resource });
             if (result) {
                 if (result) {
                     log.debug('sync resource \'create\' in collection %s', LinkUtil.getUri(result, LinkRelation.Self));

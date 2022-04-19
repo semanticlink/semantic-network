@@ -47,14 +47,14 @@ export async function create<T extends LinkedRepresentation, TResult extends Lin
     }
 
     const {
-        onCollection,
+        createContext,
         rel = LinkRelation.Self,
     } = { ...options };
 
 
-    if (onCollection) {
-        if (instanceOfCollection(onCollection)) {
-            const newVar = await createCollectionItem(onCollection, document as DocumentRepresentation, options);
+    if (createContext) {
+        if (instanceOfCollection(createContext)) {
+            const newVar = await createCollectionItem(createContext, document as DocumentRepresentation, options);
             return newVar as TResult;
         } else {
             log.warn('option \'on\' options cannot be used outside of a collection, skipping');

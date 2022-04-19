@@ -80,7 +80,9 @@ export class TrackedRepresentationFactory {
                         const uri = headers.location;
                         if (uri) {
                             // TODO: decide on pluggable hydration strategy
-                            const hydrated = await this.load(SparseRepresentationFactory.make({ uri }), options);
+                            const hydrated = await this.load(
+                                SparseRepresentationFactory.make({ uri }),
+                                { ...options, rel: LinkRelation.Self});
                             log.debug('tracked representation created and loaded %s', uri);
                             return hydrated;
                         } else {

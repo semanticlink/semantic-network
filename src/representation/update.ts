@@ -1,6 +1,6 @@
 import { instanceOfUriList } from '../utils/instanceOf';
 import { LinkedRepresentation, LinkUtil } from 'semantic-link';
-import { ResourceUpdateOptions } from '../interfaces/ResourceUpdateOptions';
+import { ResourceUpdateOptions } from '../interfaces/resourceUpdateOptions';
 import anylogger from 'anylogger';
 import { LinkRelation } from '../linkRelation';
 import { defaultEditFormStrategy } from './editFormMergeStrategy';

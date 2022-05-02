@@ -313,11 +313,11 @@ export class TrackedRepresentationFactory {
 
                         return await this.processResource(resource, response.data as DocumentRepresentation<T>, options) as T;
 
-                    } catch (e) {
+                    } catch (e: unknown) {
                         if (isHttpRequestError(e)) {
                             this.processError<T>(e, uri, resource, trackedState);
                         } else {
-                            log.warn('TODO: re-throw??');
+                            log.warn('Unhandled http exception %o', e);
                             // throw(e);
                         }
                     }

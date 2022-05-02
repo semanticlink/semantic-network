@@ -18,6 +18,17 @@ import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 const log = anylogger('Update');
 
 /**
+ * A subset of the {@link ApiOptions} that are appropriate for a HTTP PUT.
+ *
+ * @see ApiOptions
+ */
+export type ApiUpdateOptions = ResourceUpdateOptions &
+    ResourceLinkOptions &
+    HttpRequestOptions &
+    ResourceMergeOptions &
+    ResourceFetchOptions;
+
+/**
  * Update on existing resource
  *      TODO: accept but don't require TrackedRepresentation interface
  *      TODO: always returns resource but hard to know if error. Either throw or return undefined
@@ -26,11 +37,7 @@ const log = anylogger('Update');
 export async function update<T extends LinkedRepresentation>(
     resource: T | Tracked<T>,
     document: T | DocumentRepresentation<T>,
-    options?: ResourceUpdateOptions &
-        ResourceLinkOptions &
-        HttpRequestOptions &
-        ResourceMergeOptions &
-        ResourceFetchOptions): Promise<T> {
+    options?: ApiUpdateOptions): Promise<T> {
 
     // PATCH
     if (instanceOfCollection(resource)) {

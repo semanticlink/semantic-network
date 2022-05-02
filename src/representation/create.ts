@@ -29,17 +29,24 @@ import { ResourceCreateOptions } from '../interfaces/resourceCreateOptions';
 const log = anylogger('create');
 
 /**
+ * A subset of the {@link ApiOptions} that are appropriate for a HTTP POST.
+ *
+ * @see ApiOptions
+ */
+export type ApiCreateOptions = ResourceCreateOptions &
+    ResourceFactoryOptions &
+    ResourceQueryOptions &
+    ResourceLinkOptions &
+    HttpRequestOptions &
+    ResourceFetchOptions;
+
+/**
  *
  * TODO: accept but don't require TrackedRepresentation interface
  */
 export async function create<T extends LinkedRepresentation, TResult extends LinkedRepresentation = T>(
     document: DocumentRepresentation<T> | Tracked<T> | LinkType,
-    options?: ResourceCreateOptions &
-        ResourceFactoryOptions &
-        ResourceQueryOptions &
-        ResourceLinkOptions &
-        HttpRequestOptions &
-        ResourceFetchOptions): Promise<TResult | undefined> {
+    options?: ApiCreateOptions): Promise<TResult | undefined> {
 
     if (!document) {
         log.debug('No document provided to create');

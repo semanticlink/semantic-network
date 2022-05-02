@@ -14,6 +14,18 @@ import { ResourceDeleteOptions } from '../interfaces/resourceDeleteOptions';
 const log = anylogger('delete');
 
 /**
+ * A subset of the {@link ApiOptions} that are appropriate for a HTTP DELETE.
+ *
+ * @see ApiOptions
+ */
+export type ApiDeleteOptions = ResourceDeleteOptions &
+    ResourceFactoryOptions &
+    ResourceQueryOptions &
+    ResourceLinkOptions &
+    HttpRequestOptions &
+    ResourceFetchOptions;
+
+/**
  *
  * TODO: accept but don't require TrackedRepresentation interface
  * @param resource
@@ -22,12 +34,7 @@ const log = anylogger('delete');
  */
 export async function del<T extends LinkedRepresentation>(
     resource: T | Tracked<T>,
-    options?: ResourceDeleteOptions &
-        ResourceFactoryOptions &
-        ResourceQueryOptions &
-        ResourceLinkOptions &
-        HttpRequestOptions &
-        ResourceFetchOptions): Promise<T | undefined> {
+    options?: ApiDeleteOptions): Promise<T | undefined> {
 
     const { where = undefined, removeOnDeleteItem = true } = { ...options };
 

@@ -18,6 +18,19 @@ import { LoaderJobOptions } from '../interfaces/loader';
 const log = anylogger('get');
 
 /**
+ * A subset of the {@link ApiOptions} that are appropriate for a HTTP GET.
+ *
+ * @see ApiOptions
+ */
+export type ApiGetOptions = ResourceFactoryOptions &
+    ResourceQueryOptions &
+    ResourceLinkOptions &
+    HttpRequestOptions &
+    ResourceMergeOptions &
+    ResourceFetchOptions &
+    ResourceUpdateOptions &
+    LoaderJobOptions;
+/**
  * Retrieve a resource based on its context and options, and its current state (ie hydrated or not)
  *
  * Note: a returned resource will not always be the same (ie self) but rather a different linked resource.
@@ -28,14 +41,7 @@ export async function get<TReturn extends LinkedRepresentation,
     T extends LinkedRepresentation | TReturn = LinkedRepresentation,
     TResult extends TReturn = T extends TReturn ? T : TReturn>(
     resource: T | Tracked<T>,
-    options?: ResourceFactoryOptions &
-        ResourceQueryOptions &
-        ResourceLinkOptions &
-        HttpRequestOptions &
-        ResourceMergeOptions &
-        ResourceFetchOptions &
-        ResourceUpdateOptions &
-        LoaderJobOptions): Promise<Nullable<TResult | Tracked<TResult>>> {
+    options?: ApiGetOptions): Promise<Nullable<TResult | Tracked<TResult>>> {
 
     const {
         rel = undefined,

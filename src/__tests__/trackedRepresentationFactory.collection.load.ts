@@ -58,8 +58,9 @@ describe('Tracked Representation Factory', () => {
         ])('deleted status \'%s\'', async (status: Status) => {
             const collection = SparseRepresentationFactory.make<CollectionRepresentation>(
                 { status, uri, sparseType: 'collection' });
-            const actual = async () => await TrackedRepresentationFactory.load(collection);
-            await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com/collection\''));
+            /*const actual = async () => */await TrackedRepresentationFactory.load(collection);
+            // old behaviour was to reject - now it is to return original without call
+            // await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com/collection\''));
             expect(get).not.toHaveBeenCalled();
         });
     });

@@ -68,8 +68,9 @@ describe('Tracked Representation Factory', () => {
             Status.deleteInProgress,
         ])('deleted status \'%s\'', async (status: Status) => {
             const $api = SparseRepresentationFactory.make<ApiRepresentation>({ status, uri });
-            const actual = async () => await TrackedRepresentationFactory.load($api);
-            await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com\''));
+            /*const actual = async () => */await TrackedRepresentationFactory.load($api);
+            // old behaviour was to reject - now it is to return original without call
+            // await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com\''));
             expect(get).not.toHaveBeenCalled();
         });
 

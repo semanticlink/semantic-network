@@ -293,8 +293,11 @@ export class TrackedRepresentationFactory {
                         log.info('Resource is client-side only and will not be fetched %s %s', uri, trackedState.status.toString());
                         return resource;
                     case Status.deleted:
+                        log.info('Resource is already deleted and will not be fetched %s', uri);
+                        return resource;
                     case Status.deleteInProgress:
-                        return Promise.reject(new Error(`Resource 'deleted' unable to load '${uri}'`));
+                        log.info('Resource is being deleted and will not be fetched %s', uri);
+                        return resource;
                     case Status.forbidden: // TODO: enhance forbidden strategy as needed currently assumes forbidden access doesn't change per session
                         log.info('Resource is already forbidden and will not be fetched %s', uri);
                         return resource;

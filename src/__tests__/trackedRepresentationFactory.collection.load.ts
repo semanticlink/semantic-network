@@ -59,7 +59,7 @@ describe('Tracked Representation Factory', () => {
             const collection = SparseRepresentationFactory.make<CollectionRepresentation>(
                 { status, uri, sparseType: 'collection' });
             const actual = async () => await TrackedRepresentationFactory.load(collection);
-            await expect(actual).rejects.toEqual('Resource is deleted https://api.example.com/collection');
+            await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com/collection\''));
             expect(get).not.toHaveBeenCalled();
         });
     });

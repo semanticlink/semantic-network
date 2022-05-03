@@ -113,7 +113,7 @@ export class TrackedRepresentationFactory {
                 }
             }
         } else {
-            return Promise.reject('create tracked representation has no context to find uri to POST on');
+            return Promise.reject(new Error('create tracked representation has no context to find uri to POST on'));
         }
 
         return undefined;
@@ -148,7 +148,7 @@ export class TrackedRepresentationFactory {
                         return resource as unknown as T;
                     case Status.deleted:
                     case Status.deleteInProgress:
-                        return Promise.reject(`Resource is deleted ${uri}`);
+                        return Promise.reject(new Error(`Resource 'deleted' unable to delete '${uri}'`));
                     case Status.forbidden: // TODO: enhance forbidden strategy as needed currently assumes forbidden access doesn't change per session
                         log.info('Resource is already forbidden and will not be deleted %s', uri);
                         return resource as unknown as T;
@@ -183,7 +183,7 @@ export class TrackedRepresentationFactory {
 
         } else {
             // TODO: decide if we want to make a locationOnly resource if possible and then continue
-            return Promise.reject(`delete tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
+            return Promise.reject(new Error(`delete tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`));
         }
         return resource;
 
@@ -247,7 +247,7 @@ export class TrackedRepresentationFactory {
 
             return resource;
         } else {
-            return Promise.reject(`update tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`);
+            return Promise.reject(new Error(`update tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`));
         }
 
     }
@@ -294,7 +294,7 @@ export class TrackedRepresentationFactory {
                         return resource;
                     case Status.deleted:
                     case Status.deleteInProgress:
-                        return Promise.reject(`Resource is deleted ${uri}`);
+                        return Promise.reject(new Error(`Resource 'deleted' unable to load '${uri}'`));
                     case Status.forbidden: // TODO: enhance forbidden strategy as needed currently assumes forbidden access doesn't change per session
                         log.info('Resource is already forbidden and will not be fetched %s', uri);
                         return resource;

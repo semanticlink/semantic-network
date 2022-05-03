@@ -531,7 +531,6 @@ describe('Synchroniser', () => {
 
                 del.mockResolvedValueOnce(() => ({}));
 
-
                 const result = await syncResource(makeHydratedResource(parent), oneItemRemovedInCollection, [], {
                     ...options,
                     rel: 'todos',

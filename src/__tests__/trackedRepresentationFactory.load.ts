@@ -69,7 +69,7 @@ describe('Tracked Representation Factory', () => {
         ])('deleted status \'%s\'', async (status: Status) => {
             const $api = SparseRepresentationFactory.make<ApiRepresentation>({ status, uri });
             const actual = async () => await TrackedRepresentationFactory.load($api);
-            await expect(actual).rejects.toEqual('Resource is deleted https://api.example.com');
+            await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com\''));
             expect(get).not.toHaveBeenCalled();
         });
 

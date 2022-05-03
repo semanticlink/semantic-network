@@ -49,7 +49,7 @@ describe('Tracked Representation Factory', () => {
         test.each([
             [{} as LinkedRepresentation, 'create tracked representation has no context to find uri to POST on'],
         ])('no uri found, throws', async (representation: LinkedRepresentation, err: string) => {
-            await expect(async () => await TrackedRepresentationFactory.create(representation, {})).rejects.toEqual(err);
+            await expect(async () => await TrackedRepresentationFactory.create(representation, {})).rejects.toEqual(Error(err));
             expect(post).not.toHaveBeenCalled();
         });
 

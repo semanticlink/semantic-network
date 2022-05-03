@@ -62,7 +62,7 @@ describe('Tracked Representation Factory', () => {
                 }],
             } as Tracked<ApiRepresentation>, `delete tracked representation has no state on '${uri}'`],
         ])('no state', async (representation: Tracked<ApiRepresentation>, err: string) => {
-            await expect(async () => await TrackedRepresentationFactory.del(representation)).rejects.toEqual(err);
+            await expect(async () => await TrackedRepresentationFactory.del(representation)).rejects.toEqual(Error(err));
             expect(del).not.toHaveBeenCalled();
         });
 

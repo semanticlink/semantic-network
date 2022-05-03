@@ -63,7 +63,7 @@ describe('Tracked Representation Factory', () => {
                 }],
             } as Tracked<ApiRepresentation>, `update tracked representation has no state on '${uri}'`],
         ])('no state', async (representation: Tracked<ApiRepresentation>, err: string) => {
-            await expect(async () => await TrackedRepresentationFactory.update(representation, document as unknown as DocumentRepresentation)).rejects.toEqual(err);
+            await expect(async () => await TrackedRepresentationFactory.update(representation, document as unknown as DocumentRepresentation)).rejects.toEqual(Error(err));
             expect(put).not.toHaveBeenCalled();
         });
 

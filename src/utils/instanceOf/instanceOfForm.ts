@@ -1,7 +1,22 @@
-import { LinkedRepresentation, LinkUtil } from 'semantic-link';
+import { instanceOfLinkedRepresentation, LinkedRepresentation, LinkUtil } from 'semantic-link';
 import { FormRepresentation } from '../../interfaces/formRepresentation';
 import { FormItem } from '../../interfaces/formItem';
 import { LinkRelation } from '../../linkRelation';
+
+/**
+ * This is a known hack to determine if a URL refers to a form. This is used
+ * to match a path element from URLs of the form:
+ *     - https://schema.example.com/my/form/create
+ *     - https://schema.example.com/my/create-form
+ */
+export const knownFormPathElements = [
+    'form',
+    LinkRelation.CreateForm,
+    LinkRelation.EditForm,
+    LinkRelation.ApplyForm,
+    LinkRelation.SearchForm,
+];
+
 
 /**
  * A guard to detect whether the object is a form {@link FormRepresentation}
@@ -14,7 +29,7 @@ export function instanceOfForm(object: unknown | LinkedRepresentation): object i
     // form starts off looking like a collection with 'items'
     const { items } = { ...object as FormRepresentation };
 
-    if (items) {
+    if (instanceOfLinkedRepresentation(object) && Array.isArray(items)) {
         const [first]: FormItem[] = items;
         // simple check that the items has a 'type' in it
         if (first !== undefined && 'type' in first) {
@@ -37,7 +52,17 @@ export function instanceOfForm(object: unknown | LinkedRepresentation): object i
              */
             const uri = LinkUtil.getUri(object as LinkedRepresentation, LinkRelation.Self);
             if (uri) {
-                return uri.includes('form');
+                try {
+                    const path = new URL(uri).pathname;
+                    if (path) {
+                        const pathComponents = path.split('/');
+                        return knownFormPathElements.some(x => pathComponents.includes(x));
+                    }
+                } catch (e: unknown) {
+                    // The uri isn't able to be deconstructed so fallback to treating the 'self' URL
+                    // as a string and perform a simple contains match.
+                    return uri.includes('form');
+                }
             }
             return false;
         }

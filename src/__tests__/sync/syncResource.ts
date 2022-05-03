@@ -336,6 +336,7 @@ describe('Synchroniser', () => {
             }
 
             if (uri) {
+                console.log(`GET %s`, uri);
                 return { data: factory(uri) };
             } else {
                 throw new Error('Not found');
@@ -514,7 +515,7 @@ describe('Synchroniser', () => {
                 });
 
                 expect(result).toBeDefined();
-                verifyMocks(7, 1, 0, 0);
+                verifyMocks(8, 1, 0, 0);
             });
 
             it('should delete when a document is not found in collection', async () => {

@@ -23,6 +23,7 @@ import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfT
 import { instanceOfFeed } from '../utils/instanceOf/instanceOfFeed';
 import { FormRepresentation } from '../interfaces/formRepresentation';
 import { LoaderJobOptions } from '../interfaces/loader';
+import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -82,7 +83,7 @@ export class TrackedRepresentationFactory {
                             // TODO: decide on pluggable hydration strategy
                             const hydrated = await this.load(
                                 SparseRepresentationFactory.make({ ...options, uri }),
-                                { ...options, rel: LinkRelation.Self});
+                                { ...options, rel: LinkRelation.Self });
                             log.debug('tracked representation created and loaded %s', uri);
                             return hydrated;
                         } else {
@@ -267,6 +268,7 @@ export class TrackedRepresentationFactory {
         options?: ResourceLinkOptions &
             HttpRequestOptions &
             ResourceMergeOptions &
+            ResourceQueryOptions &
             ResourceFetchOptions &
             LoaderJobOptions): Promise<T | Tracked<T>> {
 
@@ -275,6 +277,7 @@ export class TrackedRepresentationFactory {
             const {
                 rel = LinkRelation.Self,
                 getUri = LinkUtil.getUri,
+                includeItems = false,
             } = { ...options };
 
             const uri = getUri(resource, rel);
@@ -297,6 +300,7 @@ export class TrackedRepresentationFactory {
                         return resource;
                 }
 
+                // TODO: check if load due to cache expiry is required.
                 if (TrackedRepresentationUtil.needsFetchFromState(resource, options) ||
                     TrackedRepresentationUtil.needsFetchFromHeaders(resource)) {
                     try {
@@ -312,7 +316,6 @@ export class TrackedRepresentationFactory {
                         trackedState.retrieved = new Date();
 
                         return await this.processResource(resource, response.data as DocumentRepresentation<T>, options) as T;
-
                     } catch (e: unknown) {
                         if (isHttpRequestError(e)) {
                             this.processError<T>(e, uri, resource, trackedState);
@@ -322,7 +325,14 @@ export class TrackedRepresentationFactory {
                         }
                     }
                 } else {
-                    log.debug('return cached resource: \'%s\'', uri);
+                    // Iff the resource is a collection, then if the collection has been loaded (hydrated), and
+                    // the caller has requested the items be loaded, then iterate over the individual items
+                    // to check they are loaded.
+                    if (instanceOfCollection(resource)) {
+                        if (includeItems) {
+                            await this.processCollectionItems(resource, options);
+                        }
+                    }
                 }
             } else {
                 log.error('undefined returned on link \'%s\' (check stack trace)', rel);
@@ -331,7 +341,8 @@ export class TrackedRepresentationFactory {
             const uri = LinkUtil.getUri(resource, LinkRelation.Self);
             if (uri) {
                 log.debug('tracked representation created: unknown on \'%s\'', uri);
-                const unknown = SparseRepresentationFactory.make({ ...options, addStateOn: resource, status: Status.unknown });
+                const unknown = SparseRepresentationFactory.make(
+                    { ...options, addStateOn: resource, status: Status.unknown });
                 return await TrackedRepresentationFactory.load(unknown, options) as T;
             } else {
                 log.error('load tracked representation has no processable uri');

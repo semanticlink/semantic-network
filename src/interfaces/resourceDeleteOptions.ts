@@ -1,4 +1,4 @@
-import { CollectionRepresentation, LinkedRepresentation, LinkSelector, RelationshipType, Uri } from 'semantic-link';
+import { LinkedRepresentation, LinkSelector, RelationshipType, Uri } from 'semantic-link';
 
 export interface ResourceDeleteOptions {
 

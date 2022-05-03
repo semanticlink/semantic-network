@@ -309,6 +309,13 @@ describe('Synchroniser', () => {
             items: formItems,
         };
 
+        const newOne934875Uri = 'https://api.example.com/todo/newOne934875';
+        const newItem = {
+            name: 'New One',
+            state: 'http://example.com/todo/state/open',
+            due: '0001-01-01T11:40:00+11:40',
+        };
+
         const fakeResponseFactory = <T extends LinkedRepresentation>(resource: T, rel: RelationshipType): Partial<AxiosResponse<T>> | never => {
             const uri = LinkUtil.getUri(resource, rel);
 
@@ -318,6 +325,8 @@ describe('Synchroniser', () => {
              */
             function factory(uri: string): T {
                 switch (uri) {
+                    case newOne934875Uri:
+                        return { links: [{ rel: 'self', href: newOne934875Uri }], ...newItem } as unknown as T;
                     case parentUri:
                         return parent as unknown as T;
                     case todosCollectionUri:
@@ -331,13 +340,21 @@ describe('Synchroniser', () => {
                     case todoCreateFormUri:
                         return createForm as unknown as T;
                     default:
-                        throw new Error(`Fake not found: ${uri}`);
+                        const message = `Fake not found: ${uri}`;
+                        // log to console gives better information because the error is being swallowed
+                        // in practice, this should never be shown
+                        console.log(message);
+                        throw new Error(message);
                 }
             }
 
             if (uri) {
-                console.log(`GET %s`, uri);
-                return { data: factory(uri) };
+
+                const data = factory(uri);
+                // debugging - but should not be on as it makes the inndividual test results difficult to read
+                // see the jest verbose option
+                // console.log(`GET %s`, uri);
+                return { data };
             } else {
                 throw new Error('Not found');
             }
@@ -439,7 +456,8 @@ describe('Synchroniser', () => {
                 };
 
                 get.mockImplementation((resource, rel) => {
-                    switch (LinkUtil.getUri(resource, rel)) {
+                    const uri = LinkUtil.getUri(resource, rel);
+                    switch (uri) {
                         case todosCollectionUri:
                             return { data: { ...todosCollection } };
                         case  todo2Uri:
@@ -449,7 +467,9 @@ describe('Synchroniser', () => {
                         case  todoEditFormUri:
                             return { data: editForm };
                         default:
-                            throw new Error('unknown uri');
+                            const message = `unknown uri ${uri}`;
+                            console.log(message);
+                            throw new Error(message);
                     }
                 });
 
@@ -495,11 +515,7 @@ describe('Synchroniser', () => {
             });
 
             it('should add when the document is not found in collection', async () => {
-                const newItem = {
-                    name: 'New One',
-                    state: 'http://example.com/todo/state/open',
-                    due: '0001-01-01T11:40:00+11:40',
-                };
+
 
                 const oneItemAddedInCollection = {
                     ...todosCollection,
@@ -507,7 +523,7 @@ describe('Synchroniser', () => {
                 };
 
                 get.mockImplementation(fakeResponseFactory);
-                post.mockResolvedValueOnce({ headers: { location: 'https://api.example.com/todo/newOne934875' } });
+                post.mockResolvedValueOnce({ headers: { location: newOne934875Uri } });
 
                 const result = await syncResource(makeHydratedResource(parent), oneItemAddedInCollection, [], {
                     ...options,
@@ -515,7 +531,10 @@ describe('Synchroniser', () => {
                 });
 
                 expect(result).toBeDefined();
-                verifyMocks(8, 1, 0, 0);
+
+                // Note: double GET on edit-form because forms are NOT shared between resources
+                // TODO: implement forms as pooled
+                verifyMocks(7, 1, 0, 0);
             });
 
             it('should delete when a document is not found in collection', async () => {

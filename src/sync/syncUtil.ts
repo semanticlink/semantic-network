@@ -189,7 +189,7 @@ export class SyncUtil {
                 // If the caller has signalled that the collection is read-only, or the collection
                 // if missing a 'create-form' representation then we assume that the NOD can
                 // not be changed.
-            } else if (readonly || !LinkUtil.matches(collectionResource, /create-form/)) {
+            } else if (readonly || !LinkUtil.matches(collectionResource, LinkRelation.CreateForm)) {
                 log.debug(`read-only collection '${LinkUtil.getUri(collectionResource, LinkRelation.Self)}'`);
                 return {
                     createStrategy: createReadonlyResourceAndUpdateResolver,

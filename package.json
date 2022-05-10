@@ -57,7 +57,7 @@
   "dependencies": {
     "anylogger": "^1.0.11",
     "bottleneck": "^2.19.5",
-    "semantic-link": "^1.0.7",
+    "semantic-link": "^1.0.8",
     "tslib": ">=2.2"
   }
 }

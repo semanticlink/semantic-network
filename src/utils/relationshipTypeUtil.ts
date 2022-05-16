@@ -34,20 +34,17 @@ export class RelationshipTypeUtil {
         }
 
 
-        if (rel instanceof RegExp) {
-            return (
-                rel
-                    .toString()
-                    // remove the regexp aspects eg /test/gi -> test
-                    .replace(/\/[gi]*/g, '')
-                    // remove all other non aplha and hyphen chars
-                    .replace(/[^-a-zA-Z]*/g, '')
-                    // replace create-form --> createForm
-                    .replace(/(-[a-z])/g, $1 => $1.toUpperCase().replace('-', ''))
-            );
-        }
+        return (
+            rel
+                .toString()
+                // remove the regexp aspects eg 'test'' -> test
+                .replace(/\/[gi]*/g, '')
+                // remove all other non alpha and hyphen chars
+                .replace(/[^-a-zA-Z]*/g, '')
+                // replace create-form --> createForm
+                .replace(/(-[a-z])/g, $1 => $1.toUpperCase().replace('-', ''))
+        );
 
-        throw new Error(`Rel type of array not parsable to be converted: '${typeof rel}'`);
     }
 
 }

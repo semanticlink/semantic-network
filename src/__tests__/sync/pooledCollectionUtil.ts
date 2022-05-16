@@ -39,7 +39,7 @@ describe('Pooled collection', () => {
         };
 
         it('returns document based on uri/name matching', async () => {
-            const result = await PooledResourceUtil.get(parentCollection, 'roles', /roles/, resource);
+            const result = await PooledResourceUtil.get(parentCollection, 'roles', 'roles', resource);
             assertThat(result).is(document);
             expect(spy).toHaveBeenCalled();
         });
@@ -56,7 +56,7 @@ describe('Pooled collection', () => {
                     },
                 },
             } as PooledCollectionOptions;
-            await PooledResourceUtil.get(parentCollection, 'roles', /roles/, resource, options);
+            await PooledResourceUtil.get(parentCollection, 'roles', 'roles', resource, options);
 
             expect(mock).toHaveBeenCalled();
         });
@@ -83,7 +83,7 @@ describe('Pooled collection', () => {
                     },
                 },
             } as PooledCollectionOptions;
-            const result = await PooledResourceUtil.get(parentCollection, 'roles', /roles/, resource, options);
+            const result = await PooledResourceUtil.get(parentCollection, 'roles', 'roles', resource, options);
             assertThat(result).is(document);
 
         });
@@ -108,7 +108,7 @@ describe('Pooled collection', () => {
 
             // sinon.stub(cache, 'createCollectionItem').callsFake(() => Promise.resolve(createdResource));
             const spy = jest.spyOn(ApiUtil, 'create').mockResolvedValue(createdResource);
-            const result = await PooledResourceUtil.get(parentCollection, 'roles', /roles/, resource, options);
+            const result = await PooledResourceUtil.get(parentCollection, 'roles', 'roles', resource, options);
 
             assertThat(result).is(createdResource);
             expect(mock).toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe('Pooled collection', () => {
 
             const spy = jest.spyOn(ApiUtil, 'get').mockResolvedValue(createdResource);
 
-            const result = await PooledResourceUtil.get(parentCollection, 'roles', /roles/, resource, options);
+            const result = await PooledResourceUtil.get(parentCollection, 'roles', 'roles', resource, options);
 
             if (result) {
                 assertThat(result).is(createdResource);

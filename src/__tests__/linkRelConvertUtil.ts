@@ -50,20 +50,13 @@ describe('link rel converter utils', () => {
         it('should match string', function() {
             expect(relTypeToCamel('test')).toBe('test');
         });
-        it('should match regex', function() {
-            expect(relTypeToCamel(/test/)).toBe('test');
-        });
-        it('should match global regex', function() {
-            expect(relTypeToCamel(/test/g)).toBe('test');
-        });
+
         it('should match case insensitive regex', function() {
-            expect(relTypeToCamel(/test/i)).toBe('test');
+            expect(relTypeToCamel('Test')).toBe('Test');
         });
-        it('should match global case insensitive regex', function() {
-            expect(relTypeToCamel(/test/gi)).toBe('test');
-        });
+
         it('should match camel case regex', function() {
-            expect(relTypeToCamel(/create-form/)).toBe('createForm');
+            expect(relTypeToCamel('create-form')).toBe('createForm');
         });
     });
 });

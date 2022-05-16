@@ -149,9 +149,9 @@ module.exports = {
 
     // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
     testPathIgnorePatterns: [
-      "fixtures",
-      "helpers",
-      "domain"
+        'fixtures',
+        'helpers',
+        'domain',
     ],
 
     // The regexp pattern Jest uses to detect test files
@@ -164,7 +164,9 @@ module.exports = {
     // testRunner: "jasmine2",
 
     // This option sets the URL for the jsdom environment. It is reflected in properties such as location.href
-    testURL: 'http://localhost',
+    testEnvironmentOptions: {
+        url: 'http://localhost',
+    },
 
     // Setting this value to "fake" allows the use of fake timers for functions such as "setTimeout"
     // timers: "real",

@@ -13,6 +13,7 @@ import { FormRepresentation } from '../interfaces/formRepresentation';
 import { SingletonRepresentation } from '../types/types';
 import { ApiUtil } from '../apiUtil';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
+import { ResourceCreateOptions } from '../interfaces/resourceCreateOptions';
 
 jest.mock('../representation/trackedRepresentationFactory');
 const trackedRepresentationFactory = TrackedRepresentationFactory as jest.Mocked<typeof TrackedRepresentationFactory>;
@@ -37,12 +38,12 @@ describe('resource, create', () => {
             'collection, on creates',
             {
                 createContext: SparseRepresentationFactory.make({ uri, sparseType: 'collection' }),
-            } as ResourceFactoryOptions,
+            } as ResourceCreateOptions,
             trackedRepresentationFactory.create,
             1,
             1,
         ],
-    ])('%s', async (title: string, options: ResourceFactoryOptions, factory: any, calledTimes: number, addItems: number) => {
+    ])('%s', async (title: string, options: ResourceCreateOptions, factory: any, calledTimes: number, addItems: number) => {
 
         const addItemToCollectionMock = jest.spyOn(RepresentationUtil, 'addItemToCollection');
         addItemToCollectionMock.mockImplementation(() => ({ links: [], items: [] } as CollectionRepresentation));

@@ -170,7 +170,7 @@ export class TrackedRepresentationUtil {
         } else {
             log.warn('target is not a tracked representation and cannot add resource; \'%s\'', LinkUtil.getUri(target, LinkRelation.Self));
         }
-        return target as T;
+        return target;
     }
 
     /**

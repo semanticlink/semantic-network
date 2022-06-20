@@ -27,24 +27,21 @@ export class TrackedRepresentationUtil {
     }
 
     /**
-     * Checks the resource is currently tracked in either as a singleton or a collection
+     * Checks the named child object is tracked on the resource.
+     *
+     * A resource keeps a set of child singletons and a set of child collections. This utility
+     * provides a logical 'in' operator on those sets.
+     *
+     * Note: field name ideally comes in as K only, but in practice it also needs to be dealt with as arbitrary string
+     *       as soon as it is known to be a tracked representation then it can cast string to K (rather than deal with
+     *       string in the subsequent methods
      */
     public static isTracked<T extends Tracked<LinkedRepresentation> | LinkedRepresentation | Partial<LinkedRepresentation>,
         K extends keyof T = keyof T>(
         resource: T,
         name: K | string): boolean {
-
-        // note: field name ideally comes in as K only, but in practice it also needs to be dealt with as arbitrary string
-        //       as soon as it known to be a tracked representation then it can cast string to K (rather than deal with
-        //       string in the subsequent methods
-
-        if (instanceOfTrackedRepresentation(resource)) {
-            return instanceOfCollection(resource) ?
-                this.isCollectionTracked(resource, name as K) :
-                this.isSingletonTracked(resource, name as K);
-        }
-
-        return false;
+        return instanceOfTrackedRepresentation(resource) &&
+            (this.isSingletonTracked(resource, name as K) || this.isCollectionTracked(resource, name as K));
     }
 
     /**

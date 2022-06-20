@@ -1,7 +1,6 @@
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
 import { RepresentationUtil } from '../utils/representationUtil';
-import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
 import { create } from '../representation/create';
 import { Status } from '../representation/status';
 import { DocumentRepresentation } from '../interfaces/document';

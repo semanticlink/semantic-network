@@ -30,7 +30,7 @@ const log = anylogger('Steps Test');
  * Helper to create a {@link LinkedRepresentation} with {@link State}
  */
 const makeHydratedResource = <T extends LinkedRepresentation>(document: T): T | Tracked<T> =>
-    SparseRepresentationFactory.make({ addStateOn: document  });
+    SparseRepresentationFactory.make({ addStateOn: document });
 
 describe('Steps with pooled resources', () => {
     let options: ResourceQueryOptions;
@@ -110,32 +110,34 @@ describe('Steps with pooled resources', () => {
 
 
     describe('sync', () => {
-        it('strategy with page and question, 1 created step with existing pooled question', async () => {
-            /*
-             * This structure:
-             *
-             *  - add a new page
-             *  - the new page is a question ('field') that already exists in the pooled collection
-             */
-            const aDocument = {
-                ...page1,
-                steps: {
-                    ...page1Feed,
-                    items: [{
-                        ...questionStep,
-                        field: question,
-                    }],
-                },
-            } as unknown as StepRepresentation;
 
-            const resolvers: PooledCollectionOptions = {
-                resolver: uriMappingResolver,
-                /*
-                  * Organisation is the 'tenanted' home of the questions that live outside the lifecycle
-                  * of the application workflow
-                  */
-                resourceResolver: new PooledOrganisation(makeHydratedResource(organisation)).resourceResolver,
-            };
+        /*
+         * This structure:
+         *
+         *  - add a new page
+         *  - the new page is a question ('field') that already exists in the pooled collection
+         */
+        const aDocument = {
+            ...page1,
+            steps: {
+                ...page1Feed,
+                items: [{
+                    ...questionStep,
+                    field: question,
+                }],
+            },
+        } as unknown as StepRepresentation;
+
+        const resolvers: PooledCollectionOptions = {
+            resolver: uriMappingResolver,
+            /*
+              * Organisation is the 'tenanted' home of the questions that live outside the lifecycle
+              * of the application workflow
+              */
+            resourceResolver: new PooledOrganisation(makeHydratedResource(organisation)).resourceResolver,
+        };
+
+        it('strategy with page and question, 1 created step with existing pooled question', async () => {
 
             await sync({
                 resource,
@@ -145,13 +147,8 @@ describe('Steps with pooled resources', () => {
                 strategies: [syncResult => sync({ ...syncResult, rel: CustomLinkRelation.Field })],
             });
 
-            /*
-             * Expect only that the 'step' is created (and not the 'question')
-             */
-            verifyMocks(12, 0, 0, 2);
-
             /* list of out the requests to aid understanding (rather than overwhelm!) */
-            const uris = [
+            const getUris = [
                 ['self', 'https://api.example.com/organisation/a656927b0f/step/ac50e024ff/step'],
                 ['self', 'https://api.example.com/organisation/a656927b0f/step/ec7a386294'],
                 ['self', 'https://api.example.com/organisation/a656927b0f/step/92c28454b7'],
@@ -159,15 +156,26 @@ describe('Steps with pooled resources', () => {
                 ['self', 'https://api.example.com/question/cf6c4b9c7f'],
                 ['self', 'https://api.example.com/question/cf6c4b9c7f/choice'],
                 ['self', 'https://api.example.com/choice/881e3ed135'],
-                ['self', 'https://api.example.com/organisation/a656927b0f/step/ac50e024ff/step'],
+                ['self', 'https://api.example.com/organisation/a656927b0f/step/form/create'],
+                ['self', 'https://api.example.com/organisation/a656927b0f/question'],
                 ['self', 'https://api.example.com/organisation/a656927b0f/step/92c28454b7'],
-                ['self', 'https://api.example.com/organisation/a656927b0f/step/form/edit'],
-                ['self', 'https://api.example.com/question/cf6c4b9c7f'],
-                ['self', 'https://api.example.com/question/form/edit'],
             ];
 
             const actualUris = get.mock.calls.map(x => [x[1], LinkUtil.getUri(x[0], x[1])]);
-            assertThat(actualUris).is(uris);
+            assertThat(actualUris).is(getUris);
+
+            const posts = [
+                ['self', 'https://api.example.com/organisation/a656927b0f/step/ac50e024ff/step'],
+            ];
+
+            const postUris = post.mock.calls.map(x => [x[1], LinkUtil.getUri(x[0], x[1])]);
+            assertThat(postUris).is(posts);
+
+            /*
+             * Expect only that the 'step' is created (and not the 'question')
+             */
+            verifyMocks(10, 1, 0, 0);
+
         });
     });
 })

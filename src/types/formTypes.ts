@@ -31,6 +31,7 @@ export enum FieldType {
     Checkbox = '//types/form/check',
     Date = '//types/form/date',
     DateTime = '//types/form/datetime',
+    DateRange = '//types/form/date/range',
     Week = '//types/form/date/week',
     Month = '//types/form/date/month',
     Range = '//types/form/range',
@@ -75,6 +76,7 @@ export type FormType =
     | FieldType.Checkbox
     | FieldType.Date
     | FieldType.DateTime
+    | FieldType.DateRange
     | FieldType.Time
     | FieldType.Select
     | FieldType.Collection

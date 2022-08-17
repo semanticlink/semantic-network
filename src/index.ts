@@ -28,6 +28,8 @@ export * from './sync/pooledResourceUtil';
 export * from './sync/syncUtil';
 export * from './sync/uriFieldResolver';
 export * from './sync/uriMappingResolver';
+// search
+export * from './search/searchUtil';
 // utils
 export * from './utils/fieldLinksResolverUtil';
 export * from './utils/fieldResolverUtil';
@@ -38,6 +40,7 @@ export * from './utils/jsonSerialiser';
 export * from './utils/linkRelConvertUtil';
 export * from './utils/promiseWaitAll';
 export * from './utils/relationshipTypeUtil';
+export * from './utils/resourceUtil';
 export * from './utils/representationUtil';
 export * from './utils/trackedRepresentationUtil';
 export * from './utils/comparators/canonicalOrSelf';
@@ -76,6 +79,7 @@ export * from './interfaces/loader';
 export * from './interfaces/loaderRequest';
 export * from './interfaces/mergeOptions';
 export * from './interfaces/pooledCollectionOptions';
+export * from './interfaces/pooledSearchOptions';
 export * from './interfaces/resolver';
 export * from './interfaces/resourceAssignOptions';
 export * from './interfaces/resourceFactoryOptions';

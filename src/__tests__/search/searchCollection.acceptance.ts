@@ -182,64 +182,7 @@ describe('pooled search collection acceptance', () => {
 
         });
 
-        it('creates new as singleton collection', async () => {
-
-            const resource = await TrackedRepresentationFactory.load(SparseRepresentationFactory.make({
-                uri: 'http://api.example.com/role',
-                sparseType: 'collection',
-            }));
-
-            const options = { rel: 'search', name: '.search' };
-            const searchResults = SearchUtil.makePooledCollection(resource, options);
-
-            const context = await ApiUtil.get(resource, options) as CollectionRepresentation;
-            const results = await create(
-                { search: 'x' } as DocumentRepresentation,
-                {
-                    createContext: context,
-                    makeSparseStrategy: (o) => pooledCollectionMakeStrategy(searchResults, o),
-                }) as CollectionRepresentation;
-
-            CollectionMerger.merge(context, results);
-
-            expect(context.items).toHaveLength(1);
-            expect(searchResults.items).toHaveLength(1);
-            expect(results.items).toHaveLength(1);
-
-            const results2 = await create(
-                { search: 'x2' } as DocumentRepresentation,
-                {
-                    createContext: context,
-                    makeSparseStrategy: (o) => pooledCollectionMakeStrategy(searchResults, o),
-                }) as CollectionRepresentation;
-            CollectionMerger.merge(context, results2);
-
-            expect(context.items).toHaveLength(2);
-            expect(searchResults.items).toHaveLength(2);
-            expect(results.items).toHaveLength(1);
-            expect(results2.items).toHaveLength(2);
-
-            const results3 = await create(
-                { search: 'x3' } as DocumentRepresentation,
-                {
-                    createContext: context,
-                    makeSparseStrategy: (o) => pooledCollectionMakeStrategy(searchResults, o),
-                }) as CollectionRepresentation;
-            CollectionMerger.merge(context, results3);
-
-            expect(results).toBeDefined();
-            expect(context.items).toHaveLength(1);
-            expect(searchResults.items).toHaveLength(3);
-            expect(results.items).toHaveLength(1);
-            expect(results3.items).toHaveLength(1);
-
-            expect(get).toHaveBeenCalledTimes(4 + 2);
-            expect(post).toHaveBeenCalledTimes(1 + 2);
-            expect(del).not.toHaveBeenCalled();
-            expect(put).not.toHaveBeenCalled();
-        });
-
-        it('creates new as singleton collection refactored', async () => {
+        it('creates search collection', async () => {
 
             const resource = await TrackedRepresentationFactory.load(SparseRepresentationFactory.make({
                 uri: 'http://api.example.com/role',

@@ -6,18 +6,11 @@ import {
     LinkUtil,
     RelationshipType,
 } from 'semantic-link';
-import {
-    pooledCollectionMakeStrategy,
-    SparseRepresentationFactory,
-} from '../../representation/sparseRepresentationFactory';
+import { SparseRepresentationFactory } from '../../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../../representation/trackedRepresentationFactory';
 import { HttpRequestFactory } from '../../http/httpRequestFactory';
 import { bottleneckLoader } from '../../http/bottleneckLoader';
-import { create } from '../../representation/create';
 import { AxiosResponse } from 'axios';
-import { DocumentRepresentation } from '../../interfaces/document';
-import { ApiUtil } from '../../apiUtil';
-import { CollectionMerger } from '../../representation/collectionMerger';
 
 describe('pooled search collection acceptance', () => {
 

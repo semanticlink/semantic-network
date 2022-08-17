@@ -1,4 +1,3 @@
-import { SingletonRepresentation } from '../types/types';
 import { ResourceAssignOptions, ResourceMergeOptions } from '../interfaces/resourceAssignOptions';
 
 export const defaultOptions: ResourceMergeOptions = {};

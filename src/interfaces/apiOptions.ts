@@ -9,7 +9,7 @@ import { HttpRequestOptions } from './httpRequestOptions';
 import { LoaderJobOptions } from './loader';
 import { ResourceCreateOptions } from './resourceCreateOptions';
 import { ResourceDeleteOptions } from './resourceDeleteOptions';
-import { PooledSearchOptions } from './pooled/pooledSearchOptions';
+import { PooledSearchOptions } from './pooledSearchOptions';
 
 export type ApiOptions =
     ResourceCreateOptions &

@@ -28,9 +28,15 @@ function firstLinkNameStrategy(rel: RelationshipType | undefined, representation
         const [first] = LinkUtil.filter(representation as LinkedRepresentation, rel);
         if (first) {
             return LinkRelConvertUtil.relTypeToCamel(first);
+        } else {
+            // broken and should not fall through
+            // what is the return strategy on link not found?
+            log.error('Rel not found on representation');
+            return '';
         }
+    } else {
+        return LinkRelConvertUtil.relTypeToCamel(rel);
     }
-    return LinkRelConvertUtil.relTypeToCamel(rel);
 }
 
 export class NamedRepresentationFactory {

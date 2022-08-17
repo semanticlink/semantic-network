@@ -61,10 +61,9 @@ export async function create<T extends LinkedRepresentation, TResult extends Lin
 
     if (createContext) {
         if (instanceOfCollection(createContext)) {
-            const newVar = await createCollectionItem(createContext, document as DocumentRepresentation, options);
-            return newVar as TResult;
+            return await createCollectionItem(createContext, document as DocumentRepresentation, options) as TResult;
         } else {
-            log.warn('option \'on\' options cannot be used outside of a collection, skipping');
+            log.warn('option \'createContext\' options cannot be used outside of a collection, skipping');
             // fall through and keep processing
         }
     }
@@ -102,9 +101,9 @@ async function createCollectionItem<T extends LinkedRepresentation>(
 
     if (instanceOfForm(form)) {
         try {
-            const merged = await mergeStrategy(document, form, options);
+            const mergedDocument = await mergeStrategy(document, form, options);
 
-            if (merged) {
+            if (mergedDocument) {
 
                 /*
                  * Choose where to get the uri from in cascading order:
@@ -117,7 +116,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
 
                 const item = await TrackedRepresentationFactory.create(
                     contextResource as unknown as Tracked<T>,
-                    merged,
+                    mergedDocument,
                     { ...options, rel });
 
                 // 201 will return an item compared with 200, 202

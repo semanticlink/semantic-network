@@ -130,7 +130,7 @@ export class CollectionMerger {
             Object.assign(lvalue.links, rvalue.links);
         }
 
-        const omitted = this.omitItems(lvalue, rvalue);
-        return this.extractItems(omitted, rvalue);
+        const omitted = this.omitItems(lvalue, rvalue, options);
+        return this.extractItems(omitted, rvalue, options);
     }
 }

@@ -201,7 +201,7 @@ export async function syncResource<T extends Representation, U extends Document>
         const result = await ApiUtil.get(resource, options);
         if (result) {
             log.debug('sync singleton on rel \'%s\' %s', rel, LinkUtil.getUri(resource, LinkRelation.Self));
-            const update = await ApiUtil.update(resource, document, options);
+            const update = await ApiUtil.update(resource, document as unknown as T, options);
             if (update) {
                 await (await SyncUtil.syncResources(resource, document, strategies, options))();
             }

@@ -98,7 +98,6 @@ export async function get<TReturn extends LinkedRepresentation,
         log.debug('get named singleton sub resource');
         return await NamedRepresentationFactory.load(resource, options);
     }
-
     // otherwise all resources
     log.debug('get resource');
     return await TrackedRepresentationFactory.load(resource, options) as unknown as TResult;

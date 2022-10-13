@@ -21,14 +21,14 @@ export const options = createInstance();
 export class SingletonMerger {
 
     /**
-     * Copy the values of all of the enumerable own properties from one or more source objects to a target object.
+     * Copy the values of all the enumerable own properties from one or more source objects to a target object.
      * Returns the target object.
      *
      * @param target The target object to copy to
      * @param source The source object from which to copy properties
      * @param options
      */
-    public static merge<T, U>(target: T, source: U, options?: ResourceMergeOptions): Extract<U, T> {
+    public static merge<T extends object, U>(target: T, source: U, options?: ResourceMergeOptions): Extract<U, T> {
 
         const { set = optionsInstance.set } = { ...options };
 
@@ -52,7 +52,7 @@ export class SingletonMerger {
      * @param resource The resource object that is added to the target
      * @param options
      */
-    public static add<T, U>(target: T, prop: keyof T | string, resource: U, options?: ResourceAssignOptions): T {
+    public static add<T extends object, U>(target: T, prop: keyof T | string, resource: U, options?: ResourceAssignOptions): T {
         const { set = optionsInstance.set } = { ...options };
         if (set) {
             set(target, prop as keyof T, resource);

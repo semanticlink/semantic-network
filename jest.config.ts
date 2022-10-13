@@ -58,13 +58,7 @@ const config: Config.InitialOptions = {
     // globalTeardown: null,
 
     // A set of global variables that need to be available in all test environments
-    globals: {
-        'ts-jest': {
-            tsconfig: 'tsconfig.json',
-            babelConfig: true,
-            diagnostics: true,
-        },
-    },
+    globals: {},
 
     // An array of directory names to be searched recursively up from the requiring module's location
     // moduleDirectories: [
@@ -176,7 +170,13 @@ const config: Config.InitialOptions = {
 
     // A map from regular expressions to paths to transformers
     transform: {
-        '^.+\\.(ts|tsx)$': 'ts-jest',
+        '^.+\\.(ts|tsx)$': [
+            'ts-jest',
+            {
+                tsconfig: 'tsconfig.json',
+                babelConfig: true,
+                diagnostics: true,
+            }],
         '^.+\\.(js|jsx)$': 'babel-jest',
     },
 

@@ -1,9 +1,11 @@
 import { CollectionRepresentation } from 'semantic-link';
 import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import anylogger from 'anylogger';
-import { canonicalOrSelf } from '../utils/comparators/canonicalOrSelf';
+import { CanonicalOrSelf, EqualityUtil } from '../utils/comparators/canonicalOrSelf';
+import { CollectionMergerOptions } from '../interfaces/collectionMergerOptions';
 
 const log = anylogger('CollectionMerger');
+
 /**
  * A helper class for manipulating items in a {@link CollectionRepresentation.items}.
  */
@@ -14,13 +16,14 @@ export class CollectionMerger {
      *
      * This method splices (mutates) the {@link CollectionRepresentation.items} in order to retain bindings if they exist.
      *
-     * The equality operator is {@link canonicalOrSelf}.
+     * The equality operator is {@link CanonicalOrSelf}.
      */
     public static omitItems<T extends CollectionRepresentation>(
         lvalue: T,
         rvalue: T,
-        options?: ResourceAssignOptions): T {
+        options?: ResourceAssignOptions & CollectionMergerOptions): T {
 
+        const { equalityOperator = CanonicalOrSelf } = { ...options };
         const { items } = lvalue;
 
         if (!items) {
@@ -48,7 +51,7 @@ export class CollectionMerger {
 
             const indexes: number[] = items
                 .map((item, index) => {
-                    const found = rvalue.items.findIndex(r => canonicalOrSelf(item, r));
+                    const found = rvalue.items.findIndex(r => EqualityUtil.matches(item, r, equalityOperator));
                     // when found in rvalue retain the corresponding lvalue index for removal
                     // mark -1 to those that are not to bbe removed
                     return found >= 0 ? -1 : index;
@@ -68,6 +71,7 @@ export class CollectionMerger {
         }
         return lvalue;
     }
+
     /**
      * Extract items in the rvalue that are not in the lvalue to extend the lvalue.
      * Returns the lvalue (mutated).
@@ -79,7 +83,9 @@ export class CollectionMerger {
     public static extractItems<T extends CollectionRepresentation>(
         lvalue: T,
         rvalue: T,
-        options?: ResourceAssignOptions): T {
+        options?: ResourceAssignOptions & CollectionMergerOptions): T {
+        const { equalityOperator = CanonicalOrSelf } = { ...options };
+
         const { items } = lvalue;
 
         if (!items) {
@@ -97,37 +103,40 @@ export class CollectionMerger {
             // create a set of items in rvalue that don't exist
             const include = rvalue
                 .items
-                .filter(item => items.findIndex(r => canonicalOrSelf(item, r)) < 0);
+                .filter(item => items.findIndex(r => EqualityUtil.matches(item, r, equalityOperator)) < 0);
 
             // add into the set at the tail
             lvalue.items.splice(lvalue.items.length, 0, ...include);
         }
         return lvalue;
     }
+
     /**
      * Return a lvalue
      *  1. items that
      *   - only has items found in rvalue
      *   - where the lvalue already had a value leave the original lvalue item in place.
-     *  2. links in the lvalue with any new rvalue links
+     *  2. links in the lvalue with any new rvalue links [optional]
      *
      *  The equality operator is {@link canonicalOrSelf}.
      *
-     * Note: the identity operator does not need to know about {@link StateEnum}
+     * Note: the identity operator does not need to know about state
      */
     public static merge<T extends CollectionRepresentation>(
         lvalue: T,
         rvalue: T,
-        options?: ResourceAssignOptions): T {
+        options?: ResourceAssignOptions & CollectionMergerOptions): T {
 
-        const { set } = { ...options };
-        if (set) {
-            // update the links
-            // Note: currently does not update other fields from incoming representation
-            // TODO: in the odd the case that a collection has attributes
-            set(lvalue, 'links', rvalue.links);
-        } else {
-            Object.assign(lvalue.links, rvalue.links);
+        const { set, mergeLinks = true } = { ...options };
+        if (mergeLinks) {
+            if (set) {
+                // update the links
+                // Note: currently does not update other fields from incoming representation
+                // TODO: in the odd the case that a collection has attributes
+                set(lvalue, 'links', rvalue.links);
+            } else {
+                Object.assign(lvalue.links, rvalue.links);
+            }
         }
 
         const omitted = this.omitItems(lvalue, rvalue, options);

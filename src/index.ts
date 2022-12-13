@@ -101,3 +101,4 @@ export * from './interfaces/sync/syncResult';
 export * from './interfaces/sync/types';
 export * from './interfaces/sync/uriListResolver';
 export * from './interfaces/sync/uriResolver';
+export { CollectionMergerOptions } from './interfaces/collectionMergerOptions';

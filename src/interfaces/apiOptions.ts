@@ -10,6 +10,7 @@ import { LoaderJobOptions } from './loader';
 import { ResourceCreateOptions } from './resourceCreateOptions';
 import { ResourceDeleteOptions } from './resourceDeleteOptions';
 import { PooledSearchOptions } from './pooledSearchOptions';
+import { CollectionMergerOptions } from './collectionMergerOptions';
 
 export type ApiOptions =
     ResourceCreateOptions &
@@ -23,4 +24,5 @@ export type ApiOptions =
     HttpRequestOptions &
     MergeOptions &
     PooledSearchOptions &
+    CollectionMergerOptions &
     LoaderJobOptions;

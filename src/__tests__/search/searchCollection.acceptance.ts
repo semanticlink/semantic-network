@@ -25,6 +25,8 @@ describe('pooled search collection acceptance', () => {
     const searchCollection = {
         links: [
             { rel: 'self', href: 'http://api.example.com/role/search' },
+            { rel: 'up', href: 'up-x' },
+            { rel: 'other', href: 'other-x' },
             { rel: 'create-form', href: 'http://api.example.com/role/search/form/create' },
         ],
         items: [],
@@ -33,6 +35,8 @@ describe('pooled search collection acceptance', () => {
     const searchResult1 = {
         links: [
             { rel: 'self', href: 'http://api.example.com/role/search?search=x' },
+            { rel: 'up', href: 'up-x-should-not-be-copied' },
+            { rel: 'should-not-be-copied', href: 'should-not-be-copied' },
             { rel: 'create-form', href: 'http://api.example.com/role/search/form/create' },
         ],
         items: [
@@ -43,6 +47,7 @@ describe('pooled search collection acceptance', () => {
     const searchResult2 = {
         links: [
             { rel: 'self', href: 'http://api.example.com/role/search?search=x' },
+            { rel: 'should-not-be-copied', href: 'should-not-be-copied' },
             { rel: 'create-form', href: 'http://api.example.com/role/search/form/create' },
         ],
         items: [
@@ -54,6 +59,7 @@ describe('pooled search collection acceptance', () => {
     const searchResult3 = {
         links: [
             { rel: 'self', href: 'http://api.example.com/role/search?search=x' },
+            { rel: 'should-not-be-copied', href: 'should-not-be-copied' },
             { rel: 'create-form', href: 'http://api.example.com/role/search/form/create' },
         ],
         items: [
@@ -196,8 +202,8 @@ describe('pooled search collection acceptance', () => {
 
             expect(get).toHaveBeenCalledTimes(gets);
 
-            const results = await SearchUtil.search(resource, { search: 'x' });
-            expect(get).toHaveBeenCalledTimes(addGets(3));
+            const results = await SearchUtil.search(resource, { search: 'x' }, { includeItems: true });
+            expect(get).toHaveBeenCalledTimes(addGets(3 + 1 /* includeItems: true */));
             expect(post).toHaveBeenCalledTimes(addPosts(1));
 
             await SearchUtil.search(resource, { search: 'x2' });
@@ -209,11 +215,14 @@ describe('pooled search collection acceptance', () => {
             expect(get).toHaveBeenCalledTimes(addGets(1));
             expect(post).toHaveBeenCalledTimes(addPosts(1));
 
-            await SearchUtil.search(resource, { search: 'x2' });
-            expect(get).toHaveBeenCalledTimes(addGets(1));
+            await SearchUtil.search(resource, { search: 'x2' }, { includeItems: true });
+            expect(get).toHaveBeenCalledTimes(addGets(1 + 2));
             expect(post).toHaveBeenCalledTimes(addPosts(1));
 
             expect(results).toBeDefined();
+
+            expect(LinkUtil.matches(results, 'should-not-be-copied')).toBeFalsy();
+            expect(LinkUtil.getUri(results, 'up')).toBe('up-x');
 
             expect(get).toHaveBeenCalledTimes(gets);
             expect(post).toHaveBeenCalledTimes(posts);

@@ -11,9 +11,9 @@ import anylogger from 'anylogger';
 import { create } from '../representation/create';
 import { DocumentRepresentation } from '../interfaces/document';
 import { CollectionMerger } from '../representation/collectionMerger';
-import { ApiUtil } from '../apiUtil';
 import { LinkRelation } from '../linkRelation';
 import ResourceUtil from '../utils/resourceUtil';
+import { get } from '../representation/get';
 
 const log = anylogger('SearchUtil');
 
@@ -75,6 +75,8 @@ export default class SearchUtil {
      * With each call, the pooled search collection will use existing items or fetch new ones to minimise the
      * across the wire calls.
      *
+     * The default implementation will create a '.pooled-search' sub-collection that can be view in devtool
+     *
      * @param context resource that has the search collection as a link relation
      * @param document the search fields that will be used for the search (and is merged into the create/search form)
      * @param options
@@ -90,25 +92,32 @@ export default class SearchUtil {
             searchPooledPrefix = '.pooled-',
         } = { ...options };
 
+        // TODO: be better to strip {@link PooledSearchOptions} options going forward
+        // need a clone without/omit Omit<ApiOptions, keyof<CollectionMergerOptions>>
+
         const pooledResource = SearchUtil.makePooledCollection(context, {
             ...options,
             rel: searchRel,
             name: searchName || `${searchPooledPrefix}${searchRel}`,
         });
-        const searchResource = await ApiUtil.get(context, {
-            ...options,
-            rel: searchRel,
-        }) as CollectionRepresentation<T>;
+        const searchResource = await get(
+            context,
+            {
+                ...options,
+                rel: searchRel,
+            }) as CollectionRepresentation<T>;
 
         const results = await create(
             document,
             {
+                ...options,
                 createContext: searchResource,
                 makeSparseStrategy: (options) => pooledCollectionMakeStrategy(pooledResource, options),
             }) as CollectionRepresentation;
 
         if (results) {
-            CollectionMerger.merge(searchResource, results);
+            // search collections don't want to merge the result links into the original search links
+            CollectionMerger.merge(searchResource, results, { mergeLinks: false, ...options });
         } else {
             log.debug('no search results available');
         }

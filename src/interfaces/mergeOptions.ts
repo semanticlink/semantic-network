@@ -6,6 +6,7 @@ import { LinkedRepresentation, RelationshipType } from 'semantic-link';
 export type IsTrackedResolver = <T extends LinkedRepresentation | Partial<T>>(resource: T, field: keyof T) => boolean;
 export type RelNameResolver = (resource: LinkedRepresentation) => string | undefined;
 
+
 /**
  * Options available when merging resource via a three-way merger
  */

@@ -1,4 +1,4 @@
-import { CollectionRepresentation, LinkedRepresentation, LinkUtil } from 'semantic-link';
+import { CollectionRepresentation, LinkedRepresentation, LinkUtil, RelationshipType } from 'semantic-link';
 import { ApiOptions } from '../interfaces/apiOptions';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
@@ -14,6 +14,7 @@ import { CollectionMerger } from '../representation/collectionMerger';
 import { LinkRelation } from '../linkRelation';
 import ResourceUtil from '../utils/resourceUtil';
 import { get } from '../representation/get';
+import { EqualityUtil } from '../utils/equalityUtil';
 
 const log = anylogger('SearchUtil');
 
@@ -123,6 +124,25 @@ export default class SearchUtil {
         }
 
         return searchResource;
+    }
+
+    /**
+     * Add to a (search) collection a new item. This is used where the current list is being added to independently
+     * of a newly added collection without returning the entire search collection
+     *
+     * @default equalityMatch {@link CanonicalOrSelf}
+     */
+    public static update(collection: CollectionRepresentation, item: LinkedRepresentation, equalityMatch?: RelationshipType): void {
+        if (instanceOfCollection(collection) && item) {
+            const index = collection.items.findIndex(r => EqualityUtil.matches(item, r, equalityMatch));
+            if (index >= 0) {
+                // if found, replace
+                collection.items.splice(index, 1, item);
+            } else {
+                // else add to head
+                collection.items.splice(0, 0, item);
+            }
+        }
     }
 
 }

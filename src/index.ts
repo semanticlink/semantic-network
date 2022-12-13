@@ -31,6 +31,7 @@ export * from './sync/uriMappingResolver';
 // search
 export * from './search/searchUtil';
 // utils
+export * from './utils/equalityUtil';
 export * from './utils/fieldLinksResolverUtil';
 export * from './utils/fieldResolverUtil';
 export * from './utils/formUtil';
@@ -102,3 +103,4 @@ export * from './interfaces/sync/types';
 export * from './interfaces/sync/uriListResolver';
 export * from './interfaces/sync/uriResolver';
 export { CollectionMergerOptions } from './interfaces/collectionMergerOptions';
+export { EqualityUtil } from './utils/equalityUtil';

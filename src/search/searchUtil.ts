@@ -127,12 +127,12 @@ export default class SearchUtil {
     }
 
     /**
-     * Add to a (search) collection a new item. This is used where the current list is being added to independently
+     * In-place add to a (search) collection a new item. This is used where the current list is being added to independently
      * of a newly added collection without returning the entire search collection
      *
      * @default equalityMatch {@link CanonicalOrSelf}
      */
-    public static update(collection: CollectionRepresentation, item: LinkedRepresentation, equalityMatch?: RelationshipType): void {
+    public static update<T extends LinkedRepresentation = LinkedRepresentation>(collection: CollectionRepresentation<T>, item: T, equalityMatch?: RelationshipType): void {
         if (instanceOfCollection(collection) && item) {
             const index = collection.items.findIndex(r => EqualityUtil.matches(item, r, equalityMatch));
             if (index >= 0) {
@@ -142,6 +142,8 @@ export default class SearchUtil {
                 // else add to head
                 collection.items.splice(0, 0, item);
             }
+        } else {
+            log.debug('No collection found to update');
         }
     }
 

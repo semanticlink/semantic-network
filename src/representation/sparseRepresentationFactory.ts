@@ -31,6 +31,7 @@ const log = anylogger('SparseRepresentationFactory');
 export class SparseRepresentationFactory {
 
     public static mappedTitleAttributeName = 'name' as const;
+    public static mappedFromFeedItemFieldName = 'title' as const;
 
     /**
      * A simple facade to allow the make() method to be provided by an alternative strategy.
@@ -116,6 +117,7 @@ export class SparseRepresentationFactory {
             title = undefined,
             status = options?.uri ? Status.locationOnly : Status.virtual,
             mappedTitle = this.mappedTitleAttributeName,
+            mappedTitleFrom = this.mappedFromFeedItemFieldName,
             sparseType = 'singleton',
         } = { ...options };
 
@@ -142,7 +144,9 @@ export class SparseRepresentationFactory {
                 if (typeof item === 'string' /* Uri */) {
                     return this.makeSparse({ uri: item });
                 } else {
-                    return this.makeSparse({ uri: item.id, title: item.title });
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    return this.makeSparse({ uri: item.id, title: item[mappedTitleFrom] });
                 }
             });
 
@@ -151,7 +155,9 @@ export class SparseRepresentationFactory {
             // note: sparseType: 'feed' is an internal type generated from {@link makeHydrated} to populate items
             const { feedItem } = { ...options };
             if (feedItem) {
-                return this.makeSparse({ uri: feedItem.id, title: feedItem.title });
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                return this.makeSparse({ uri: feedItem.id, title: feedItem[mappedTitleFrom] });
             } else {
                 log.error('Cannot create resource of type \'feedItem\' should be set - returning unknown');
                 return this.makeSparse({ status: Status.unknown });

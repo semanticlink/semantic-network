@@ -57,6 +57,14 @@ export interface ResourceFactoryOptions {
     readonly mappedTitle?: string;
 
     /**
+     * Generate a resource from a feed item with a title from the given field attribute
+     *
+     * @default: title
+     * @see SparseRepresentationFactory.mappedFromFeedItemFieldName
+     */
+    readonly mappedTitleFrom?: string;
+
+    /**
      * The strategy used to create sparse {@link LinkedRepresentation} objects. This allows to caller
      * to plug in an alternative implementation (say to implement a pooled resource strategy).
      */

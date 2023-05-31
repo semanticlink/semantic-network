@@ -115,4 +115,20 @@ export interface FormItem {
      * Note: this link needs to be followed by the client and treated as a {@link FeedRepresentation}
      */
     readonly id?: string | Uri;
+
+    /**
+     * A {@link FieldType.Collection} may require re-mapping the {@link FeedItemRepresentation} from title to another
+     * field (eg description)
+     *
+     * Note: this can be passed into the {@link SparseRepresentationFactory} but see {@link SparseRepresentationFactory.mappedFromFeedItemFieldName}
+     */
+    readonly mappedTitleFrom?: string;
+
+    /**
+     * A {@link FieldType.Collection} may require re-mapping the {@link FeedItemRepresentation} from title to another
+     * field (eg description)
+     *
+     * Note: this can be passed into the {@link SparseRepresentationFactory} but see {@link SparseRepresentationFactory.mappedTitleAttributeName}
+     */
+    readonly mappedTitle?: string;
 }

@@ -43,6 +43,8 @@ export type ApiCreateOptions = ResourceCreateOptions &
 /**
  *
  * TODO: accept but don't require TrackedRepresentation interface
+ *
+ * @throws HttpRequestError
  */
 export async function create<T extends LinkedRepresentation, TResult extends LinkedRepresentation = T>(
     document: DocumentRepresentation<T> | Tracked<T> | LinkType,
@@ -80,6 +82,13 @@ export async function create<T extends LinkedRepresentation, TResult extends Lin
     throw new Error('create options not satisfied');
 }
 
+/**
+ *
+ * @param resource
+ * @param document
+ * @param options
+ * @throws HttpRequestError
+ */
 async function createCollectionItem<T extends LinkedRepresentation>(
     resource: CollectionRepresentation<T>,
     document: DocumentRepresentation<T>,
@@ -92,6 +101,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
     const {
         mergeStrategy = defaultCreateFormStrategy,
         formRel = [LinkRelation.CreateForm, LinkRelation.SearchForm] as RelationshipType,
+        throwOnCreateError,
     } = { ...options };
 
     const form = await ApiUtil.get(resource as unknown as Tracked<T>, {
@@ -133,6 +143,10 @@ async function createCollectionItem<T extends LinkedRepresentation>(
                 log.error('[Merge] unknown create error %s', e);
             } else {
                 log.error('[Merge] unknown create error %o', e);
+            }
+
+            if (throwOnCreateError) {
+                throw e;
             }
         }
     } else {

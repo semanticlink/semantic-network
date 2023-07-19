@@ -81,7 +81,7 @@ export class TrackedRepresentationFactory {
                             log.warn('server not returning status code');
                         }
 
-                        const uri = headers.location;
+                        const uri = headers.location as string | undefined;
                         if (uri) {
                             // TODO: decide on pluggable hydration strategy
                             const hydrated = await this.load(
@@ -167,7 +167,7 @@ export class TrackedRepresentationFactory {
                     trackedState.status = Status.deleted;
                     // mutate the original resource headers
                     // how was it retrieved
-                    trackedState.headers = response?.headers;
+                    trackedState.headers = response?.headers as Record<string, string>;
                     // save the across-the-wire meta data so we can check for collisions/staleness
                     trackedState.retrieved = new Date();
 
@@ -225,7 +225,7 @@ export class TrackedRepresentationFactory {
 
                     // mutate the original resource headers
                     // how was it retrieved
-                    trackedState.headers = response.headers;
+                    trackedState.headers = response.headers as Record<string, string>;
                     // save the across-the-wire meta data so we can check for collisions/staleness
                     trackedState.previousStatus = trackedState.status;
                     trackedState.status = Status.hydrated;
@@ -313,7 +313,7 @@ export class TrackedRepresentationFactory {
 
                         // mutate the original resource headers
                         // how was it retrieved
-                        trackedState.headers = response.headers;
+                        trackedState.headers = response.headers as Record<string, string>;
                         // save the across-the-wire meta data so we can check for collisions/staleness
                         trackedState.previousStatus = trackedState.status;
                         trackedState.status = Status.hydrated;
@@ -394,7 +394,7 @@ export class TrackedRepresentationFactory {
                 // when was it retrieved
                 trackedState.retrieved = new Date();
                 // how was it retrieved
-                trackedState.headers = response.headers;
+                trackedState.headers = response.headers as Record<string, string>;
                 /**
                  * On a forbidden resource we are going to let the decision of what to do with
                  * it lie at the application level. So we'll set the state, etc and return the

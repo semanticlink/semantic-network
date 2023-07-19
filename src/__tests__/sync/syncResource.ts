@@ -5,7 +5,7 @@ import { Tracked } from '../../types/types';
 import { assertThat } from 'mismatched';
 import { HttpRequestOptions } from '../../interfaces/httpRequestOptions';
 import { LinkRelation } from '../../linkRelation';
-import { AxiosResponse } from 'axios';
+import { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { syncResource } from '../../sync/syncResource';
 
 describe('Synchroniser', () => {
@@ -46,7 +46,7 @@ describe('Synchroniser', () => {
         headers: {},
         status: 204,
         statusText: '',
-        config: {},
+        config: {} as InternalAxiosRequestConfig,
     };
 
     const get = jest.fn();

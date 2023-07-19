@@ -74,11 +74,12 @@ describe('resource, get, on self', () => {
         assertThat(api).is($api);
 
         // loading of self doesn't created self as a subresource
-        assertThat($api).is({
-            links: match.ofType.array(),
-            version: '56',
-            self: match.isEquals(undefined),
-        } as any);
+        assertThat($api)
+            .is(match.obj.has({
+                links: match.ofType.array(),
+                version: '56',
+                self: match.isEquals(undefined),
+            }));
 
     });
 

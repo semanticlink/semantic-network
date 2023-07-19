@@ -5,7 +5,7 @@ import {SparseRepresentationFactory} from '../representation/sparseRepresentatio
 import {Tracked} from '../types/types';
 import {instanceOfCollection} from '../utils/instanceOf/instanceOfCollection';
 import {instanceOfTrackedRepresentation} from '../utils/instanceOf/instanceOfTrackedRepresentation';
-import {SingletonMerger} from '../../lib';
+import { SingletonMerger } from '../representation/singletonMerger';
 
 type T = Tracked<LinkedRepresentation> & { me: LinkedRepresentation } & { users: CollectionRepresentation };
 const makeRoot = () => SparseRepresentationFactory.make({uri: 'https://example.com'}) as T;

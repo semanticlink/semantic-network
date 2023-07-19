@@ -20,7 +20,13 @@ describe('resource, get, on sub resource', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+        {
+            postFactory: post,
+            getFactory: get,
+            putFactory: put,
+            deleteFactory: del,
+            loader: bottleneckLoader,
+        }, true);
 
     afterEach(() => {
         get.mockReset();

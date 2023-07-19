@@ -21,7 +21,13 @@ describe('Tracked Representation Factory', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+        {
+            postFactory: post,
+            getFactory: get,
+            putFactory: put,
+            deleteFactory: del,
+            loader: bottleneckLoader,
+        }, true);
 
     afterEach(() => {
         post.mockReset();
@@ -58,7 +64,8 @@ describe('Tracked Representation Factory', () => {
         ])('deleted status \'%s\'', async (status: Status) => {
             const collection = SparseRepresentationFactory.make<CollectionRepresentation>(
                 { status, uri, sparseType: 'collection' });
-            /*const actual = async () => */await TrackedRepresentationFactory.load(collection);
+            /*const actual = async () => */
+            await TrackedRepresentationFactory.load(collection);
             // old behaviour was to reject - now it is to return original without call
             // await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com/collection\''));
             expect(get).not.toHaveBeenCalled();

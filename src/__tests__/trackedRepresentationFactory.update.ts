@@ -19,7 +19,13 @@ describe('Tracked Representation Factory', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+        {
+            postFactory: post,
+            getFactory: get,
+            putFactory: put,
+            deleteFactory: del,
+            loader: bottleneckLoader,
+        }, true);
 
     function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {
         assertThat({
@@ -65,6 +71,28 @@ describe('Tracked Representation Factory', () => {
         ])('no state', async (representation: Tracked<ApiRepresentation>, err: string) => {
             await expect(async () => await TrackedRepresentationFactory.update(representation, document as unknown as DocumentRepresentation)).rejects.toEqual(Error(err));
             expect(put).not.toHaveBeenCalled();
+        });
+
+
+        test.each([
+            [true],
+            [false],
+        ])('catch response error, throws %s', async (throws: boolean) => {
+
+            put.mockRejectedValue(new Error('ouch'));
+
+            const options = { throwOnUpdateError: throws };
+            const representation = SparseRepresentationFactory.make<ApiRepresentation>({ uri });
+            if (throws) {
+                await expect(async () =>
+                    await TrackedRepresentationFactory.update(representation, document as unknown as DocumentRepresentation, options))
+                    .rejects
+                    .toEqual(Error('ouch'));
+            } else {
+                const actual = await TrackedRepresentationFactory.update(representation, document as unknown as DocumentRepresentation, options);
+                expect(actual).not.toBeUndefined();
+            }
+            expect(put).toHaveBeenCalled();
         });
 
         describe('state values', () => {

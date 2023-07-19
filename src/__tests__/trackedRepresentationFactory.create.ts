@@ -9,6 +9,7 @@ import { LinkRelation } from '../linkRelation';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 import { instanceOfSingleton } from '../utils/instanceOf/instanceOfSingleton';
 import { bottleneckLoader } from '../http/bottleneckLoader';
+import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
 
 describe('Tracked Representation Factory', () => {
 
@@ -18,7 +19,13 @@ describe('Tracked Representation Factory', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+        {
+            postFactory: post,
+            getFactory: get,
+            putFactory: put,
+            deleteFactory: del,
+            loader: bottleneckLoader,
+        }, true);
 
     function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {
         assertThat({
@@ -47,21 +54,43 @@ describe('Tracked Representation Factory', () => {
         const uri = 'https://api.example.com';
 
         test.each([
-            [{} as LinkedRepresentation, 'create tracked representation has no context to find uri to POST on'],
-        ])('no uri found, throws', async (representation: LinkedRepresentation, err: string) => {
-            await expect(async () => await TrackedRepresentationFactory.create(representation, {})).rejects.toEqual(Error(err));
+            [{} as LinkedRepresentation, {}, 'create tracked representation has no context to find uri to POST on'],
+        ])('no uri found, throws', async (representation: LinkedRepresentation, options: HttpRequestOptions, err: string) => {
+            await expect(async () => await TrackedRepresentationFactory.create(representation, {}, options)).rejects.toEqual(Error(err));
             expect(post).not.toHaveBeenCalled();
         });
 
         test.each([
+            [true],
+            [false],
+        ])('catch response error, throws %s', async (throws: boolean) => {
+
+            const $api = SparseRepresentationFactory.make<ApiRepresentation>({ uri });
+            post.mockRejectedValue(new Error('ouch'));
+
+            const options = { throwOnCreateError: throws };
+
+            if (throws) {
+                await expect(async () =>
+                    await TrackedRepresentationFactory.create($api, {}, options))
+                    .rejects
+                    .toEqual(Error('ouch'));
+            } else {
+                const actual = await TrackedRepresentationFactory.create($api, {}, options);
+                expect(actual).toBeUndefined();
+            }
+            expect(post).toHaveBeenCalled();
+        });
+
+        test.each([
             [201, true, 1, 1, 0, 0],
-            [200, undefined, 0, 1, 0, 0],
-            [202, undefined, 0, 1, 0, 0],
-            [400, undefined, 0, 1, 0, 0],
-            [500, undefined, 0, 1, 0, 0],
+            [200, false, 0, 1, 0, 0],
+            [202, false, 0, 1, 0, 0],
+            [400, false, 0, 1, 0, 0],
+            [500, false, 0, 1, 0, 0],
         ])('status code, %s', async (
             statusCode: number,
-            returns: boolean | undefined,
+            returns: boolean,
             getCount: number,
             postCount: number,
             putCount: number,

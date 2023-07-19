@@ -34,7 +34,13 @@ describe('get', () => {
         it('load, forceLoad hydrated', async () => {
 
             HttpRequestFactory.Instance(
-                { getFactory: get, putFactory: put, deleteFactory: del, postFactory: post, loader: bottleneckLoader }, true);
+                {
+                    getFactory: get,
+                    putFactory: put,
+                    deleteFactory: del,
+                    postFactory: post,
+                    loader: bottleneckLoader,
+                }, true);
 
             await ApiUtil.get(makeFromFixture(resource as LinkedRepresentation), { forceLoad: true });
 

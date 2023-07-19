@@ -1,5 +1,6 @@
 import { Status } from './status';
 import { StandardResponseHeader } from '../types/types';
+import { HttpRequestError } from '../interfaces/httpRequestError';
 
 export class State {
 
@@ -17,6 +18,11 @@ export class State {
      * Current state of the {@link TrackedRepresentation}
      */
     status: Status;
+
+    /**
+     * Error added on 400 & 500 {@link Status.unknown}, {@link Status.forbidden} and {@link Status.unknown}
+     */
+    error?: HttpRequestError;
 
     /**
      * Previous state of the {@link TrackedRepresentation}

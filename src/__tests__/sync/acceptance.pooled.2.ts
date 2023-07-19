@@ -78,7 +78,13 @@ describe('Steps with pooled (new) resources', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+        {
+            postFactory: post,
+            getFactory: get,
+            putFactory: put,
+            deleteFactory: del,
+            loader: bottleneckLoader,
+        }, true);
 
 
     function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {
@@ -169,7 +175,7 @@ describe('Steps with pooled (new) resources', () => {
 
             const actualUris = get.mock.calls.map(x => LinkUtil.getUri(x[0], x[1]));
             assertThat(actualUris).is(uris.map(x => x[1]));
-            
+
             /*
              * Expect only that the 'step' is created (and not the 'question')
              */

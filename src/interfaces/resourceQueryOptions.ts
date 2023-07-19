@@ -39,7 +39,7 @@ export interface ResourceQueryOptions {
     readonly nameStrategy?: (name: RelationshipType) => string | undefined | never;
 
     /**
-     * Alters the hydration strategy for {@link CollectionRepresentation<T>}. By default collections are sparsely populated (that is
+     * Alters the hydration strategy for {@link CollectionRepresentation{T}}}. By default collections are sparsely populated (that is
      * the {@link CollectionRepresentation<T>.items}  has not gone to the server to get all the details for each item).
      */
     readonly includeItems?: boolean;

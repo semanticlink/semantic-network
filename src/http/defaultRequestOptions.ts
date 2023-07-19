@@ -5,10 +5,13 @@ import { defaultDeleteFactory } from './defaultDeleteFactory';
 import { defaultPostFactory } from './defaultPostFactory';
 import { bottleneckLoader } from './bottleneckLoader';
 
-export const defaultOptions: Required<HttpRequestOptions> = {
+export const defaultRequestOptions: Required<HttpRequestOptions> = {
     getFactory: defaultGetFactory,
     putFactory: defaultPutFactory,
     deleteFactory: defaultDeleteFactory,
     postFactory: defaultPostFactory,
     loader: bottleneckLoader,
+    throwOnCreateError: false,
+    throwOnUpdateError: false,
+    throwOnLoadError: false,
 };

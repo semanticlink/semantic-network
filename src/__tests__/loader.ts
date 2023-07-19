@@ -50,7 +50,13 @@ describe('Add a request', () => {
         const del = jest.fn();
 
         HttpRequestFactory.Instance(
-            { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+            {
+                postFactory: post,
+                getFactory: get,
+                putFactory: put,
+                deleteFactory: del,
+                loader: bottleneckLoader,
+            }, true);
         const uri = 'https://api.example.com';
         const id = uri;
 
@@ -97,7 +103,13 @@ describe('Add a request', () => {
         const del = jest.fn();
 
         HttpRequestFactory.Instance(
-            { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+            {
+                postFactory: post,
+                getFactory: get,
+                putFactory: put,
+                deleteFactory: del,
+                loader: bottleneckLoader,
+            }, true);
         const uri = 'https://api.example.com';
         const id = uri;
 
@@ -140,11 +152,14 @@ describe('Add a request', () => {
     });
 
 
-
     describe('promiseDelay', () => {
 
-        beforeEach(() => { jest.useFakeTimers(); });
-        afterEach(() => { jest.useRealTimers(); });
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+        afterEach(() => {
+            jest.useRealTimers();
+        });
         it('should not resolve until timeout has elapsed', async () => {
 
             const spy = jest.fn();

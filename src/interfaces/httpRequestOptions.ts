@@ -23,5 +23,26 @@ export interface HttpRequestOptions {
     ) => Promise<AxiosResponse<T>>;
     deleteFactory?: (link: LinkType, rel: RelationshipType) => Promise<AxiosResponse<void>>;
     loader?: Loader;
+    /**
+     * Compatability flag to eat {@lnk HttpRequestError} and return undefined. This will be set to true in future versions.
+     *
+     * @default false
+     * @see defaultRequestOptions.throwOnCreateError
+     */
+    throwOnCreateError?: boolean;
+    /**
+     * Compatability flag to eat {@lnk HttpRequestError}. This will be set to true in future versions.
+     *
+     * @default false
+     * @see defaultRequestOptions.throwOnUpdateError
+     */
+    throwOnUpdateError?: boolean;
+    /**
+     * Compatability flag to eat {@lnk HttpRequestError}. This will be set to true in future versions.
+     *
+     * @default false
+     * @see defaultRequestOptions.throwOnLoadError
+     */
+    throwOnLoadError?: boolean;
 }
 

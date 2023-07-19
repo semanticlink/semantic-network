@@ -24,6 +24,7 @@ import { instanceOfFeed } from '../utils/instanceOf/instanceOfFeed';
 import { FormRepresentation } from '../interfaces/formRepresentation';
 import { LoaderJobOptions } from '../interfaces/loader';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
+import { defaultRequestOptions } from '../http/defaultRequestOptions';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -39,6 +40,7 @@ export class TrackedRepresentationFactory {
      * @param document content of the representation
      * @param options
      * @returns a 201 returns a representation whereas the 200 and 202 return undefined
+     * @throws AxiosError
      */
     public static async create<T extends LinkedRepresentation, TResult extends LinkedRepresentation>(
         resource: T | Tracked<T> | FormRepresentation,
@@ -53,6 +55,7 @@ export class TrackedRepresentationFactory {
         const {
             rel = LinkRelation.Self,
             getUri = LinkUtil.getUri,
+            throwOnCreateError = defaultRequestOptions.throwOnCreateError,
         } = { ...options };
 
         const uri = getUri(resource, rel);
@@ -107,9 +110,9 @@ export class TrackedRepresentationFactory {
                     // errors don't get attached back on the context resource, just log them
                     log.warn(`Request error returning undefined: '${e.message}'}`);
                     // fall through to undefined
-                } else {
-                    log.warn(`Request error returning undefined`);
-                    // fall through to undefined
+                }
+                if (throwOnCreateError) {
+                    throw e;
                 }
             }
         } else {
@@ -173,8 +176,6 @@ export class TrackedRepresentationFactory {
                 } catch (e) {
                     if (isHttpRequestError(e)) {
                         this.processError(e, uri, resource, trackedState);
-                    } else {
-                        // throw (e);
                     }
                 }
             } else {
@@ -208,6 +209,7 @@ export class TrackedRepresentationFactory {
             const {
                 rel = LinkRelation.Self,
                 getUri = LinkUtil.getUri,
+                throwOnUpdateError = defaultRequestOptions.throwOnUpdateError,
             } = { ...options };
 
             const uri = getUri(resource, rel);
@@ -236,9 +238,9 @@ export class TrackedRepresentationFactory {
                     // TODO: add options error type detection factory
                     if (isHttpRequestError(e)) {
                         this.processError(e, uri, resource, trackedState);
-                    } else {
-                        log.warn('TODO: re-throw');
-                        // throw(e);
+                    }
+                    if (throwOnUpdateError) {
+                        throw e;
                     }
                 }
             } else {
@@ -249,7 +251,6 @@ export class TrackedRepresentationFactory {
         } else {
             return Promise.reject(new Error(`update tracked representation has no state on '${LinkUtil.getUri(resource, LinkRelation.Self)}'`));
         }
-
     }
 
     /**
@@ -278,6 +279,7 @@ export class TrackedRepresentationFactory {
                 rel = LinkRelation.Self,
                 getUri = LinkUtil.getUri,
                 includeItems = false,
+                throwOnLoadError = defaultRequestOptions.throwOnLoadError,
             } = { ...options };
 
             const uri = getUri(resource, rel);
@@ -322,9 +324,9 @@ export class TrackedRepresentationFactory {
                     } catch (e: unknown) {
                         if (isHttpRequestError(e)) {
                             this.processError<T>(e, uri, resource, trackedState);
-                        } else {
-                            log.warn('Unhandled http exception %o', e);
-                            // throw(e);
+                        }
+                        if (throwOnLoadError) {
+                            throw e;
                         }
                     }
                 } else {
@@ -399,22 +401,25 @@ export class TrackedRepresentationFactory {
                  * resource. This means that the application needs to check if it is {@link Status.forbidden}
                  * and decide whether to remove (from say the set, or in the UI dim the item).
                  */
+                trackedState.error = e;
             } else if (response.status === 404) {
                 const message = `Likely stale collection for '${LinkUtil.getUri(resource, LinkRelation.Self)}' on resource ${uri}`;
                 log.info(message);
                 trackedState.status = Status.deleted;
                 // TODO: this should return a Promise.reject for it to be dealt with
-                throw new Error(message);
             } else if (response.status >= 400 && response.status < 499) {
                 log.info(`Client error '${response.statusText}' on resource ${uri}`);
                 trackedState.status = Status.unknown;
+                trackedState.error = e;
             } else if (response.status >= 500 && response.status < 599) {
                 log.info(`Server error '${response.statusText}' on resource ${uri}`);
                 trackedState.status = Status.unknown;
+                trackedState.error = e;
             } else {
                 log.error(`Request error: '${e.message}'}`);
                 log.debug(e.stack);
                 trackedState.status = Status.unknown;
+                trackedState.error = e;
                 /**
                  * We really don't know what is happening here. But allow the application
                  * to continue.
@@ -449,7 +454,10 @@ export class TrackedRepresentationFactory {
             ResourceFetchOptions &
             ResourceQueryOptions &
             LoaderJobOptions): Promise<CollectionRepresentation<T>> {
-        const { rel = LinkRelation.Self, includeItems } = { ...options };
+        const {
+            rel = LinkRelation.Self,
+            includeItems,
+        } = { ...options };
 
         const uri = LinkUtil.getUri(resource, rel);
 

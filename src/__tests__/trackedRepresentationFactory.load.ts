@@ -18,7 +18,13 @@ describe('Tracked Representation Factory', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+        {
+            postFactory: post,
+            getFactory: get,
+            putFactory: put,
+            deleteFactory: del,
+            loader: bottleneckLoader,
+        }, true);
 
     afterEach(() => {
         post.mockReset();
@@ -53,6 +59,28 @@ describe('Tracked Representation Factory', () => {
             assertThat(api).isNot(undefined);
         });
 
+
+        test.each([
+            [true],
+            [false],
+        ])('catch response error, throws %s', async (throws: boolean) => {
+
+            get.mockRejectedValue(new Error('ouch'));
+
+            const options = { throwOnLoadError: throws };
+            const $api = SparseRepresentationFactory.make<ApiRepresentation>({ uri });
+            if (throws) {
+                await expect(async () =>
+                    await TrackedRepresentationFactory.load($api, options))
+                    .rejects
+                    .toEqual(Error('ouch'));
+            } else {
+                const actual = await TrackedRepresentationFactory.load($api, options);
+                expect(actual).not.toBeUndefined();
+            }
+            expect(get).toHaveBeenCalled();
+        });
+
         test.each([
             Status.virtual,
             Status.forbidden,
@@ -68,7 +96,8 @@ describe('Tracked Representation Factory', () => {
             Status.deleteInProgress,
         ])('deleted status \'%s\'', async (status: Status) => {
             const $api = SparseRepresentationFactory.make<ApiRepresentation>({ status, uri });
-            /*const actual = async () => */await TrackedRepresentationFactory.load($api);
+            /*const actual = async () => */
+            await TrackedRepresentationFactory.load($api);
             // old behaviour was to reject - now it is to return original without call
             // await expect(actual).rejects.toEqual(Error('Resource \'deleted\' unable to load \'https://api.example.com\''));
             expect(get).not.toHaveBeenCalled();

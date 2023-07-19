@@ -19,7 +19,13 @@ describe('resource, get, on sparse', () => {
     const del = jest.fn();
 
     HttpRequestFactory.Instance(
-        { postFactory: post, getFactory: get, putFactory: put, deleteFactory: del, loader: bottleneckLoader }, true);
+        {
+            postFactory: post,
+            getFactory: get,
+            putFactory: put,
+            deleteFactory: del,
+            loader: bottleneckLoader,
+        }, true);
 
     afterEach(() => {
         post.mockReset();
@@ -105,7 +111,7 @@ describe('resource, get, on sparse', () => {
             assertThat(me.name).is('me');
             assertThat(status).is(Status.hydrated);
             assertThat(previousStatus).is(Status.locationOnly);
-            assertThat(headers).is({  });
+            assertThat(headers).is({});
             assertThat(collection).is(new Set<string>());
             assertThat(singleton).is(new Set<string>());
             assertThat(retrieved).isNot(null);

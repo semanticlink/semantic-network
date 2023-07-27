@@ -360,7 +360,12 @@ export class FieldResolverUtil {
                         }
                     } // else fall through to return undefined
                 } else {
-                    log.error('Field value type not found \'%s\'', typeof fieldValue);
+                    if (Array.isArray(formItem.items)){
+                        log.debug('Form items already loaded or recursively nothing to load: count \'%s\'', formItem.items?.length);
+                    } else {
+                        log.warn('Form items type not found \'%s\'', typeof fieldValue);
+                    }
+
                     // else fall through to return undefined
                 }
             } else {

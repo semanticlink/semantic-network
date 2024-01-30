@@ -68,7 +68,7 @@ class UriMappingResolver implements Resolver {
             }
 
         }
-        log.debug('resolved not found \'%s\'', documentUri, documentUri);
+        log.debug('resolved not found \'%s\'', documentUri);
         return documentUri;
     }
     /**

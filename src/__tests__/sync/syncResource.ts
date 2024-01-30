@@ -480,7 +480,7 @@ describe('Synchroniser', () => {
                     { ...options, rel: 'todos' });
 
                 expect(result).toBeDefined();
-                verifyMocks(5, 0, 0, 0);
+                verifyMocks(4, 0, 0, 0);
 
             });
 
@@ -511,7 +511,7 @@ describe('Synchroniser', () => {
                 });
 
                 expect(result).toBeDefined();
-                verifyMocks(5, 0, 1, 0);
+                verifyMocks(4, 0, 1, 0);
             });
 
             it('should add when the document is not found in collection', async () => {
@@ -532,9 +532,7 @@ describe('Synchroniser', () => {
 
                 expect(result).toBeDefined();
 
-                // Note: double GET on edit-form because forms are NOT shared between resources
-                // TODO: implement forms as pooled
-                verifyMocks(7, 1, 0, 0);
+                verifyMocks(6, 1, 0, 0);
             });
 
             it('should delete when a document is not found in collection', async () => {

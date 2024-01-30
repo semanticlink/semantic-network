@@ -328,21 +328,19 @@ export class SyncUtil {
             // add the document to the collection and add a mapping
             const result = await ApiUtil.create(document, { ...options, createContext: resource });
             if (result) {
-                if (result) {
-                    const resultUri = LinkUtil.getUri(result, LinkRelation.Self);
-                    const originalUri = LinkUtil.getUri(document as T, LinkRelation.Self);
-                    if (originalUri && resultUri && originalUri !== resultUri) {
-                        resolver.add(originalUri, resultUri);
-                    } else {
-                        log.warn('sync resource \'create\' unable to map uris');
-                    }
-                    log.debug('sync resource \'create\' in collection %s', resultUri);
-                    return {
-                        resource: result,
-                        document: document,
-                        action: 'create',
-                    } as SyncInfo;
+                const resultUri = LinkUtil.getUri(result, LinkRelation.Self);
+                const originalUri = LinkUtil.getUri(document as T, LinkRelation.Self);
+                if (originalUri && resultUri && originalUri !== resultUri) {
+                    resolver.add(originalUri, resultUri);
+                } else {
+                    log.warn('sync resource \'create\' unable to map uris');
                 }
+                log.debug('sync resource \'create\' in collection %s', resultUri);
+                return {
+                    resource: result,
+                    document: document,
+                    action: 'create',
+                } as SyncInfo;
             } else {
                 log.warn('sync resource \'create\' failed in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
             }

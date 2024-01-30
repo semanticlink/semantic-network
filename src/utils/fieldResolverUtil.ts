@@ -88,6 +88,8 @@ export class FieldResolverUtil {
 
         const { defaultFields } = { ...options };
 
+        log.debug('resolving fields on \'%s\'', LinkUtil.getUri(document as LinkedRepresentation, LinkRelation.Self));
+
         // pick all the fields as specified from the form
         const fieldsToResolve = FormUtil.fieldsToResolve(document, form, defaultFields as TField[]);
 
@@ -360,7 +362,7 @@ export class FieldResolverUtil {
                         }
                     } // else fall through to return undefined
                 } else {
-                    if (Array.isArray(formItem.items)){
+                    if (Array.isArray(formItem.items)) {
                         log.debug('Form items already loaded or recursively nothing to load: count \'%s\'', formItem.items?.length);
                     } else {
                         log.warn('Form items type not found \'%s\'', typeof fieldValue);

@@ -158,21 +158,23 @@ export class Differencer {
         //
         // 1. Delete all resource first
         //
-        log.debug('delete strategy: count \'%s\'', deleteItems.length);
-        for (const item of deleteItems) {
+        log.debug('delete strategy sequential: count \'%s\'', deleteItems.length);
+        for await (const item of deleteItems) {
             await deleteStrategy(item);
         }
 
         //
         //  2. Then update the existing resources
         //
-        log.debug('update strategy: count \'%s\'', updateItems.length);
         if (batchSize === 0 || !batchSize) {
-            for (const item of updateItems) {
+            log.debug('update strategy parallel: count \'%s\'', updateItems.length);
+            await Promise.all(updateItems.map(async item => await updateStrategy(item.lVal, item.rVal)));
+
+        } else {
+            log.debug('update strategy sequential: count \'%s\'', updateItems.length);
+            for await (const item of updateItems) {
                 await updateStrategy(item.lVal, item.rVal);
             }
-        } else {
-            await Promise.all(updateItems.map(async item => await updateStrategy(item.lVal, item.rVal)));
         }
 
         //
@@ -181,17 +183,20 @@ export class Differencer {
         let createResults: CreateType[] = [];
 
         if (batchSize === 0 || !batchSize) {
-            for (const item of createItems) {
-                const resource = await createStrategy(item);
-                createResults.push({ lVal: item, rVal: resource });
-            }
-        } else {
-            createResults = (await Promise.all(createItems
+            log.debug('create strategy parallel: count \'%s\'', createItems.length);
+            createResults = await Promise.all(createItems
                 .map(async item => {
                     const resource = await createStrategy(item);
                     return { lVal: item, rVal: resource };
                 })
-            ));
+            );
+
+        } else {
+            log.debug('create strategy sequential: count \'%s\'', createItems.length);
+            for await (const item of createItems) {
+                const resource = await createStrategy(item);
+                createResults.push({ lVal: item, rVal: resource });
+            }
         }
 
         const infos = [

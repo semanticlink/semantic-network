@@ -296,6 +296,7 @@ export class SyncUtil {
         options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions): Promise<SyncInfo | undefined> {
 
         const {
+            resolver = noopResolver,
             findResourceInCollectionStrategy = this.defaultFindResourceInCollectionStrategy,
             forceCreate = false,
         } = { ...options };
@@ -312,7 +313,8 @@ export class SyncUtil {
             if (result) {
                 const resource = await ApiUtil.update(result, document, options);
                 if (resource) {
-                    log.debug('sync resource \'update\' in collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
+                    const uri = LinkUtil.getUri(resource, LinkRelation.Self);
+                    log.debug('sync resource \'update\' in collection %s', uri);
                     return {
                         resource: resource,
                         document: document,
@@ -323,11 +325,18 @@ export class SyncUtil {
                 }
             }
         } else {
-            // add the document to the collection a
+            // add the document to the collection and add a mapping
             const result = await ApiUtil.create(document, { ...options, createContext: resource });
             if (result) {
                 if (result) {
-                    log.debug('sync resource \'create\' in collection %s', LinkUtil.getUri(result, LinkRelation.Self));
+                    const resultUri = LinkUtil.getUri(result, LinkRelation.Self);
+                    const originalUri = LinkUtil.getUri(document as T, LinkRelation.Self);
+                    if (originalUri && resultUri && originalUri !== resultUri) {
+                        resolver.add(originalUri, resultUri);
+                    } else {
+                        log.warn('sync resource \'create\' unable to map uris');
+                    }
+                    log.debug('sync resource \'create\' in collection %s', resultUri);
                     return {
                         resource: result,
                         document: document,

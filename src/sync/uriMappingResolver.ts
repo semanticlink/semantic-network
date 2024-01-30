@@ -31,7 +31,7 @@ class UriMappingResolver implements Resolver {
      * Update a mapping to/from a network of data (NOD) URI to/from a document URI.
      */
     update(documentUri: Uri, resolvedUri: Uri) {
-        log.debug('update \'%s\' --> \'%s\'', documentUri, resolvedUri);
+        log.debug('resolver: update \'%s\' --> \'%s\'', documentUri, resolvedUri);
         this.resolutions.set(documentUri, resolvedUri);
     }
 
@@ -39,7 +39,7 @@ class UriMappingResolver implements Resolver {
      * Add a mapping to/from a network of data (NOD) URI to/from a document URI.
      */
     add(documentUri: Uri, resolvedUri: Uri) {
-        log.debug('add \'%s\' --> \'%s\'', documentUri, resolvedUri);
+        log.debug('resolver: add \'%s\' --> \'%s\'', documentUri, resolvedUri);
         this.resolutions.set(documentUri, resolvedUri);
     }
 
@@ -50,7 +50,7 @@ class UriMappingResolver implements Resolver {
     remove(documentUri: Uri) {
         for (const entry of this.resolutions.entries()) {
             if (entry[1] === documentUri) {
-                log.debug('remove \'%s\'', entry[0]);
+                log.debug('resolver: remove \'%s\'', entry[0]);
                 this.resolutions.delete(entry[0]);
             }
         }
@@ -68,7 +68,7 @@ class UriMappingResolver implements Resolver {
             }
 
         }
-        log.debug('resolved (default) \'%s\' --> \'%s\'', documentUri, documentUri);
+        log.debug('resolved not found \'%s\'', documentUri, documentUri);
         return documentUri;
     }
     /**

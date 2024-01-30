@@ -48,7 +48,7 @@ export class SyncUtil {
             if (result) {
                 const uri = LinkUtil.getUri(deleteResource, LinkRelation.Self);
                 if (uri) {
-                    log.debug('sync delete on collection \'%s\' %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uri);
+                    log.debug('sync delete on collection \'%s\'', LinkUtil.getUri(collectionResource, LinkRelation.Self));
                     resolver.remove(uri);
                 }
             } else {
@@ -72,7 +72,7 @@ export class SyncUtil {
                     const uriOriginal = LinkUtil.getUri(updateDataDocument, LinkRelation.Self);
                     const uriResult = LinkUtil.getUri(updateResource, LinkRelation.Self);
                     if (uriOriginal && uriResult) {
-                        log.debug('sync update on \'%s\' %s --> %s', LinkUtil.getUri(update, LinkRelation.Self), uriOriginal, uriResult);
+                        log.debug('sync update on \'%s\'', LinkUtil.getUri(update, LinkRelation.Self));
                         resolver.update(uriOriginal, uriResult);
                     }
                 }
@@ -83,8 +83,6 @@ export class SyncUtil {
 
         /**
          *
-         * @param {*} createDataDocument
-         * @return {?LinkedRepresentation} the new resource
          */
         const createResourceAndUpdateResolver: CreateStrategy = async <T extends LinkedRepresentation>(createDataDocument: T) => {
 
@@ -93,7 +91,7 @@ export class SyncUtil {
             if (result) {
                 const uriResult = LinkUtil.getUri(result, LinkRelation.Self);
                 if (uriOriginal && uriResult) {
-                    log.debug('sync create on collection \'%s\' %s --> %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uriOriginal, uriResult);
+                    log.debug('sync create on collection \'%s\'', LinkUtil.getUri(collectionResource, LinkRelation.Self));
                     resolver.add(uriOriginal, uriResult);
                 }
             } else {
@@ -107,13 +105,12 @@ export class SyncUtil {
          * A read-only collection needs have an item deleted. We don't delete it
          * but can add it to our mapping resolver anyway.
          *
-         * We don't expect to come in here but we will if the document supplied
-         * has less items that the current network of data (likely from time to time).
+         * We don't expect to come in here, but we will if the document supplied
+         * has fewer items that the current network of data (likely from time to time).
          */
         const deleteReadonlyResourceAndUpdateResolver: DeleteStrategy = async <T extends LinkedRepresentation>(collectionResourceItem: T) => {
             const uri = LinkUtil.getUri(collectionResourceItem, LinkRelation.Self);
             if (uri) {
-                log.debug('sync remove %s', uri);
                 resolver.remove(uri);
             }
         };
@@ -149,7 +146,7 @@ export class SyncUtil {
             const result = await ApiUtil.delete(collectionResource, { ...options, where: deleteResource });
             if (result) {
                 const uri = LinkUtil.getUri(deleteResource, LinkRelation.Self);
-                log.debug('sync on collection delete \'%s\' %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uri);
+                log.debug('sync on collection delete \'%s\'', LinkUtil.getUri(collectionResource, LinkRelation.Self));
                 if (uri) {
                     resolver.remove(uri);
                 }
@@ -216,12 +213,33 @@ export class SyncUtil {
         strategies: StrategyType[] = [],
         options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions): Promise<() => Promise<void[]>> {
 
-        log.debug('sync strategy resource: parallel');
-        return async () => await Promise.all(strategies.map(async (strategy) => strategy({
-            resource,
-            document,
-            options,
-        })));
+        const { strategyBatchSize = undefined } = { ...options };
+
+        if (strategyBatchSize === 0 || !strategyBatchSize) {
+            log.debug('sync strategy resource: parallel');
+            return async () => await Promise.all(
+                strategies.map(async (strategy) =>
+                    await strategy({
+                        resource,
+                        document,
+                        options,
+                    })));
+        } else {
+            return async () => {
+                const results = [];
+                for await (const strategy of strategies) {
+                    const result = await strategy({
+                        resource,
+                        document,
+                        options,
+                    });
+
+                    results.push(result);
+                }
+                return results;
+            };
+        }
+
     }
 
     public static async tailRecursionThroughStrategies(
@@ -231,10 +249,11 @@ export class SyncUtil {
 
         const { strategyBatchSize = undefined } = { ...options };
 
-        for (const strategy of strategies) {
+        for await (const strategy of strategies) {
             if (strategyBatchSize === 0 || !strategyBatchSize) {
                 // invoke a parallel strategy when want to go for it
                 log.debug('sync strategy tail: parallel');
+
                 await Promise.all(syncInfos.map(async syncInfo => {
                     await strategy({
                         resource: syncInfo.resource,
@@ -244,15 +263,29 @@ export class SyncUtil {
                 }));
 
             } else {
-                log.debug('sync strategy tail: sequential ');
                 // invoke a sequential strategy - and for now, single at a time
-                for (const syncInfo of syncInfos) {
+                log.debug('sync strategy tail: sequential ');
+
+                /*
+                await syncInfos.reduce(
+                    async (acc, curr) => {
+                        return await strategy({
+                            resource: curr.resource,
+                            document: curr.document,
+                            options,
+                        });
+                    },
+                    Promise.resolve());
+                */
+
+                for await (const syncInfo of syncInfos) {
                     await strategy({
                         resource: syncInfo.resource,
                         document: syncInfo.document,
                         options,
                     });
                 }
+
             }
         }
     }
@@ -307,15 +340,20 @@ export class SyncUtil {
         }
     }
 
-    public static syncInfos(strategies: StrategyType[], options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions): (syncInfo: SyncInfo) => Promise<LinkedRepresentation> {
+    public static syncInfos(
+        strategies: StrategyType[],
+        options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions)
+        : (syncInfo: SyncInfo) => Promise<LinkedRepresentation> {
         return async syncInfo => {
             const { strategyBatchSize = undefined } = { ...(options) };
 
-            for (const strategy of strategies) {
-                if (strategyBatchSize === 0 || !strategyBatchSize) {
+            // note: currently both parallel and sequential are same because the set n = 1
 
-                    log.debug('sync strategy info: parallel');
+            for await (const strategy of strategies) {
+                if (strategyBatchSize === 0 || !strategyBatchSize) {
                     // invoke a parallel strategy when want to go for it
+                    log.debug('sync strategy info: parallel');
+
                     await Promise.all([syncInfo].map(async syncInfo => {
                         await strategy({
                             resource: syncInfo.resource,
@@ -327,7 +365,19 @@ export class SyncUtil {
                 } else {
                     // invoke a sequential strategy - and for now, single at a time
                     log.debug('sync strategy info: sequential');
-                    for (const syncInfo1 of [syncInfo]) {
+
+                    /*
+                    await [syncInfo].reduce(
+                        async (acc, curr) => {
+                            return await strategy({
+                                resource: curr.resource,
+                                document: curr.document,
+                                options,
+                            });
+                        },
+                        Promise.resolve());
+                    */
+                    for await (const syncInfo1 of [syncInfo]) {
                         await strategy({
                             resource: syncInfo1.resource,
                             document: syncInfo1.document,

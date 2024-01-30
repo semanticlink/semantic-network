@@ -8,7 +8,8 @@ import { LinkRelConvertUtil } from '../utils/linkRelConvertUtil';
 import { instanceOfUriList } from '../utils/instanceOf/instanceOfUriList';
 import { RepresentationUtil } from '../utils/representationUtil';
 import anylogger from 'anylogger';
-import { Representation, Document } from '../types/types';
+import { Document, Representation } from '../types/types';
+import { LinkRelation } from '../linkRelation';
 
 const log = anylogger('sync');
 
@@ -106,7 +107,8 @@ export async function sync<T extends Representation = Representation, U extends 
     // shared configuration
     const { resource, document, strategies = [], options = <SyncOptions>{}, rel } = syncAction;
 
-    log.debug('sync: start');
+    const uri = LinkUtil.getUri(resource, LinkRelation.Self);
+    log.debug('sync: start [\'%s\']', uri);
 
     // resource or collection (directly). This means that no rel is specified
     if (instanceOfResourceSync(syncAction)) {
@@ -115,7 +117,7 @@ export async function sync<T extends Representation = Representation, U extends 
             await syncResource(resource, document, strategies, options);
         } else {
             if (instanceOfCollection(document)) {
-                throw new Error('Not Implement: a document collection cannot be synchronised onto a singleton');
+                throw new Error('Not Implemented: a document collection cannot be synchronised onto a singleton');
             }
             log.debug('sync: on singleton');
             await syncResource(resource, document, strategies, options);
@@ -140,24 +142,24 @@ export async function sync<T extends Representation = Representation, U extends 
             const namedDocument = RepresentationUtil.getProperty(document, name);
             if (namedDocument) {
                 if (instanceOfCollection(namedDocument)) {
-                    log.debug('sync: named document collection');
+                    log.debug('sync: named document collection [\'%s\' with rel \'%s\']', name, rel);
                     await syncResource(resource, namedDocument as unknown as T, strategies, { ...options, rel });
                 } else {
                     if (instanceOfCollection(resource)) {
-                        log.debug('sync: collection');
+                        log.debug('sync: collection [\'%s\' with rel \'%s\']', name, rel);
                         await syncResource(resource, document, strategies, { ...options, rel });
                     } else {
-                        log.debug('sync: named singleton');
+                        log.debug('sync: named singleton [\'%s\' with rel \'%s\']', name, rel);
                         await syncResource(resource, document, strategies, { ...options, rel, relOnDocument: rel });
                     }
                 }
             } else {
-                log.debug('named document not found');
+                log.debug('sync: named document not found');
             }
         } else {
-            log.warn('Matching document does not exist on rel \'%s\' for %s', rel, LinkUtil.getUri(resource as LinkType, 'self'));
+            log.warn('sync: matching document does not exist on rel \'%s\' for %s', rel, LinkUtil.getUri(resource as LinkType, 'self'));
         }
     }
 
-    log.debug('sync: end');
+    log.debug('sync: end [\'%s\']', uri);
 }

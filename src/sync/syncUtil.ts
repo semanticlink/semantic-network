@@ -69,11 +69,11 @@ export class SyncUtil {
             if (result) {
                 const update = await ApiUtil.update(result, updateDataDocument, options);
                 if (update) {
-                    log.debug('sync update on %s', LinkUtil.getUri(update, LinkRelation.Self));
-                    const uri = LinkUtil.getUri(updateDataDocument, LinkRelation.Self);
-                    const uri1 = LinkUtil.getUri(updateResource, LinkRelation.Self);
-                    if (uri && uri1) {
-                        resolver.update(uri, uri1);
+                    const uriOriginal = LinkUtil.getUri(updateDataDocument, LinkRelation.Self);
+                    const uriResult = LinkUtil.getUri(updateResource, LinkRelation.Self);
+                    if (uriOriginal && uriResult) {
+                        log.debug('sync update on \'%s\' %s --> %s', LinkUtil.getUri(update, LinkRelation.Self), uriOriginal, uriResult);
+                        resolver.update(uriOriginal, uriResult);
                     }
                 }
             } else {
@@ -89,15 +89,15 @@ export class SyncUtil {
         const createResourceAndUpdateResolver: CreateStrategy = async <T extends LinkedRepresentation>(createDataDocument: T) => {
 
             const result = await ApiUtil.create(createDataDocument, { ...options, createContext: collectionResource });
+            const uriOriginal = LinkUtil.getUri(createDataDocument, LinkRelation.Self);
             if (result) {
-                const uri = LinkUtil.getUri(createDataDocument, LinkRelation.Self);
-                const uri1 = LinkUtil.getUri(result, LinkRelation.Self);
-                if (uri && uri1) {
-                    log.debug('sync create on collection \'%s\' %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uri1);
-                    resolver.add(uri, uri1);
+                const uriResult = LinkUtil.getUri(result, LinkRelation.Self);
+                if (uriOriginal && uriResult) {
+                    log.debug('sync create on collection \'%s\' %s --> %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uriOriginal, uriResult);
+                    resolver.add(uriOriginal, uriResult);
                 }
             } else {
-                log.warn('sync on collection not created %s', LinkUtil.getUri(collectionResource, LinkRelation.Self));
+                log.warn('sync on collection not created \'%s\' for %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uriOriginal);
             }
             // TODO: returning undefined changes the interface T | undefined on the CreateStrategy
             return result as unknown as T;
@@ -216,6 +216,7 @@ export class SyncUtil {
         strategies: StrategyType[] = [],
         options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions): Promise<() => Promise<void[]>> {
 
+        log.debug('sync strategy resource: parallel');
         return async () => await Promise.all(strategies.map(async (strategy) => strategy({
             resource,
             document,
@@ -223,12 +224,17 @@ export class SyncUtil {
         })));
     }
 
-    public static async tailRecursionThroughStrategies(strategies: StrategyType[], syncInfos: SyncInfo[], options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions): Promise<void> {
+    public static async tailRecursionThroughStrategies(
+        strategies: StrategyType[],
+        syncInfos: SyncInfo[],
+        options?: SyncOptions & ResourceFetchOptions & HttpRequestOptions): Promise<void> {
+
         const { strategyBatchSize = undefined } = { ...options };
 
         for (const strategy of strategies) {
             if (strategyBatchSize === 0 || !strategyBatchSize) {
                 // invoke a parallel strategy when want to go for it
+                log.debug('sync strategy tail: parallel');
                 await Promise.all(syncInfos.map(async syncInfo => {
                     await strategy({
                         resource: syncInfo.resource,
@@ -238,6 +244,7 @@ export class SyncUtil {
                 }));
 
             } else {
+                log.debug('sync strategy tail: sequential ');
                 // invoke a sequential strategy - and for now, single at a time
                 for (const syncInfo of syncInfos) {
                     await strategy({
@@ -306,6 +313,8 @@ export class SyncUtil {
 
             for (const strategy of strategies) {
                 if (strategyBatchSize === 0 || !strategyBatchSize) {
+
+                    log.debug('sync strategy info: parallel');
                     // invoke a parallel strategy when want to go for it
                     await Promise.all([syncInfo].map(async syncInfo => {
                         await strategy({
@@ -317,6 +326,7 @@ export class SyncUtil {
 
                 } else {
                     // invoke a sequential strategy - and for now, single at a time
+                    log.debug('sync strategy info: sequential');
                     for (const syncInfo1 of [syncInfo]) {
                         await strategy({
                             resource: syncInfo1.resource,

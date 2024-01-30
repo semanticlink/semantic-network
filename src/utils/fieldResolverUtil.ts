@@ -98,7 +98,7 @@ export class FieldResolverUtil {
                 const fieldValue = await this.resolve(document[field as string] as FieldValue, formItem, options);
                 if (fieldValue) {
                     const { fieldResolver } = { ...options };
-                    log.debug('resolving field %s', field);
+                    log.debug('resolving field \'%s\'', field);
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore TS2538: Type 'Omit ' cannot be used as an index type.
                     (document)[field] = fieldResolver ?

@@ -207,6 +207,7 @@ export async function syncResource<T extends Representation, U extends Document>
             }
         }
     } else if (!rel && !relOnDocument && instanceOfCollection(resource) && instanceOfDocumentCollection(document)) {
+        log.debug('sync collection items %s', LinkUtil.getUri(resource, LinkRelation.Self));
 
         const { info } = await SyncUtil.synchroniseCollection(resource, document as unknown as CollectionRepresentation, options);
         if (info) {
@@ -218,7 +219,7 @@ export async function syncResource<T extends Representation, U extends Document>
         }
     } else if (!rel && !relOnDocument && instanceOfCollection(resource) && instanceOfDocumentSingleton(document)) {
 
-        log.debug('collection %s with \'%s\'', LinkUtil.getUri(resource, LinkRelation.Self));
+        log.debug('sync collection %s', LinkUtil.getUri(resource, LinkRelation.Self));
 
         const result = await ApiUtil.get(resource, options);
         if (instanceOfCollection(result)) {
@@ -241,7 +242,7 @@ export async function syncResource<T extends Representation, U extends Document>
         }
     } else if (rel && !relOnDocument && instanceOfDocumentSingleton(document)) {
 
-        log.debug('resource (named collection) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
+        log.debug('sync resource (named collection) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
 
         const namedResource = await ApiUtil.get(resource, { ...options, rel });
         if (instanceOfCollection(namedResource)) {
@@ -256,7 +257,7 @@ export async function syncResource<T extends Representation, U extends Document>
         const namedResource = await ApiUtil.get(resource, { ...options, rel });
 
         if (namedResource) {
-            log.debug('resource (named singleton) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
+            log.debug('sync resource (named singleton) \'%s\' on %s', name, LinkUtil.getUri(resource, LinkRelation.Self));
             const namedDocument = RepresentationUtil.getProperty(document, nameOnDocument) as DocumentRepresentation<T>;
             const updated = await ApiUtil.update(namedResource as T, namedDocument, options);
             if (updated) {

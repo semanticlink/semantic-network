@@ -80,9 +80,11 @@ export class RepresentationUtil {
                 return undefined;
             }
         } else if (Array.isArray(where)) {
-            log.warn('find resource in collection failed: array cannot be assigned to where');
+            log.debug('find resource in collection: array cannot be assigned to where');
+        } else if (!where) {
+            log.debug('find resource in collection: where not used as \'%s\'', where);
         } else {
-            log.warn('find resource in collection failed: unknown where');
+            log.debug('find resource in collection: unknown where');
         }
 
         // attribute look up strategy. Used for fallback strategy 2.
@@ -98,6 +100,8 @@ export class RepresentationUtil {
         }
 
         const resourceTitle = getResourceTitle(where);
+
+        log.debug('find resource in collection: \'%s\' \'%s\' \'%s\'', name, resourceTitle);
 
         // go through the collection and match the URI against either a link relation or attribute
         return collection

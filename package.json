@@ -1,6 +1,6 @@
 {
   "name": "semantic-network",
-  "version": "0.7.14",
+  "version": "0.7.15",
   "description": "A utility library for manipulating a list of links that form a semantic interface to a network of resources.",
   "main": "lib/es5/index.js",
   "module": "lib/index.js",
@@ -43,6 +43,7 @@
     "@babel/preset-env": "^7.22.9",
     "@babel/preset-typescript": "^7.22.5",
     "@types/jest": "^29.5.3",
+    "@types/lodash.clonedeep": "^4.5.9",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
     "babel-jest": "^29.6.1",
@@ -59,6 +60,7 @@
   "dependencies": {
     "anylogger": "^1.0.11",
     "bottleneck": "^2.19.5",
+    "lodash.clonedeep": "^4.5.0",
     "semantic-link": "^1.0.8",
     "tslib": ">=2.6.0"
   },

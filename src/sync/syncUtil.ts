@@ -77,7 +77,7 @@ export class SyncUtil {
                     }
                 }
             } else {
-                log.warn('sync not updated on %s', LinkUtil.getUri(updateResource, LinkRelation.Self));
+                log.debug('sync not updated on %s', LinkUtil.getUri(updateResource, LinkRelation.Self));
             }
         };
 
@@ -95,7 +95,7 @@ export class SyncUtil {
                     resolver.add(uriOriginal, uriResult);
                 }
             } else {
-                log.warn('sync on collection not created \'%s\' for %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uriOriginal);
+                log.debug('sync on collection not created \'%s\' for %s', LinkUtil.getUri(collectionResource, LinkRelation.Self), uriOriginal);
             }
             // TODO: returning undefined changes the interface T | undefined on the CreateStrategy
             return result as unknown as T;
@@ -333,7 +333,7 @@ export class SyncUtil {
                 if (originalUri && resultUri && originalUri !== resultUri) {
                     resolver.add(originalUri, resultUri);
                 } else {
-                    log.warn('sync resource \'create\' unable to map uris');
+                    log.debug('sync resource \'create\' new not mapped \'%s\'', resultUri);
                 }
                 log.debug('sync resource \'create\' in collection %s', resultUri);
                 return {

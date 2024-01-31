@@ -7,6 +7,7 @@ import { SyncOptions } from '../interfaces/sync/syncOptions';
 import { CreateType, DeleteType, SyncResultItem, UpdateType } from '../interfaces/sync/types';
 import { SyncInfo } from '../interfaces/sync/syncInfo';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
+import cloneDeep from 'lodash.clonedeep';
 
 const log = anylogger('test');
 
@@ -107,7 +108,10 @@ export class Differencer {
         // clone the items
         const deleteItems: DeleteType[] = [...resource.items];
 
-        const createItems = [...document.items];
+        // this needs a deep copy otherwise recursive structures won't work
+        // TODO: node17 and later browsers allow 'structuredClone'
+        // @see https://developer.mozilla.org/en-US/docs/Web/API/structuredClone
+        const createItems = cloneDeep(document.items);
 
         for (const comparator of comparators) {
             // Get a list of items that need to be updated.

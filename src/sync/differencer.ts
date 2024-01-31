@@ -205,13 +205,13 @@ export class Differencer {
 
         const infos = [
             ...createResults.map(({ lVal, rVal }) => ({
-                resource: lVal,
-                document: rVal,
+                document: lVal,
+                resource: rVal,
                 action: 'create',
             } as SyncInfo)),
             ...updateItems.map(({ lVal, rVal }) => ({
-                resource: lVal,
-                document: rVal,
+                document: lVal,
+                resource: rVal,
                 action: 'update',
             } as SyncInfo)),
         ];

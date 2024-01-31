@@ -144,13 +144,16 @@ describe('Steps with pooled resources', () => {
             resourceResolver: new PooledOrganisation(makeHydratedResource(organisation)).resourceResolver,
         };
 
-        it('strategy with page and question, 1 created step with existing pooled question', async () => {
+        it('strategy with page and question, 1 created step with existing question', async () => {
 
             await sync({
                 resource,
                 document: aDocument,
                 rel: CustomLinkRelation.Steps,
-                options: { ...options, ...resolvers },
+                options: {
+                    ...options,
+                    ...resolvers,
+                },
                 strategies: [syncResult => sync({ ...syncResult, rel: CustomLinkRelation.Field })],
             });
 
@@ -166,7 +169,10 @@ describe('Steps with pooled resources', () => {
                 ['self', 'https://api.example.com/organisation/a656927b0f/step/form/create'],
                 ['self', 'https://api.example.com/organisation/a656927b0f/question'],
                 ['self', 'https://api.example.com/organisation/a656927b0f/step/92c28454b7'],
+                ['self', 'https://api.example.com/question/cf6c4b9c7f'],
+                ['self', 'https://api.example.com/question/form/edit'],
             ];
+
 
             const actualUris = get.mock.calls.map(x => [x[1], LinkUtil.getUri(x[0], x[1])]);
             assertThat(actualUris).is(getUris);
@@ -178,10 +184,16 @@ describe('Steps with pooled resources', () => {
             const postUris = post.mock.calls.map(x => [x[1], LinkUtil.getUri(x[0], x[1])]);
             assertThat(postUris).is(posts);
 
+            const puts = [
+                ['self', 'https://api.example.com/question/cf6c4b9c7f'],
+            ];
+            const putUris = put.mock.calls.map(x => [x[1], LinkUtil.getUri(x[0], x[1])]);
+            assertThat(putUris).is(puts);
+
             /*
              * Expect only that the 'step' is created (and not the 'question')
              */
-            verifyMocks(10, 1, 0, 0);
+            verifyMocks(12, 1, 1, 0);
 
         });
     });

@@ -73,6 +73,20 @@ describe('Steps', () => {
             put.mockRestore();
         });
 
+        function verifyMocks(getCount: number, postCount: number, putCount: number, deleteCount: number): void {
+            assertThat({
+                get: get.mock.calls.length,
+                post: post.mock.calls.length,
+                put: put.mock.calls.length,
+                del: del.mock.calls.length,
+            }).is({
+                get: getCount,
+                post: postCount,
+                put: putCount,
+                del: deleteCount,
+            });
+        }
+
         it('load, defined', () => {
             expect(resource.steps).toBeDefined();
         });
@@ -247,7 +261,8 @@ describe('Steps', () => {
                         ],
                     });
 
-                    expect(put).toHaveBeenCalledTimes(0);
+                    verifyMocks(17, 0, 0 , 0);
+
                 });
                 it('sync, strategy with page and heading, 1 deletion', async () => {
                     const aDocument = {
@@ -284,8 +299,8 @@ describe('Steps', () => {
                         ],
                     });
 
-                    expect(put).toHaveBeenCalledTimes(0);
-                    expect(del).toHaveBeenCalledTimes(2);
+                    verifyMocks(17, 0, 0 , 0);
+
                 });
 
                 it('sync, strategy with page and heading, update 1 change', async () => {
@@ -361,7 +376,7 @@ describe('Steps', () => {
                         ],
                     });
 
-                    expect(put).toHaveBeenCalledTimes(2);
+                    verifyMocks(17, 0, 0 , 0);
 
                     const firstItem = resource.steps?.items[0].steps?.items[0];
                     if (firstItem) {

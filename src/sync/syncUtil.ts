@@ -354,6 +354,25 @@ export class SyncUtil {
         return async syncInfo => {
             const { strategyBatchSize = undefined } = { ...(options) };
 
+            if (strategyBatchSize === 0 || !strategyBatchSize) {
+                await Promise.all(strategies.map(async strategy => {
+                    await strategy({
+                        resource: syncInfo.resource,
+                        document: syncInfo.document,
+                        options,
+                    });
+                }));
+            } else {
+                for await (const strategy of strategies) {
+                    await strategy({
+                        resource: syncInfo.resource,
+                        document: syncInfo.document,
+                        options,
+                    });
+                }
+            }
+
+            /*
             // note: currently both parallel and sequential are same because the set n = 1
 
             for await (const strategy of strategies) {
@@ -373,7 +392,7 @@ export class SyncUtil {
                     // invoke a sequential strategy - and for now, single at a time
                     log.debug('sync strategy info: sequential');
 
-                    /*
+                    /!*
                     await [syncInfo].reduce(
                         async (acc, curr) => {
                             return await strategy({
@@ -383,7 +402,7 @@ export class SyncUtil {
                             });
                         },
                         Promise.resolve());
-                    */
+                    *!/
                     for await (const syncInfo1 of [syncInfo]) {
                         await strategy({
                             resource: syncInfo1.resource,
@@ -393,6 +412,7 @@ export class SyncUtil {
                     }
                 }
             }
+            */
             return syncInfo.resource;
         };
     }

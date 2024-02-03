@@ -120,7 +120,7 @@ export interface FormItem {
      * A {@link FieldType.Collection} may require re-mapping the {@link FeedItemRepresentation} from title to another
      * field (eg description)
      *
-     * Note: this can be passed into the {@link SparseRepresentationFactory} but see {@link SparseRepresentationFactory.mappedFromFeedItemFieldName}
+     * Note: this can be passed into the {@link SparseRepresentationFactory} but see {@link SparseRepresentationFactory.defaultMappedFromFeedItemFieldName}
      */
     readonly mappedTitleFrom?: string;
 
@@ -128,7 +128,7 @@ export interface FormItem {
      * A {@link FieldType.Collection} may require re-mapping the {@link FeedItemRepresentation} from title to another
      * field (eg description)
      *
-     * Note: this can be passed into the {@link SparseRepresentationFactory} but see {@link SparseRepresentationFactory.mappedTitleAttributeName}
+     * Note: this can be passed into the {@link SparseRepresentationFactory} but see {@link SparseRepresentationFactory.defaultMappedTitleAttributeName}
      */
     readonly mappedTitle?: string;
 }

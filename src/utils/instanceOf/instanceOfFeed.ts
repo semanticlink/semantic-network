@@ -1,6 +1,6 @@
 import { FeedRepresentation, instanceOfLinkedRepresentation, LinkedRepresentation } from 'semantic-link';
 import { instanceOfForm } from './instanceOfForm';
-import { FeedItemRepresentation } from 'semantic-link/lib/interfaces';
+import { FeedItemRepresentation } from '../../interfaces/feedItemRepresentation';
 
 export function instanceOfFeed(object: unknown | LinkedRepresentation): object is FeedRepresentation {
     // TODO: perhaps also check from feedOnly state

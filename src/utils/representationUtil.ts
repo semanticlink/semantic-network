@@ -92,7 +92,7 @@ export class RepresentationUtil {
         const name = NamedRepresentationFactory.defaultNameStrategy(rel);
 
         // title will only exist where a resource is passed in AND there is a mapped title. Used for fallback strategy 3.
-        const mappedTitleAttributeName = SparseRepresentationFactory.mappedTitleAttributeName;
+        const mappedTitleAttributeName = SparseRepresentationFactory.defaultMappedTitleAttributeName;
 
         /** internal helper function to return comparable string from the property of a resource */
         function getResourceTitle(obj?: any, prop: string = mappedTitleAttributeName) {

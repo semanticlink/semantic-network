@@ -7,7 +7,8 @@ import {
 import { assertThat, match } from 'mismatched';
 import each from 'jest-each';
 import {
-    pooledCollectionMakeStrategy, pooledSingletonMakeStrategy,
+    pooledCollectionMakeStrategy,
+    pooledSingletonMakeStrategy,
     SparseRepresentationFactory,
 } from '../representation/sparseRepresentationFactory';
 import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
@@ -16,6 +17,7 @@ import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { Status } from '../representation/status';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { LinkRelation } from '../linkRelation';
+import { Tracked } from '../types/types';
 
 describe('Sparse Representation Factory', () => {
 
@@ -74,12 +76,13 @@ describe('Sparse Representation Factory', () => {
                 });
     });
 
-    describe('make, collection items as singletons', () => {
+    describe('make, singleton with attributes', () => {
         each([
             ['empty (undefined)', {}, 0],
             ['items, single, uri', { defaultItems: ['//example.com/item/1'] } as ResourceFactoryOptions, 1],
             ['items, two, uri', { defaultItems: ['1', '2'] } as ResourceFactoryOptions, 2],
             ['items, two, uri', { defaultItems: ['1', '2'] } as ResourceFactoryOptions, 2],
+            ['items, one, feed', { defaultItems: [{ id: '1', title: '' }] } as ResourceFactoryOptions, 1],
             ['items, one, feed', { defaultItems: [{ id: '1', title: '' }] } as ResourceFactoryOptions, 1],
         ])
             .describe(
@@ -104,6 +107,38 @@ describe('Sparse Representation Factory', () => {
                         for (const item of resource.items) {
                             assertThat(item).is(match.predicate(instanceOfSingleton));
                         }
+                    });
+                });
+    });
+
+    describe('make, collection items as singletons', () => {
+        each([
+            ['items, one, feed', {
+                defaultItems: [{
+                    id: '1',
+                    title: 'X',
+                    lastModified: '2023-01-31T18:15:33.082549Z',
+                }],
+            } as ResourceFactoryOptions, 1],
+        ])
+            .describe(
+                '%s',
+                (title: string, options: ResourceFactoryOptions) => {
+                    options = { sparseType: 'collection', ...options };
+                    const resource = SparseRepresentationFactory.make<CollectionRepresentation>(options) as Tracked<CollectionRepresentation<LinkedRepresentation & {
+                        name: string,
+                        updatedAt: string
+                    }>>;
+
+                    it('the item is a singleton', () => {
+                        assertThat(resource.items[0]).is(match.predicate(instanceOfSingleton));
+                    });
+                    it('the item has property updatedAt', () => {
+                        assertThat(resource.items[0].updatedAt).is('2023-01-31T18:15:33.082549Z');
+                    });
+
+                    it('the item has property name', () => {
+                        assertThat(resource.items[0].name).is('X');
                     });
                 });
     });

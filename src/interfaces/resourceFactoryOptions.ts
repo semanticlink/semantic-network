@@ -1,6 +1,6 @@
 import { Status } from '../representation/status';
 import { LinkedRepresentation, Uri } from 'semantic-link';
-import { FeedItemRepresentation } from 'semantic-link/lib/interfaces';
+import { FeedItemRepresentation } from './feedItemRepresentation';
 import { Tracked } from '../types/types';
 
 export type ResourceType = 'singleton' | 'collection' | 'feed';
@@ -15,9 +15,14 @@ export interface ResourceFactoryOptions {
     readonly uri?: Uri;
 
     /**
-     * The title set on the sparsely populate resource.
+     * The title set on the sparsely populated resource.
      */
     readonly title?: string;
+
+    /**
+     * The last modified set on the sparsely populated resource.
+     */
+    readonly lastModified?: string;
 
     /**
      * Explicitly set the {@link State.status} on the resource. Currently, when there is a uri, it is set to location
@@ -54,15 +59,38 @@ export interface ResourceFactoryOptions {
      */
     readonly feedItem?: FeedItemRepresentation;
 
+    /**
+     * Generate a resource from a feed item with a title from the given field attribute
+     *
+     * @default: name
+     * @see SparseRepresentationFactory.defaultMappedTitleAttributeName
+     */
     readonly mappedTitle?: string;
 
     /**
      * Generate a resource from a feed item with a title from the given field attribute
      *
      * @default: title
-     * @see SparseRepresentationFactory.mappedFromFeedItemFieldName
+     * @see SparseRepresentationFactory.defaultMappedFromFeedItemFieldName
      */
     readonly mappedTitleFrom?: string;
+
+
+    /**
+     * Generate a resource from a feed item with an updated from the given field attribute
+     *
+     * @default: updatedAt
+     * @see SparseRepresentationFactory.defaultMappedUpdatedAttributeName
+     */
+    readonly mappedUpdated?: string;
+
+    /**
+     * Generate a resource from a feed item with an updated from the given field attribute
+     *
+     * @default: updated
+     * @see SparseRepresentationFactory.defaultMappedFromFeedItemUpdatedFieldName
+     */
+    readonly mappedUpdatedFrom?: string;
 
     /**
      * The strategy used to create sparse {@link LinkedRepresentation} objects. This allows to caller

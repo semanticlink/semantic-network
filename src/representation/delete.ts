@@ -10,6 +10,8 @@ import anylogger from 'anylogger';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { Tracked } from '../types/types';
 import { ResourceDeleteOptions } from '../interfaces/resourceDeleteOptions';
+import { Status } from './status';
+import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 
 const log = anylogger('delete');
 
@@ -36,7 +38,11 @@ export async function del<T extends LinkedRepresentation>(
     resource: T | Tracked<T>,
     options?: ApiDeleteOptions): Promise<T | undefined> {
 
-    const { where = undefined, removeOnDeleteItem = true } = { ...options };
+    const {
+        where = undefined,
+        removeOnDeleteItem = true,
+        reloadOnDelete = false,
+    } = { ...options };
 
     // find specific item in collection to delete
     if (where) {
@@ -69,5 +75,15 @@ export async function del<T extends LinkedRepresentation>(
         log.debug('Attempting to delete collection resource');
     }
 
-    return await TrackedRepresentationFactory.del(resource, options);
+    const deletedResource = await TrackedRepresentationFactory.del(resource, options);
+
+    if (!reloadOnDelete) {
+        return deletedResource;
+    }
+
+    // some deleted resources are only logically deleted and thus attributes are updates
+    // reload from the server
+    // the base logic is that once deleted, it is not retrieved again, so set to stale
+    TrackedRepresentationUtil.getState(deletedResource as Tracked<T>).status = Status.stale;
+    return await TrackedRepresentationFactory.load(deletedResource, options);
 }

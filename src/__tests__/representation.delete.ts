@@ -1,8 +1,9 @@
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
 import { TrackedRepresentationFactory } from '../representation/trackedRepresentationFactory';
-import { RepresentationUtil } from '../utils/representationUtil';
 import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
 import { del } from '../representation/delete';
+import { ResourceDeleteOptions } from '../interfaces/resourceDeleteOptions';
+import { RepresentationUtil } from '../utils/representationUtil';
 
 jest.mock('../representation/trackedRepresentationFactory');
 const trackedRepresentationFactory = TrackedRepresentationFactory as jest.Mocked<typeof TrackedRepresentationFactory>;
@@ -81,6 +82,29 @@ describe('resource, delete', () => {
         findInCollectionMock.mockRestore();
     });
 
+    test.each([
+        [
+            'singleton (default path)',
+            {
+                uri: href,
+                sparseType: 'singleton',
+                reloadOnDelete: true,
+            } as ResourceFactoryOptions & ResourceDeleteOptions,
+            1,
+        ],
+    ])('reload options, %s', async (title: string, options: ResourceFactoryOptions & ResourceDeleteOptions, calledTimesDel: number) => {
+
+
+        const resource = SparseRepresentationFactory.make(options);
+        trackedRepresentationFactory.load.mockResolvedValue(resource);
+        trackedRepresentationFactory.del.mockResolvedValue(resource);
+
+        await del(resource, options);
+
+        expect(trackedRepresentationFactory.load).toBeCalled();
+        expect(trackedRepresentationFactory.del).toBeCalledTimes(calledTimesDel);
+
+    });
 });
 
 

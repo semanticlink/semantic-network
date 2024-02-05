@@ -21,4 +21,14 @@ export interface ResourceDeleteOptions {
      * @alias: {@link ResourceQueryOptions.rel}
      */
     readonly rel?: RelationshipType;
+
+    /**
+     * After performing a logical delete, the resource is marked as stale before a reload. This is used which an item
+     * in a collection has archive lifecycles and can be returned via search-type collections.
+     *
+     * Currently only implemented on singleton resources (rather than items in collections)
+     * @default false
+     */
+    readonly reloadOnDelete?: boolean;
+
 }

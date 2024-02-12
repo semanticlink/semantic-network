@@ -9,6 +9,7 @@ import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SingletonMerger } from '../representation/singletonMerger';
 import { instanceOfCollection } from './instanceOf/instanceOfCollection';
 import { instanceOfTrackedRepresentation } from './instanceOf/instanceOfTrackedRepresentation';
+import { parse } from 'cache-control-parser';
 
 const log = anylogger('TrackedRepresentationUtil');
 
@@ -95,7 +96,7 @@ export class TrackedRepresentationUtil {
 
     /**
      * Respects conditional headers from the server on whether to push back through the application cache. Without it,
-     * client developers use 'forceLoad' option too often because requests do not respect the server cache-control
+     * client developers use {@link ResourceFetchOptions.forceLoad} option too often because requests do not respect the server cache-control
      * headers.
      *
      * Note: this code will not attempt to reimplement request headers (that is what browsers already do). However, what
@@ -103,8 +104,20 @@ export class TrackedRepresentationUtil {
      *
      *       @see https://gertjans.home.xs4all.nl/javascript/cache-control.html
      */
-    public static needsFetchFromHeaders<T extends Tracked<LinkedRepresentation>>(resource: T): boolean {
+    public static needsFetchFromHeaders<T extends Tracked<LinkedRepresentation>>(
+        resource: T,
+        options?: ResourceFetchOptions): boolean {
+
+        const { checkCacheControlHeader = false, checkExpiresHeader = true } = { ...options };
         const { headers = {} } = this.getState(resource);
+        const {
+            'expires': expires = undefined,
+            'last-modified': lastModified = undefined,
+            'cache-control': cacheControl = undefined,
+        } = headers;
+
+        const now = new Date();
+
         /*
          * The goal is to leave all heavy lifting to the browser (ie implement caching rules). The key issue
          * here is whether to return the in-memory resource or push through to the browser request (ie xhr).
@@ -112,32 +125,25 @@ export class TrackedRepresentationUtil {
          * The main issue is whether "time" is up and a potential refresh is required. This calculation is the
          * last-modified + max-age. However, the server provides this as an absolute date in the expires header.
          */
-        if (headers.expires) {
-            return new Date() > new Date(headers.expires);
+        if (checkExpiresHeader && expires) {
+            return now > new Date(expires);
         }
 
-        /*
-        // it is possible the expires header is not provided and the following logic may be required in the future
-        // yarn add @tusbar/cache-control
-        // TODO: headers map doesn't allow for title case
-        //
-        const cacheControl = this.headers['cache-control'];
-        if (cacheControl) {
-            const headers = parse(cacheControl);
+        if (checkCacheControlHeader && cacheControl) {
+            const {
+                'max-age': maxAge = undefined,
+                'no-cache': noCache = undefined,
+            } = parse(cacheControl);
 
-            if (headers.maxAge === 0 || headers.noCache) {
+            if (maxAge === 0 || noCache) {
                 return true;
             }
-            if (headers.mustRevalidate) {
-                const lastModified = this.headers['last-modified'];
-                if (lastModified) {
-                    const date = new Date(lastModified);
-                    date.setSeconds(date.getSeconds() + headers.maxAge || 0);
-                    return now > date;
-                }
+            if (lastModified && maxAge) {
+                const date = new Date(lastModified);
+                date.setSeconds(date.getSeconds() + maxAge || 0);
+                return now > date;
             }
         }
-        */
 
         return false;
     }

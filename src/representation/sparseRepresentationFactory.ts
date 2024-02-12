@@ -9,6 +9,8 @@ import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { LinkRelation } from '../linkRelation';
 import { CanonicalOrSelf } from '../utils/comparators/canonicalOrSelf';
 import { FeedItemRepresentation } from '../interfaces/feedItemRepresentation';
+import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
+import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 
 const log = anylogger('SparseRepresentationFactory');
 
@@ -107,18 +109,22 @@ export class SparseRepresentationFactory {
      */
     public static pooledSingletonMakeStrategy<T extends LinkedRepresentation | CollectionRepresentation>(
         pool: CollectionRepresentation, options?: ResourceFactoryOptions): Tracked<T> {
-        const { addStateOn } = { ...options };
+        const { addStateOn, ...opts } = { ...options };
         if (addStateOn) {
-            return SparseRepresentationFactory.makeHydratedPoolSingleton(addStateOn, pool, options);
+            return SparseRepresentationFactory.makeHydratedPoolSingleton(addStateOn, pool, opts);
         } else {
-            return SparseRepresentationFactory.makeSparsePooled(pool, { ...options, addStateOn: undefined });
+            return SparseRepresentationFactory.makeSparsePooled(pool, opts);
         }
     }
 
     private static makeHydrated<T extends LinkedRepresentation>(
         resource: LinkedRepresentation,
         options?: ResourceFactoryOptions): Tracked<T> {
-        const { sparseType = 'singleton', status = Status.hydrated } = { ...options };
+        const {
+            sparseType = 'singleton',
+            status = Status.hydrated,
+            eTag = undefined,
+        } = { ...options };
         if (sparseType === 'feed') {
             throw new Error('Feed type not implemented. Sparse representation must be singleton or collection');
         }
@@ -127,7 +133,7 @@ export class SparseRepresentationFactory {
         // this will include links
         const tracked = {
             ...resource,
-            [state]: new State(status),
+            [state]: new State(status, eTag),
         };
 
         if (instanceOfCollection(resource)) {
@@ -171,16 +177,18 @@ export class SparseRepresentationFactory {
             uri = '', // rather than populate with undefined, default to empty string (unclear why this is a good idea)
             title = undefined,
             lastModified = undefined,
+            eTag = undefined,
             status = options?.uri ? Status.locationOnly : Status.virtual,
             mappedTitle = this.defaultMappedTitleAttributeName,
             mappedTitleFrom = this.defaultMappedFromFeedItemFieldName,
             mappedUpdated = this.defaultMappedUpdatedAttributeName,
             mappedUpdatedFrom = this.defaultMappedFromFeedItemUpdatedFieldName,
+            mappedETagFrom = this.defaultMappedFromFeedItemETagFieldName,
             sparseType = 'singleton',
         } = { ...options };
 
         const sparseResource = {
-            [state]: new State(status),
+            [state]: new State(status, eTag),
             links: [{
                 rel: LinkRelation.Self,
                 href: uri,
@@ -211,6 +219,9 @@ export class SparseRepresentationFactory {
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         lastModified: item[mappedUpdatedFrom],
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        eTag: item[mappedETagFrom],
                     });
                 }
             });
@@ -228,6 +239,9 @@ export class SparseRepresentationFactory {
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     lastModified: feedItem[mappedUpdatedFrom],
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    eTag: feedItem[mappedETagFrom],
                 });
             } else {
                 log.error('Cannot create resource of type \'feedItem\' should be set - returning unknown');
@@ -246,7 +260,11 @@ export class SparseRepresentationFactory {
         resource: LinkedRepresentation,
         pool: CollectionRepresentation,
         options?: ResourceFactoryOptions): Tracked<T> {
-        const { sparseType = 'singleton', status = Status.hydrated } = { ...options };
+        const {
+            sparseType = 'singleton',
+            status = Status.hydrated,
+            eTag = undefined,
+        } = { ...options };
         if (sparseType === 'feed') {
             throw new Error('Feed type not implemented. Sparse representation must be singleton or collection');
         }
@@ -255,7 +273,7 @@ export class SparseRepresentationFactory {
         // this will include links
         const tracked = <Tracked<T>>{
             ...resource,
-            [state]: new State(status),
+            [state]: new State(status, eTag),
         };
 
         if (instanceOfCollection(resource)) {
@@ -282,10 +300,11 @@ export class SparseRepresentationFactory {
     private static makePooledFeedItemResource(
         pool: CollectionRepresentation,
         item: FeedItemRepresentation,
-        options: ResourceFactoryOptions | undefined) {
+        options?: ResourceFactoryOptions) {
+
         const firstMatchingItem = this.firstMatchingFeedItem(pool, item.id);
         if (firstMatchingItem) {
-            return firstMatchingItem;
+            return this.mergeFeedItem(firstMatchingItem, options); // item from the pool
         } else {
             const newItem = this.makeSparse<SingletonRepresentation>({
                 ...options,
@@ -298,17 +317,46 @@ export class SparseRepresentationFactory {
     }
 
     /**
+     * if an incoming feed item is already in the collection AND the incoming has the eTag as part of the feed
+     * then check if the existing item is stale (ie stale if eTags don't match and requires fetch across the wire)
+     *
+     * note: combined with {@link includeItems} items with eTag changes should be refreshed
+     */
+    private static mergeFeedItemETag(
+        resource: LinkedRepresentation | Tracked,
+        options?: ResourceFactoryOptions): LinkedRepresentation {
+
+        if (instanceOfTrackedRepresentation(resource)) {
+            const { eTag = undefined } = { ...options };
+
+            if (eTag) {
+                const state = TrackedRepresentationUtil.getState(resource);
+                const { headers: { ETag } } = state;
+                // it is currently unclear if any status states need to be checked
+                if (ETag && eTag !== ETag /*&& state.status === Status.hydrated*/) {
+                    state.previousStatus = state.status;
+                    state.status = Status.stale;
+                } // else eTags match, don't update
+            } // else no eTag on incoming feed, don't update
+        } else {
+            log.error('Matched feed item in collection should already be a tracked resource. Developer error');
+        }
+        return resource;
+    }
+
+    /**
      *  The resource is to be made as a sparse resource as there is no data provided via
      *  the {@link ResourceFactoryOptions.addStateOn} property. Iff a link has been provided
      *  can the item be fetched from or stored into the pool.
      */
     private static makeSparsePooled<T extends LinkedRepresentation>(
-        pool: CollectionRepresentation, options?: ResourceFactoryOptions): Tracked<T> {
+        pool: CollectionRepresentation,
+        options?: ResourceFactoryOptions): Tracked<T> {
         const { uri } = { ...options };
         if (uri) {
             const firstMatchingItem = this.firstMatchingFeedItem(pool, uri);
             if (firstMatchingItem) {
-                return firstMatchingItem as Tracked<T>; // item from the pool
+                return this.mergeFeedItem(firstMatchingItem, options) as Tracked<T>; // item from the pool
             } else {
                 const sparse = this.makeSparse<T>(options);
                 pool.items.unshift(sparse);   // add item to the pool
@@ -329,9 +377,10 @@ export class SparseRepresentationFactory {
         options?: ResourceFactoryOptions): Tracked<T> {
         const uri = LinkUtil.getUri(resource, CanonicalOrSelf);
         if (uri) {
+
             const firstMatchingItem = this.firstMatchingFeedItem(pool, uri);
             if (firstMatchingItem) {
-                return firstMatchingItem as Tracked<T>; // item from the pool
+                return this.mergeFeedItem(firstMatchingItem, options) as Tracked<T>; // item from the pool
             } else {
                 const hydrated = this.makeHydrated<T>(resource, options);
                 pool.items.unshift(hydrated);   // add item to the pool
@@ -339,6 +388,38 @@ export class SparseRepresentationFactory {
             }
         } else {
             return this.makeHydrated<T>(resource, options);
+        }
+    }
+
+    private static mergeFeedItem<T extends LinkedRepresentation>(resource: T, options?: ResourceFactoryOptions): Tracked<T> {
+        // incoming changes are merged onto the existing: name, title and eTags (which change state)
+        this.mergeFeedItemFields(resource, options);
+        return this.mergeFeedItemETag(resource, options) as Tracked<T>;
+    }
+
+    /**
+     * Any resource requires incoming sparse representation options to be merged into existing resources. This method
+     * will follow any options override mappings
+     *
+     * Note: in practice, this means that incoming feed will be mapped back onto the UI with new feed titles/updatedAt
+     */
+    private static mergeFeedItemFields(resource: LinkedRepresentation, options?: ResourceFactoryOptions): void {
+        const {
+            title = undefined,
+            lastModified = undefined,
+            mappedTitle = this.defaultMappedTitleAttributeName,
+            mappedUpdated = this.defaultMappedUpdatedAttributeName,
+        } = { ...options };
+
+        if (title) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            resource[mappedTitle] = title;
+        }
+        if (title) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            resource[mappedUpdated] = lastModified;
         }
     }
 

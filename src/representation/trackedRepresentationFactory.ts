@@ -1,5 +1,5 @@
 import { CollectionRepresentation, FeedRepresentation, LinkedRepresentation, LinkUtil, Uri } from 'semantic-link';
-import { Tracked } from '../types/types';
+import { StandardResponseHeader, Tracked } from '../types/types';
 import { Status } from './status';
 import { ResourceLinkOptions } from '../interfaces/resourceLinkOptions';
 import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
@@ -167,11 +167,11 @@ export class TrackedRepresentationFactory {
                     trackedState.status = Status.deleted;
                     // mutate the original resource headers
                     // how was it retrieved
-                    trackedState.headers = response?.headers as Record<string, string>;
-                    // save the across-the-wire meta data so we can check for collisions/staleness
+                    trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
+                    // save the across-the-wire metadata, so we can check for collisions/staleness
                     trackedState.retrieved = new Date();
 
-                    return await resource as unknown as T;
+                    return resource as unknown as T;
 
                 } catch (e) {
                     if (isHttpRequestError(e)) {
@@ -225,8 +225,8 @@ export class TrackedRepresentationFactory {
 
                     // mutate the original resource headers
                     // how was it retrieved
-                    trackedState.headers = response.headers as Record<string, string>;
-                    // save the across-the-wire meta data so we can check for collisions/staleness
+                    trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
+                    // save the across-the-wire metadata, so we can check for collisions/staleness
                     trackedState.previousStatus = trackedState.status;
                     trackedState.status = Status.hydrated;
                     // when was it retrieved - for later queries
@@ -305,16 +305,16 @@ export class TrackedRepresentationFactory {
                         return resource;
                 }
 
-                // TODO: check if load due to cache expiry is required.
+                // check if load due to cache expiry is required.
                 if (TrackedRepresentationUtil.needsFetchFromState(resource, options) ||
-                    TrackedRepresentationUtil.needsFetchFromHeaders(resource)) {
+                    TrackedRepresentationUtil.needsFetchFromHeaders(resource, options)) {
                     try {
                         const response = await HttpRequestFactory.Instance().load(resource, rel, options);
 
                         // mutate the original resource headers
                         // how was it retrieved
-                        trackedState.headers = response.headers as Record<string, string>;
-                        // save the across-the-wire meta data so we can check for collisions/staleness
+                        trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
+                        // save the across-the-wire metadata, so we can check for collisions/staleness
                         trackedState.previousStatus = trackedState.status;
                         trackedState.status = Status.hydrated;
                         // when was it retrieved - for later queries
@@ -374,6 +374,18 @@ export class TrackedRepresentationFactory {
         return undefined;
     }
 
+    private static mergeHeaders(
+        trackedHeaders: Record<StandardResponseHeader, string>,
+        responseHeaders: /*RawAxiosHeaders*/ Record<string, string>) {
+        const {
+            'Etag': eTag = {},
+            'Last-Modified': lastModified = {},
+        } = { ...trackedHeaders };
+        // note: etag and last-modified may have been added also at the application level of the feed
+        // so retain but override if existing
+        return { ...eTag, ...lastModified, ...responseHeaders };
+    }
+
     /**
      * Updates the state object based on the error
      *
@@ -389,15 +401,15 @@ export class TrackedRepresentationFactory {
 
             if (response.status === 403) {
                 log.debug(`Request forbidden ${response.status} ${response.statusText} '${uri}'`);
-                // save the across-the-wire meta data so we can check for collisions/staleness
+                // save the across-the-wire metadata, so we can check for collisions/staleness
                 trackedState.status = Status.forbidden;
                 // when was it retrieved
                 trackedState.retrieved = new Date();
                 // how was it retrieved
-                trackedState.headers = response.headers as Record<string, string>;
+                trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
                 /**
                  * On a forbidden resource we are going to let the decision of what to do with
-                 * it lie at the application level. So we'll set the state, etc and return the
+                 * it lie at the application level. So we'll set the state and return the
                  * resource. This means that the application needs to check if it is {@link Status.forbidden}
                  * and decide whether to remove (from say the set, or in the UI dim the item).
                  */

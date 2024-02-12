@@ -60,6 +60,7 @@
   "dependencies": {
     "anylogger": "^1.0.11",
     "bottleneck": "^2.19.5",
+    "cache-control-parser": "^2.0.5",
     "lodash.clonedeep": "^4.5.0",
     "semantic-link": "^1.0.8",
     "tslib": ">=2.6.0"

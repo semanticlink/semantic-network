@@ -25,7 +25,12 @@ export interface ResourceFactoryOptions {
     readonly lastModified?: string;
 
     /**
-     * Explicitly set the {@link State.status} on the resource. Currently, when there is a uri, it is set to location
+     * The ETag set on the sparsely populated resource.
+     */
+    readonly eTag?: string;
+
+    /**
+     * Explicitly set the {@link State} 'status' on the resource. Currently, when there is a uri, it is set to location
      * otherwise, set to unknown
      *
      * @see TrackedRepresentationFactory.make

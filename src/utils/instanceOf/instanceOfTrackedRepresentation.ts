@@ -10,3 +10,4 @@ import { state, Tracked } from '../../types/types';
 export function instanceOfTrackedRepresentation<T extends LinkedRepresentation>(object: unknown | LinkedRepresentation): object is Tracked<T> {
     return instanceOfLinkedRepresentation(object) && (object as Tracked<T>)[state] !== undefined;
 }
+

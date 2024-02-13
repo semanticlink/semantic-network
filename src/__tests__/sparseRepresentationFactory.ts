@@ -155,7 +155,7 @@ describe('Sparse Representation Factory', () => {
                     });
                     it('the item has header etag (default mapping)', () => {
                         const item = resource.items[0] as unknown as Tracked;
-                        const { headers: { ETag: eTag = undefined } } = TrackedRepresentationUtil.getState(item);
+                        const { headers: { etag: eTag = undefined } } = TrackedRepresentationUtil.getState(item);
                         assertThat(eTag).is('45cg');
                     });
                 });
@@ -331,14 +331,22 @@ describe('Sparse Representation Factory', () => {
                 undefined,
             ],
 
-
             [
                 'empty hydrated (undefined) with eTag',
-                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] }, eTag: 'hash1' },
+                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] }, eTag: '"hash1"' },
                 { addStateOn: { links: [], items: [] } },
                 1,
                 Status.hydrated,
-                { ETag: 'hash1' },
+                { etag: '"hash1"' },
+            ],
+
+            [
+                'empty hydrated (undefined) with weak eTag',
+                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] }, eTag: 'W/\"hash1\"' },
+                { addStateOn: { links: [], items: [] } },
+                1,
+                Status.hydrated,
+                { etag: 'W/\"hash1\"' },
             ],
 
 
@@ -348,58 +356,58 @@ describe('Sparse Representation Factory', () => {
                 {
                     addStateOn: {
                         links: [],
-                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: 'hash1' }],
+                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: '"hash1"' }],
                     },
                 },
                 1,
                 Status.locationOnly,
-                { ETag: 'hash1' },
+                { etag: '"hash1"' },
             ],
 
 
             [
                 'An sparse item, where that item is **not** in the pool, adds second ready to load',
-                { uri: '//example.com/item/99', eTag: 'hash99' },
+                { uri: '//example.com/item/99', eTag: '"hash99"' },
                 {
                     addStateOn: {
                         links: [],
-                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: 'hash1' }],
+                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: '"hash1"' }],
                     },
                 },
                 2,
                 Status.locationOnly,
-                { ETag: 'hash1' },
+                { etag: '"hash1"' },
             ],
 
             [
                 'A hydrated item, where that item is already in the pool',
                 {
                     addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] },
-                    eTag: 'hash-updated-ready-for-pool',
+                    eTag: '"hash-updated-ready-for-pool"',
                 },
                 {
                     addStateOn: {
                         links: [],
-                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: 'hash-pooled-1' }],
+                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: '"hash-pooled-1"' }],
                     },
                 },
                 1,
                 Status.stale,
-                { ETag: 'hash-pooled-1' },
+                { etag: '"hash-pooled-1"' },
             ],
 
             [
                 'A hydrated item, where that item is already in the pool, same eTags',
-                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] }, eTag: 'hash1' },
+                { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] }, eTag: '"hash1"' },
                 {
                     addStateOn: {
                         links: [],
-                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: 'hash1' }],
+                        items: [{ id: '//example.com/item/1', title: 'Pool item #1', eTag: '"hash1"' }],
                     },
                 },
                 1,
                 Status.locationOnly,
-                { ETag: 'hash1' },
+                { etag: '"hash1"' },
             ],
 
 
@@ -443,8 +451,8 @@ describe('Sparse Representation Factory', () => {
 
                     it('pool first item has header eTag', () => {
                         // always check the last index (count-1)
-                        const { headers: { ETag } } = TrackedRepresentationUtil.getState(pool.items[poolItemCount - 1] as Tracked);
-                        expect((ETag ? { ETag } : undefined)).toStrictEqual(headers);
+                        const { headers: { etag } } = TrackedRepresentationUtil.getState(pool.items[poolItemCount - 1] as Tracked);
+                        expect((etag ? { etag } : undefined)).toStrictEqual(headers);
                     });
 
                     it('any pool items are singletons', () => {

@@ -21,7 +21,7 @@ export type StandardResponseHeader =
     'Content-Type' |
     'Cookie' |
     'Date' |
-    'ETag' |
+    'etag' |
     'Expect' |
     'Expires' |
     'Forwarded' |

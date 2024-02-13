@@ -41,7 +41,7 @@ export class State {
         this.previousStatus = undefined;
         this.singleton = new Set<string>();
         this.collection = new Set<string>();
-        this.headers = { ...(eTag && { ETag: eTag }) };
+        this.headers = { ...(eTag && { etag: eTag }) };
         this.retrieved = undefined;
     }
 }

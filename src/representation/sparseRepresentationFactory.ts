@@ -331,7 +331,7 @@ export class SparseRepresentationFactory {
 
             if (eTag) {
                 const state = TrackedRepresentationUtil.getState(resource);
-                const { headers: { etag } } = state;
+                const etag = TrackedRepresentationUtil.getETag(resource);
                 // it is currently unclear if any status states need to be checked
                 if (etag && eTag !== etag /*&& state.status === Status.hydrated*/) {
                     state.previousStatus = state.status;

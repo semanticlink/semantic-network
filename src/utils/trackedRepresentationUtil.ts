@@ -19,13 +19,30 @@ export class TrackedRepresentationUtil {
         if (!tracking) {
             const uri = LinkUtil.getUri(resource, LinkRelation.Self);
             if (uri) {
-                log.error('state not found on %s', uri);
+                log.debug('state not found on %s', uri);
             } else {
-                log.error('state not found on unknown');
+                log.debug('state not found on unknown');
             }
         }
         return tracking;
     }
+
+    /**
+     * Looks through into the {@link State} headers for the ETag
+     */
+    public static getETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): string | undefined {
+        const state = this.getState(resource);
+        const { headers: { etag } } = { ...state };
+        return etag;
+    }
+
+    /**
+     * Checks if an eTag exists based on looking through into the {@link State} headers for the ETag
+     */
+    public static hasETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): boolean {
+        return this.getETag(resource) !== undefined;
+    }
+
 
     /**
      * Checks the named child object is tracked on the resource.

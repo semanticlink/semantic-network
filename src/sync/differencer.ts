@@ -1,13 +1,14 @@
 import anylogger from 'anylogger';
 import { CollectionRepresentation, LinkedRepresentation, LinkUtil } from 'semantic-link';
-import { defaultEqualityOperators } from '../utils/comparators';
 import { LinkRelation } from '../linkRelation';
-import { ComparableRepresentation, Comparator } from '../interfaces/comparator';
+import { Comparator } from '../interfaces/comparator';
 import { SyncOptions } from '../interfaces/sync/syncOptions';
 import { CreateType, DeleteType, SyncResultItem, UpdateType } from '../interfaces/sync/types';
 import { SyncInfo } from '../interfaces/sync/syncInfo';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import cloneDeep from 'lodash.clonedeep';
+import { defaultEqualityOperators } from '../utils/comparators/defaultEqualityOperators';
+import { ComparableRepresentation } from '../interfaces/comparableRepresentation';
 
 const log = anylogger('test');
 
@@ -34,7 +35,7 @@ export class Differencer {
      * The most specific and robust equality check is first, with the most vague and
      * optimistic last.
      */
-    static get defaultEqualityOperators(): (Comparator<ComparableRepresentation> | Comparator<LinkedRepresentation>)[] {
+    static get defaultEqualityOperators(): Comparator<ComparableRepresentation>[] {
         return defaultEqualityOperators;
     }
 

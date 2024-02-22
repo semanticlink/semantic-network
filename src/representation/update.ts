@@ -1,4 +1,4 @@
-import { instanceOfUriList } from '../utils/instanceOf';
+import { instanceOfUriList } from '../utils/instanceOf/instanceOfUriList';
 import { LinkedRepresentation, LinkUtil } from 'semantic-link';
 import { ResourceUpdateOptions } from '../interfaces/resourceUpdateOptions';
 import anylogger from 'anylogger';

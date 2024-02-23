@@ -303,8 +303,22 @@ export class SparseRepresentationFactory {
         options?: ResourceFactoryOptions) {
 
         const firstMatchingItem = this.firstMatchingFeedItem(pool, item.id);
+
+        // when found by id merge across the title and the etag
+        // which will then make it stale, etc
         if (firstMatchingItem) {
-            return this.mergeFeedItem(firstMatchingItem, options); // item from the pool
+            const {
+                mappedTitleFrom = this.defaultMappedFromFeedItemFieldName,
+                mappedETagFrom = this.defaultMappedFromFeedItemETagFieldName,
+            } = { ...options };
+
+            const etag = item[mappedETagFrom];
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const title = item[mappedTitleFrom];
+
+            const resourceFactoryOptions = { title, eTag: etag } as ResourceFactoryOptions;
+            return this.mergeFeedItem(firstMatchingItem, { ...resourceFactoryOptions, ...options }); // item from the pool
         } else {
             const newItem = this.makeSparse<SingletonRepresentation>({
                 ...options,

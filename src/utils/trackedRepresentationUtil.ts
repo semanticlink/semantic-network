@@ -28,6 +28,16 @@ export class TrackedRepresentationUtil {
     }
 
     /**
+     * Helper to set resource to stale so that the cache forces need fetch
+     */
+    public static setStale<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): void {
+        if (instanceOfTrackedRepresentation(resource)) {
+            const state = TrackedRepresentationUtil.getState(resource);
+            state.status = Status.stale;
+        }
+    }
+
+    /**
      * Looks through into the {@link State} headers for the ETag
      */
     public static getETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): string | undefined {

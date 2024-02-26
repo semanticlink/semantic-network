@@ -417,7 +417,7 @@ export class SparseRepresentationFactory {
      *
      * Note: in practice, this means that incoming feed will be mapped back onto the UI with new feed titles/updatedAt
      */
-    private static mergeFeedItemFields(resource: LinkedRepresentation, options?: ResourceFactoryOptions): void {
+    private static mergeFeedItemFields(resource: LinkedRepresentation, options?: ResourceFactoryOptions): LinkedRepresentation {
         const {
             title = undefined,
             lastModified = undefined,
@@ -430,11 +430,12 @@ export class SparseRepresentationFactory {
             // @ts-ignore
             resource[mappedTitle] = title;
         }
-        if (title) {
+        if (lastModified) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             resource[mappedUpdated] = lastModified;
         }
+        return resource;
     }
 
     /**

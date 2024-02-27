@@ -93,7 +93,7 @@ describe('Sparse Representation Factory', () => {
             ['items, one, feed lastModified', {
                 defaultItems: [{
                     id: '1',
-                    lastModified: '34vg',
+                    updated: '34vg',
                 }],
             } as ResourceFactoryOptions, 1],
         ])
@@ -129,7 +129,7 @@ describe('Sparse Representation Factory', () => {
                 defaultItems: [{
                     id: '1',
                     title: 'X',
-                    lastModified: '2023-01-31T18:15:33.082549Z',
+                    updated: '2023-01-31T18:15:33.082549Z',
                     eTag: '45cg',
                 }],
             } as ResourceFactoryOptions],

@@ -20,9 +20,9 @@ export interface ResourceFactoryOptions {
     readonly title?: string;
 
     /**
-     * The last modified set on the sparsely populated resource.
+     * The updated set on the sparsely populated resource.
      */
-    readonly lastModified?: string;
+    readonly updated?: string;
 
     /**
      * The ETag set on the sparsely populated resource.

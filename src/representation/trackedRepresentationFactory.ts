@@ -379,11 +379,10 @@ export class TrackedRepresentationFactory {
         responseHeaders: /*RawAxiosHeaders*/ Record<string, string>) {
         const {
             'Etag': eTag = {},
-            'Last-Modified': lastModified = {},
         } = { ...trackedHeaders };
-        // note: etag and last-modified may have been added also at the application level of the feed
+        // note: etag may have been added also at the application level of the feed
         // so retain but override if existing
-        return { ...eTag, ...lastModified, ...responseHeaders };
+        return { ...eTag, ...responseHeaders };
     }
 
     /**

@@ -4,7 +4,7 @@ export interface FeedItemRepresentation extends FIR {
     /**
      * Last modified date of the feed item
      */
-    lastModified?: string;
+    updated?: string;
     /**
      * ETag of the feed item
      */

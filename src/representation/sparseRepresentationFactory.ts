@@ -35,7 +35,7 @@ export class SparseRepresentationFactory {
     public static defaultMappedTitleAttributeName = 'name' as const;
     public static defaultMappedFromFeedItemFieldName = 'title' as const;
     public static defaultMappedUpdatedAttributeName = 'updatedAt' as const;
-    public static defaultMappedFromFeedItemUpdatedFieldName = 'lastModified' as const;
+    public static defaultMappedFromFeedItemUpdatedFieldName = 'updated' as const;
     public static defaultMappedFromFeedItemETagFieldName = 'eTag' as const;
 
     /**
@@ -176,7 +176,7 @@ export class SparseRepresentationFactory {
         const {
             uri = '', // rather than populate with undefined, default to empty string (unclear why this is a good idea)
             title = undefined,
-            lastModified = undefined,
+            updated = undefined,
             eTag = undefined,
             status = options?.uri ? Status.locationOnly : Status.virtual,
             mappedTitle = this.defaultMappedTitleAttributeName,
@@ -202,7 +202,7 @@ export class SparseRepresentationFactory {
             return {
                 ...sparseResource,
                 ...(title && { [mappedTitle]: title }),
-                ...(lastModified && { [mappedUpdated]: lastModified }),
+                ...(updated && { [mappedUpdated]: updated }),
             };
         } else if (sparseType === 'collection') {
             const { defaultItems = [] } = { ...options };
@@ -218,7 +218,7 @@ export class SparseRepresentationFactory {
                         title: item[mappedTitleFrom],
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
-                        lastModified: item[mappedUpdatedFrom],
+                        updated: item[mappedUpdatedFrom],
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         eTag: item[mappedETagFrom],
@@ -238,7 +238,7 @@ export class SparseRepresentationFactory {
                     title: feedItem[mappedTitleFrom],
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
-                    lastModified: feedItem[mappedUpdatedFrom],
+                    updated: feedItem[mappedUpdatedFrom],
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     eTag: feedItem[mappedETagFrom],
@@ -420,7 +420,7 @@ export class SparseRepresentationFactory {
     private static mergeFeedItemFields(resource: LinkedRepresentation, options?: ResourceFactoryOptions): LinkedRepresentation {
         const {
             title = undefined,
-            lastModified = undefined,
+            updated = undefined,
             mappedTitle = this.defaultMappedTitleAttributeName,
             mappedUpdated = this.defaultMappedUpdatedAttributeName,
         } = { ...options };
@@ -430,10 +430,10 @@ export class SparseRepresentationFactory {
             // @ts-ignore
             resource[mappedTitle] = title;
         }
-        if (lastModified) {
+        if (updated) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            resource[mappedUpdated] = lastModified;
+            resource[mappedUpdated] = updated;
         }
         return resource;
     }

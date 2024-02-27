@@ -25,6 +25,7 @@ import { FormRepresentation } from '../interfaces/formRepresentation';
 import { LoaderJobOptions } from '../interfaces/loader';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { defaultRequestOptions } from '../http/defaultRequestOptions';
+import { AxiosRequestConfig } from 'axios';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -280,6 +281,7 @@ export class TrackedRepresentationFactory {
                 getUri = LinkUtil.getUri,
                 includeItems = false,
                 throwOnLoadError = defaultRequestOptions.throwOnLoadError,
+                includeIfNoneMatchesHeaderFromETag = false,
             } = { ...options };
 
             const uri = getUri(resource, rel);
@@ -309,7 +311,17 @@ export class TrackedRepresentationFactory {
                 if (TrackedRepresentationUtil.needsFetchFromState(resource, options) ||
                     TrackedRepresentationUtil.needsFetchFromHeaders(resource, options)) {
                     try {
-                        const response = await HttpRequestFactory.Instance().load(resource, rel, options);
+
+                        const response = await HttpRequestFactory.Instance().load(
+                            resource,
+                            rel,
+                            {
+                                // add eTag detection for when feed items had the eTag included
+                                ...(includeIfNoneMatchesHeaderFromETag && TrackedRepresentationUtil.hasETag(resource) ?
+                                    { headers: { 'if-none-match': TrackedRepresentationUtil.getETag(resource) } } :
+                                    {}),
+                                ...options,
+                            });
 
                         // mutate the original resource headers
                         // how was it retrieved

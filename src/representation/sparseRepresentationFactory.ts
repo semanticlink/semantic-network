@@ -349,7 +349,7 @@ export class SparseRepresentationFactory {
                 // it is currently unclear if any status states need to be checked
                 if (etag && eTag !== etag /*&& state.status === Status.hydrated*/) {
                     state.previousStatus = state.status;
-                    state.status = Status.stale;
+                    state.status = Status.staleFromETag;
                 } // else eTags match, don't update
             } // else no eTag on incoming feed, don't update
         } else {

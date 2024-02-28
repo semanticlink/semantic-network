@@ -102,4 +102,9 @@ export enum Status {
      * to happen when collection item has been deleted, the collection should be marked as stale.
      */
     stale,
+
+    /**
+     * The client-side feed has provided an eTag that marks the resource as needed to be retrieved with 'if-none-match' header.
+     */
+    staleFromETag,
 }

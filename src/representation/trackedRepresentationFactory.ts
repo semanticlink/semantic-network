@@ -25,7 +25,6 @@ import { FormRepresentation } from '../interfaces/formRepresentation';
 import { LoaderJobOptions } from '../interfaces/loader';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { defaultRequestOptions } from '../http/defaultRequestOptions';
-import { AxiosRequestConfig } from 'axios';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -317,9 +316,12 @@ export class TrackedRepresentationFactory {
                             rel,
                             {
                                 // add eTag detection for when feed items had the eTag included
-                                ...(includeIfNoneMatchesHeaderFromETag && TrackedRepresentationUtil.hasETag(resource) ?
-                                    { headers: { 'if-none-match': TrackedRepresentationUtil.getETag(resource) } } :
-                                    {}),
+                                ...(
+                                    includeIfNoneMatchesHeaderFromETag &&
+                                    trackedState.status === Status.staleFromETag &&
+                                    TrackedRepresentationUtil.hasETag(resource) ?
+                                        { headers: { 'if-none-match': TrackedRepresentationUtil.getETag(resource) } } :
+                                        {}),
                                 ...options,
                             });
 

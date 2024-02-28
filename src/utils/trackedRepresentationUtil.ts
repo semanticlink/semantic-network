@@ -106,6 +106,7 @@ export class TrackedRepresentationUtil {
             const fetch = /*status === Status.unknown ||*/
                 status === Status.locationOnly ||
                 status === Status.stale ||
+                status === Status.staleFromETag ||
                 (forceLoad && status === Status.hydrated);
 
             if (fetch) {

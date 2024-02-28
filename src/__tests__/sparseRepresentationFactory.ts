@@ -392,7 +392,7 @@ describe('Sparse Representation Factory', () => {
                     },
                 },
                 1,
-                Status.stale,
+                Status.staleFromETag,
                 { etag: '"hash-pooled-1"' },
             ],
 

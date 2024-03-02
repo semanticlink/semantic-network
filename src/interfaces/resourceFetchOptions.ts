@@ -1,3 +1,4 @@
+import { AddRequestHeaderStrategy } from './addRequestHeaderStrategy';
 
 export interface ResourceFetchOptions {
 
@@ -29,12 +30,19 @@ export interface ResourceFetchOptions {
     readonly checkCacheControlHeader?: boolean;
 
     /**
+     * When set to true, the loader will detect a stale eTag state and then call the provided {@link AddRequestHeaderStrategy}
+     *
+     * @default false (currently experimental)
+     */
+    readonly useStaleEtagStrategy? : boolean;
+
+    /**
      * When set to true, the loader will detect any eTags in the headers and provided back on the request in the 'if-none-match' header
      *
      * This functionality allows the server to provided the eTag in the feed and then detection back through to the server
      *
      * @default false (currently experimental)
      */
-    readonly includeIfNoneMatchesHeaderFromETag? : boolean;
+    readonly defaultStaleEtagAddRequestHeaderStrategy? : AddRequestHeaderStrategy;
 
 }

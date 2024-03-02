@@ -104,3 +104,4 @@ export { CollectionMergerOptions } from './interfaces/collectionMergerOptions';
 export { EqualityUtil } from './utils/equalityUtil';
 export { defaultEqualityOperators } from './utils/comparators/defaultEqualityOperators';
 export { ComparableRepresentation } from './interfaces/comparableRepresentation';
+export { AddRequestHeaderStrategy } from './interfaces/addRequestHeaderStrategy';

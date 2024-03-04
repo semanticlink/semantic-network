@@ -331,8 +331,12 @@ export class TrackedRepresentationFactory {
                         // mutate the original resource headers
                         // how was it retrieved
                         trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
-                        // clear any feed headers, for example eager feed item eTags are no longer needed
-                        trackedState.feedHeaders = {};
+
+                        // clear etag feed headers, for example eager feed item eTags are no longer needed
+                        if (TrackedRepresentationUtil.hasFeedETag(resource) &&
+                            TrackedRepresentationUtil.getETag(resource) === TrackedRepresentationUtil.getFeedETag(resource)) {
+                            TrackedRepresentationUtil.setFeedETag(resource);
+                        }
                         // save the across-the-wire metadata, so we can check for collisions/staleness
                         trackedState.previousStatus = trackedState.status;
                         trackedState.status = Status.hydrated;

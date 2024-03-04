@@ -337,19 +337,14 @@ export class SparseRepresentationFactory {
      * note: combined with {@link includeItems} items with eTag changes should be refreshed
      */
     private static mergeFeedItemETag(
-        resource: LinkedRepresentation | Tracked,
-        options?: ResourceFactoryOptions): LinkedRepresentation {
+        resource: LinkedRepresentation | Tracked/*, options?: ResourceFactoryOptions*/): LinkedRepresentation {
 
         if (instanceOfTrackedRepresentation(resource)) {
-            // const { eTag = undefined } = { ...options };
-
-            // if (eTag) {
             if (TrackedRepresentationUtil.hasStaleETag(resource)) {
                 const state = TrackedRepresentationUtil.getState(resource);
                 state.previousStatus = state.status;
                 state.status = Status.staleFromETag;
             } // else eTags match, don't update
-            // } // else no eTag on incoming feed, don't update
         } else {
             log.error('Matched feed item in collection should already be a tracked resource. Developer error');
         }
@@ -406,7 +401,7 @@ export class SparseRepresentationFactory {
     private static mergeFeedItem<T extends LinkedRepresentation>(resource: T, options?: ResourceFactoryOptions): Tracked<T> {
         // incoming changes are merged onto the existing: name, title and eTags (which change state)
         this.mergeFeedItemFields(resource, options);
-        return this.mergeFeedItemETag(resource, options) as Tracked<T>;
+        return this.mergeFeedItemETag(resource/*, options*/) as Tracked<T>;
     }
 
     /**

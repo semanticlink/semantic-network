@@ -12,6 +12,12 @@ import { AxiosRequestConfig } from 'axios';
  */
 export const loadOnStaleETagAddNoCacheHeaderStrategy: AddRequestHeaderStrategy = (): AxiosRequestConfig => {
     return {
+        /**
+         * WARNING: if this is a CORS request that both pragma and cache-control must be registered as exposed
+         *          Access-Control-Allow-Headers (otherwise failed CORS request in browser)
+         *
+         *          @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Request-Headers
+         */
         headers: {
             // http 1.0 - @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
             'pragma': 'no-cache',

@@ -341,17 +341,15 @@ export class SparseRepresentationFactory {
         options?: ResourceFactoryOptions): LinkedRepresentation {
 
         if (instanceOfTrackedRepresentation(resource)) {
-            const { eTag = undefined } = { ...options };
+            // const { eTag = undefined } = { ...options };
 
-            if (eTag) {
+            // if (eTag) {
+            if (TrackedRepresentationUtil.hasStaleETag(resource)) {
                 const state = TrackedRepresentationUtil.getState(resource);
-                const etag = TrackedRepresentationUtil.getETag(resource);
-                // it is currently unclear if any status states need to be checked
-                if (etag && eTag !== etag /*&& state.status === Status.hydrated*/) {
-                    state.previousStatus = state.status;
-                    state.status = Status.staleFromETag;
-                } // else eTags match, don't update
-            } // else no eTag on incoming feed, don't update
+                state.previousStatus = state.status;
+                state.status = Status.staleFromETag;
+            } // else eTags match, don't update
+            // } // else no eTag on incoming feed, don't update
         } else {
             log.error('Matched feed item in collection should already be a tracked resource. Developer error');
         }

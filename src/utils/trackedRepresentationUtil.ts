@@ -14,6 +14,10 @@ import { parse } from 'cache-control-parser';
 const log = anylogger('TrackedRepresentationUtil');
 
 export class TrackedRepresentationUtil {
+    /**
+     * Return back the internal {@link State} object for tracking and introspection
+     * @param resource
+     */
     public static getState<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): State {
         const tracking = resource[state];
         if (!tracking) {
@@ -28,13 +32,17 @@ export class TrackedRepresentationUtil {
     }
 
     /**
-     * Helper to set resource to stale so that the cache forces need fetch
+     * Helper to set resource to {@link Status.stale}  so that the cache forces need fetch
      */
-    public static setStale<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): void {
-        if (instanceOfTrackedRepresentation(resource)) {
-            const state = TrackedRepresentationUtil.getState(resource);
-            state.status = Status.stale;
-        }
+    public static setStateStale<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): void {
+        this.setState(resource, Status.stale);
+    }
+
+    /**
+     * Helper to set resource to {@link Status.staleFromETag} so that the cache forces need fetch
+     */
+    public static setStateStaleFromETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): void {
+        this.setState(resource, Status.staleFromETag);
     }
 
     /**
@@ -47,12 +55,53 @@ export class TrackedRepresentationUtil {
     }
 
     /**
+     * Looks through into the {@link State} headers for the ETag
+     */
+    public static getFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): string | undefined {
+        const state = this.getState(resource);
+        const { feedHeaders: { etag } } = { ...state };
+        return etag;
+    }
+
+    /**
+     * Sets the value of the feed eTag and if null is provided, it is cleared
+     * @param resource
+     * @param eTag
+     */
+    public static setFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U, eTag?: string): void {
+        const state = this.getState(resource);
+        if (eTag) {
+            state.feedHeaders = { ...state.feedHeaders, etag: eTag };
+        } else {
+            delete state.feedHeaders.etag;
+        }
+    }
+
+    /**
      * Checks if an eTag exists based on looking through into the {@link State} headers for the ETag
      */
     public static hasETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): boolean {
         return this.getETag(resource) !== undefined;
     }
 
+    /**
+     * Checks if an eTag exists based on looking through into the {@link State} headers for the ETag
+     */
+    public static hasFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): boolean {
+        return this.getETag(resource) !== undefined;
+    }
+
+    /**
+     * Checks if the header eTag matches the feed eTag. It is deemed stale when both eTags are present and different
+     * suggesting that the latest is not present
+     */
+    public static hasStaleETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): boolean {
+        const feedETag = this.getFeedETag(resource);
+        const requestETag = this.getETag(resource);
+        return feedETag !== undefined &&
+            requestETag !== undefined &&
+            requestETag !== feedETag;
+    }
 
     /**
      * Checks the named child object is tracked on the resource.
@@ -202,6 +251,13 @@ export class TrackedRepresentationUtil {
             log.warn('target is not a tracked representation and cannot add resource; \'%s\'', LinkUtil.getUri(target, LinkRelation.Self));
         }
         return target;
+    }
+
+    private static setState<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U, status: Status) {
+        if (instanceOfTrackedRepresentation(resource)) {
+            const state = TrackedRepresentationUtil.getState(resource);
+            state.status = status;
+        }
     }
 
     /**

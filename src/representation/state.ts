@@ -36,13 +36,19 @@ export class State {
      */
     retrieved: Date | undefined;
 
+    /**
+     * Header values that are eager provided via a feed. Currently, only eTags are likely to be provided
+     */
+    feedHeaders: Record<StandardResponseHeader | string, string>;
+
     constructor(status?: Status, eTag?: string) {
         this.status = status || Status.unknown;
         this.previousStatus = undefined;
         this.singleton = new Set<string>();
         this.collection = new Set<string>();
-        this.headers = { ...(eTag && { etag: eTag }) };
+        this.headers = {};
         this.retrieved = undefined;
+        this.feedHeaders = { ...(eTag && { etag: eTag }) };
     }
 }
 

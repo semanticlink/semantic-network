@@ -155,7 +155,12 @@ describe('Sparse Representation Factory', () => {
                     });
                     it('the item has header etag (default mapping)', () => {
                         const item = resource.items[0] as unknown as Tracked;
-                        const { headers: { etag: eTag = undefined } } = TrackedRepresentationUtil.getState(item);
+                        const { feedHeaders: { etag: eTag = undefined } } = TrackedRepresentationUtil.getState(item);
+                        assertThat(eTag).is('45cg');
+                    });
+                    it('the item has header etag (default mapping) via Tracked Util', () => {
+                        const item = resource.items[0] as unknown as Tracked;
+                        const eTag = TrackedRepresentationUtil.getFeedETag(item);
                         assertThat(eTag).is('45cg');
                     });
                 });
@@ -321,7 +326,6 @@ describe('Sparse Representation Factory', () => {
     describe('make, pooled collection items as singleton with eTags, checks for stale', () => {
         each([
 
-
             [
                 'empty hydrated (undefined) with no eTag',
                 { addStateOn: { links: [{ rel: 'self', href: '//example.com/item/1' }] } },
@@ -379,6 +383,7 @@ describe('Sparse Representation Factory', () => {
                 { etag: '"hash1"' },
             ],
 
+
             [
                 'A hydrated item, where that item is already in the pool',
                 {
@@ -392,7 +397,7 @@ describe('Sparse Representation Factory', () => {
                     },
                 },
                 1,
-                Status.staleFromETag,
+                Status.locationOnly,
                 { etag: '"hash-pooled-1"' },
             ],
 
@@ -420,7 +425,7 @@ describe('Sparse Representation Factory', () => {
                     poolOptions: ResourceFactoryOptions,
                     poolItemCount: number,
                     itemAtIndexStatus: Status,
-                    headers: Record<StandardResponseHeader | string, string>) => {
+                    feedHeaders: Record<StandardResponseHeader | string, string>) => {
 
                     const pool = SparseRepresentationFactory.make<CollectionRepresentation>(poolOptions);
 
@@ -451,8 +456,8 @@ describe('Sparse Representation Factory', () => {
 
                     it('pool first item has header eTag', () => {
                         // always check the last index (count-1)
-                        const { headers: { etag } } = TrackedRepresentationUtil.getState(pool.items[poolItemCount - 1] as Tracked);
-                        expect((etag ? { etag } : undefined)).toStrictEqual(headers);
+                        const { feedHeaders: { etag } } = TrackedRepresentationUtil.getState(pool.items[poolItemCount - 1] as Tracked);
+                        expect((etag ? { etag } : undefined)).toStrictEqual(feedHeaders);
                     });
 
                     it('any pool items are singletons', () => {

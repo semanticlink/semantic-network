@@ -13,11 +13,11 @@ describe('State', () => {
         expect(state.status).toBe(Status.locationOnly);
     });
     it('should have etag set', () => {
-        const { headers: { etag: eTag = undefined } } = new State(Status.locationOnly, 'xx');
+        const { feedHeaders: { etag: eTag = undefined } } = new State(Status.locationOnly, 'xx');
         expect(eTag).toBe('xx');
     });
     it('should have etag not set', () => {
-        const { headers: { etag: eTag = undefined } } = new State(Status.locationOnly);
+        const { feedHeaders: { etag: eTag = undefined } } = new State(Status.locationOnly);
         expect(eTag).toBe(undefined);
     });
 });

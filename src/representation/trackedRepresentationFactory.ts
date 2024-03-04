@@ -313,19 +313,19 @@ export class TrackedRepresentationFactory {
                     TrackedRepresentationUtil.needsFetchFromHeaders(resource, options)) {
                     try {
 
+                        // add eTag detection for when feed items had the eTag included
+                        // default strategy is to cache bust back to get the latest
+                        // this is really important where the canonical resource has changed (say out of band)
+                        const axiosRequestConfigHeaders = trackedState.status === Status.staleFromETag && useStaleEtagStrategy ?
+                            defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
+                            {};
+
                         const response = await HttpRequestFactory.Instance().load(
                             resource,
                             rel,
                             {
-                                // add eTag detection for when feed items had the eTag included
-                                // default strategy is to cache bust back to get the latest
-                                // this is really important where the canonical resource has changed but
-                                // is harder to detect through its tenanted version
-                                ...(
-                                    trackedState.status === Status.staleFromETag &&
-                                    useStaleEtagStrategy &&
-                                    defaultStaleEtagAddRequestHeaderStrategy(resource, options)),
                                 ...options,
+                                ...axiosRequestConfigHeaders,
                             });
 
                         // mutate the original resource headers

@@ -320,7 +320,7 @@ export class TrackedRepresentationFactory {
                             defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
                             {};
 
-                        const response = await HttpRequestFactory.Instance().load(
+                        let response = await HttpRequestFactory.Instance().load(
                             resource,
                             rel,
                             {
@@ -332,9 +332,24 @@ export class TrackedRepresentationFactory {
                         // how was it retrieved
                         trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
 
-                        // clear etag feed headers, for example eager feed item eTags are no longer needed
-                        if (TrackedRepresentationUtil.hasFeedETag(resource) &&
-                            TrackedRepresentationUtil.getETag(resource) === TrackedRepresentationUtil.getFeedETag(resource)) {
+                        // retry strategy if the eTags aren't matching
+                        if (TrackedRepresentationUtil.hasFeedETag(resource)) {
+                            if (TrackedRepresentationUtil.getETag(resource) !== TrackedRepresentationUtil.getFeedETag(resource)) {
+                                // feed item is out of date and need to do extra request
+                                const axiosRequestConfigHeaders = useStaleEtagStrategy ?
+                                    defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
+                                    {};
+                                // retry with strategy (ie no cache)
+                                response = await HttpRequestFactory.Instance().load(
+                                    resource,
+                                    rel,
+                                    {
+                                        ...options,
+                                        ...axiosRequestConfigHeaders,
+                                    });
+                                trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
+                            }
+                            // clear the eTags
                             TrackedRepresentationUtil.setFeedETag(resource);
                         }
                         // save the across-the-wire metadata, so we can check for collisions/staleness

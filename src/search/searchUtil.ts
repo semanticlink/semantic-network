@@ -12,13 +12,13 @@ import { create } from '../representation/create';
 import { DocumentRepresentation } from '../interfaces/document';
 import { CollectionMerger } from '../representation/collectionMerger';
 import { LinkRelation } from '../linkRelation';
-import ResourceUtil from '../utils/resourceUtil';
+import { ResourceUtil } from '../utils/resourceUtil';
 import { get } from '../representation/get';
 import { EqualityUtil } from '../utils/equalityUtil';
 
 const log = anylogger('SearchUtil');
 
-export default class SearchUtil {
+export class SearchUtil {
 
     /**
      * Create or get a tracked resource that is a collection to store search collections. It
@@ -91,10 +91,8 @@ export default class SearchUtil {
             searchRel = LinkRelation.Search,
             searchName = undefined,
             searchPooledPrefix = '.pooled-',
+            ...opts
         } = { ...options };
-
-        // TODO: be better to strip {@link PooledSearchOptions} options going forward
-        // need a clone without/omit Omit<ApiOptions, keyof<CollectionMergerOptions>>
 
         const pooledResource = SearchUtil.makePooledCollection(context, {
             ...options,
@@ -104,21 +102,21 @@ export default class SearchUtil {
         const searchResource = await get(
             context,
             {
-                ...options,
+                ...opts,
                 rel: searchRel,
             }) as CollectionRepresentation<T>;
 
         const results = await create(
             document,
             {
-                ...options,
+                ...opts,
                 createContext: searchResource,
                 makeSparseStrategy: (options) => pooledCollectionMakeStrategy(pooledResource, options),
             }) as CollectionRepresentation;
 
         if (results) {
             // search collections don't want to merge the result links into the original search links
-            CollectionMerger.merge(searchResource, results, { mergeLinks: false, ...options });
+            CollectionMerger.merge(searchResource, results, { mergeLinks: false, ...opts });
         } else {
             log.debug('no search results available');
         }

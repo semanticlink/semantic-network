@@ -1,4 +1,4 @@
-import SearchUtil from '../../search/searchUtil';
+import { SearchUtil } from '../../search/searchUtil';
 import { CollectionRepresentation } from 'semantic-link';
 import { SparseRepresentationFactory } from '../../representation/sparseRepresentationFactory';
 import { assertThat, match } from 'mismatched';

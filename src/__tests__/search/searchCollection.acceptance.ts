@@ -1,4 +1,4 @@
-import SearchUtil from '../../search/searchUtil';
+import { SearchUtil } from '../../search/searchUtil';
 import {
     CollectionRepresentation,
     FeedRepresentation,

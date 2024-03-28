@@ -1,7 +1,7 @@
 import { ApiOptions } from '../interfaces/apiOptions';
 import { LinkRelConvertUtil } from './linkRelConvertUtil';
 
-export default class ResourceUtil {
+export class ResourceUtil {
     /**
      * Given a set of {@link ApiOptions}, use the {@link ApiOptions.name} and {@ApiOptions.rel}
      * properties to determine a name.

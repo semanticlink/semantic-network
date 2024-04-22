@@ -1,4 +1,11 @@
-import { CollectionRepresentation, FeedRepresentation, LinkedRepresentation, LinkUtil, Uri } from 'semantic-link';
+import {
+    CollectionRepresentation,
+    FeedRepresentation,
+    instanceOfLinkedRepresentation,
+    LinkedRepresentation,
+    LinkUtil,
+    Uri,
+} from 'semantic-link';
 import { SingletonRepresentation, state, Tracked } from '../types/types';
 import { State } from './state';
 import { Status } from './status';
@@ -125,47 +132,47 @@ export class SparseRepresentationFactory {
             status = Status.hydrated,
             eTag = undefined,
         } = { ...options };
+
         if (sparseType === 'feed') {
             throw new Error('Feed type not implemented. Sparse representation must be singleton or collection');
         }
 
-        // make up a tracked resource for both singleton and collection (and forms)
-        // this will include links
-        const tracked = {
-            ...resource,
-            [state]: new State(status, eTag),
-        };
+        /*
+         * The passed in resource cannot be mutated because in libraries like Vue2 the bindings will be lost
+         */
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        resource[state] = new State(status, eTag);
 
         if (instanceOfCollection(resource)) {
-            // create collection
-
             // collection requires feed items to be sparsely populated
             // should be able to know from feedOnly state
-            const feedRepresentation = resource as unknown as FeedRepresentation;
             // TODO: need to know this coming out of load
-            if (!instanceOfFeed(resource)) {
-                log.warn('Resource does not look like a feed');
+            if (instanceOfFeed(resource)) {
+                // make collection items
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                resource.items = (resource as unknown as FeedRepresentation)
+                    .items
+                    .map(x => this.makeSparse<SingletonRepresentation>({
+                        ...options,
+                        sparseType: 'feed',
+                        feedItem: x,
+                    }));
+            } else {
+                /*
+                 * Case where the resources already exist and state is to be added after it has been added in-memory
+                 */
+                for (const item of resource.items) {
+                    if (instanceOfLinkedRepresentation(resource) && !instanceOfTrackedRepresentation(resource)) {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        item[state] = new State(status);
+                    }
+                }
             }
-
-            const items = feedRepresentation
-                .items
-                .map(x => this.makeSparse<SingletonRepresentation>({
-                    ...options,
-                    sparseType: 'feed',
-                    feedItem: x,
-                }));
-
-            // make collection and items
-            // note: the assumption is that collections don't have other attributes
-            return {
-                ...tracked,
-                items: [...items],
-                // TODO: struggling with typing on CollectionRepresentation<T> where the items are a TrackedRepresentation<T>
-            } as unknown as Tracked<T>;
-        } else { // a singleton, a form (but not a collection)
-            // make a singleton (or form)
-            return tracked as Tracked<T>;
-        }
+        } // else singleton
+        return resource as Tracked<T>;
     }
 
     /**

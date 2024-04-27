@@ -11,6 +11,7 @@ import { TrackedRepresentationFactory } from '../../representation/trackedRepres
 import { HttpRequestFactory } from '../../http/httpRequestFactory';
 import { bottleneckLoader } from '../../http/bottleneckLoader';
 import { AxiosResponse } from 'axios';
+import { EqualityUtil } from '../../utils/equalityUtil';
 
 describe('pooled search collection acceptance', () => {
 
@@ -203,6 +204,60 @@ describe('pooled search collection acceptance', () => {
             expect(get).toHaveBeenCalledTimes(gets);
 
             const results = await SearchUtil.search(resource, { search: 'x' }, { includeItems: true });
+            expect(get).toHaveBeenCalledTimes(addGets(3 + 1 /* includeItems: true */));
+            expect(post).toHaveBeenCalledTimes(addPosts(1));
+
+            await SearchUtil.search(resource, { search: 'x2' });
+            expect(get).toHaveBeenCalledTimes(addGets(1));
+            expect(post).toHaveBeenCalledTimes(addPosts(1));
+
+
+            await SearchUtil.search(resource, { search: 'x3' });
+            expect(get).toHaveBeenCalledTimes(addGets(1));
+            expect(post).toHaveBeenCalledTimes(addPosts(1));
+
+            await SearchUtil.search(resource, { search: 'x2' }, { includeItems: true });
+            expect(get).toHaveBeenCalledTimes(addGets(1 + 2));
+            expect(post).toHaveBeenCalledTimes(addPosts(1));
+
+            expect(results).toBeDefined();
+
+            expect(LinkUtil.matches(results, 'should-not-be-copied')).toBeFalsy();
+            expect(LinkUtil.getUri(results, 'up')).toBe('up-x');
+
+            expect(get).toHaveBeenCalledTimes(gets);
+            expect(post).toHaveBeenCalledTimes(posts);
+            expect(del).not.toHaveBeenCalled();
+            expect(put).not.toHaveBeenCalled();
+        });
+        it('creates search collection etag aware', async () => {
+
+            const resource = await TrackedRepresentationFactory.load(SparseRepresentationFactory.make({
+                uri: 'http://api.example.com/role',
+                sparseType: 'collection',
+            }));
+
+            let posts = 0;
+            let gets = 1;
+
+            const addPosts = (increment: number): number => {
+                posts += increment;
+                return posts;
+            };
+            const addGets = (increment: number): number => {
+                gets += increment;
+                return gets;
+            };
+
+            expect(get).toHaveBeenCalledTimes(gets);
+
+            const results = await SearchUtil.search(
+                resource,
+                { search: 'x' },
+                {
+                    includeItems: true,
+                    equalityMatcher: EqualityUtil.matchesIdAndETag,
+                });
             expect(get).toHaveBeenCalledTimes(addGets(3 + 1 /* includeItems: true */));
             expect(post).toHaveBeenCalledTimes(addPosts(1));
 

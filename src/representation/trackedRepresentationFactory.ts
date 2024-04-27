@@ -340,6 +340,7 @@ export class TrackedRepresentationFactory {
                                     defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
                                     {};
                                 // retry with strategy (ie no cache)
+                                log.debug('ETags do not match: load again');
                                 response = await HttpRequestFactory.Instance().load(
                                     resource,
                                     rel,
@@ -526,7 +527,7 @@ export class TrackedRepresentationFactory {
         //  - any in existing but not in response are removed from existing
         //  - any in response but not in existing are added
         // the result is to reduce network retrieval because existing hydrated items are not response
-        resource = CollectionMerger.merge(resource, fromFeed, options);
+        resource = CollectionMerger.merge(resource, fromFeed, { ...options, mergeHeaders: false });
 
         // hydrate items is required (also, merged hydrated items won't go back across the network
         // unless there is a {@link forceLoad}

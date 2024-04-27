@@ -95,6 +95,9 @@ export class SparseRepresentationFactory {
 
     /**
      * Find the first matching item in a collection. Match by URI.
+     *
+     * At this stage, it is really unlikely that this will ever match on eTag for identity at this point. ETag
+     * checking is later on in the pipeline (ie versioning is later)
      */
     public static firstMatchingFeedItem<T extends LinkedRepresentation>(
         collection: CollectionRepresentation<T>, id: Uri): T | undefined {
@@ -324,8 +327,8 @@ export class SparseRepresentationFactory {
             // @ts-ignore
             const title = item[mappedTitleFrom];
 
-            const resourceFactoryOptions = { title, eTag: etag } as ResourceFactoryOptions;
-            return this.mergeFeedItem(firstMatchingItem, { ...resourceFactoryOptions, ...options }); // item from the pool
+            // const resourceFactoryOptions = { title, eTag: etag } as ResourceFactoryOptions;
+            return this.mergeFeedItem(firstMatchingItem, {  ...options, title, eTag: etag }); // item from the pool
         } else {
             const newItem = this.makeSparse<SingletonRepresentation>({
                 ...options,
@@ -344,10 +347,23 @@ export class SparseRepresentationFactory {
      * note: combined with {@link includeItems} items with eTag changes should be refreshed
      */
     private static mergeFeedItemETag(
-        resource: LinkedRepresentation | Tracked/*, options?: ResourceFactoryOptions*/): LinkedRepresentation {
+        resource: LinkedRepresentation | Tracked, options?: ResourceFactoryOptions): LinkedRepresentation {
+
+        const { eTag } = { ...options };
+
 
         if (instanceOfTrackedRepresentation(resource)) {
-            if (TrackedRepresentationUtil.hasStaleETag(resource)) {
+
+            if (eTag) {
+                const previousFeedETag = TrackedRepresentationUtil.getFeedETag(resource);
+                if (previousFeedETag !== eTag) {
+                    const state = TrackedRepresentationUtil.getState(resource);
+                    state.previousStatus = state.status;
+                    state.status = Status.staleFromETag;
+                    // update the feed item eTag with the new incoming—which mostly is the same but can be updated
+                    TrackedRepresentationUtil.setFeedETag(resource, eTag);
+                }
+            } else if (TrackedRepresentationUtil.hasStaleETag(resource)) {
                 const state = TrackedRepresentationUtil.getState(resource);
                 state.previousStatus = state.status;
                 state.status = Status.staleFromETag;
@@ -408,7 +424,7 @@ export class SparseRepresentationFactory {
     private static mergeFeedItem<T extends LinkedRepresentation>(resource: T, options?: ResourceFactoryOptions): Tracked<T> {
         // incoming changes are merged onto the existing: name, title and eTags (which change state)
         this.mergeFeedItemFields(resource, options);
-        return this.mergeFeedItemETag(resource/*, options*/) as Tracked<T>;
+        return this.mergeFeedItemETag(resource, options) as Tracked<T>;
     }
 
     /**

@@ -1,5 +1,5 @@
 import { LinkedRepresentation, LinkUtil } from 'semantic-link';
-import { state, Tracked } from '../types/types';
+import { StandardResponseHeader, state, Tracked } from '../types/types';
 import { State } from '../representation/state';
 import anylogger from 'anylogger';
 import { LinkRelation } from '../linkRelation';
@@ -27,6 +27,17 @@ export class TrackedRepresentationUtil {
             } else {
                 log.debug('state not found on unknown');
             }
+        }
+        return tracking;
+    }
+
+    /**
+     * Set the headers inside the internal {@link State} object for tracking and introspection
+     */
+    public static setHeaders<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U, headers: Record<StandardResponseHeader | string, string>): State {
+        const tracking = resource[state];
+        if (tracking) {
+            tracking.headers = headers;
         }
         return tracking;
     }

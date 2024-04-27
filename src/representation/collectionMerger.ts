@@ -3,7 +3,9 @@ import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import anylogger from 'anylogger';
 import { CanonicalOrSelf } from '../utils/comparators/canonicalOrSelf';
 import { CollectionMergerOptions } from '../interfaces/collectionMergerOptions';
-import { EqualityUtil } from '../utils/equalityUtil';
+import { defaultEqualityMatcher } from '../utils/equalityUtil';
+import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
+import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
 
 const log = anylogger('CollectionMerger');
 
@@ -24,7 +26,10 @@ export class CollectionMerger {
         rvalue: T,
         options?: ResourceAssignOptions & CollectionMergerOptions): T {
 
-        const { equalityOperator = CanonicalOrSelf } = { ...options };
+        const {
+            equalityOperator = CanonicalOrSelf,
+            equalityMatcher = defaultEqualityMatcher,
+        } = { ...options };
         const { items } = lvalue;
 
         if (!items) {
@@ -35,41 +40,34 @@ export class CollectionMerger {
             } else {
                 lvalue.items = [];
             }
-
-            return lvalue;
-        }
-
-        if (rvalue.items?.length > 0) {
-            // rvalue is NOT empty
-            // find all the indexes that match and sort highest to lowest
-            // if not sorted, the index position changes relative to what was taken out
-            /*
-            const excludes = rvalue
-                .items
-                .map((item) => lvalue.items.findIndex(r => canonicalOrSelf(item, r)))
-                .filter(x => x >= 0);
-            */
-
-            const indexes: number[] = items
-                .map((item, index) => {
-                    const found = rvalue.items.findIndex(r => EqualityUtil.matches(item, r, equalityOperator));
-                    // when found in rvalue retain the corresponding lvalue index for removal
-                    // mark -1 to those that are not to bbe removed
-                    return found >= 0 ? -1 : index;
-                })
-                // keep just the indexes to remove
-                .filter(x => x >= 0)
-                // sorted tail --> head (descending)
-                .sort((a, b) => b - a);
-
-            // removed starting from the tail each item so that indexes remain correct
-            for (const index of indexes) {
-                lvalue.items.splice(index, 1);
-            }
         } else {
-            // clear out the list because rvalue is empty
-            lvalue.items.splice(0, lvalue.items.length);
+
+            if (rvalue.items?.length > 0) {
+
+                const indexes: number[] = items
+                    .map((item, index) => {
+                        const found = rvalue.items.findIndex(r => {
+                            return equalityMatcher(item, r, equalityOperator);
+                        });
+                        // when found in rvalue retain the corresponding lvalue index for removal
+                        // mark -1 to those that are not to bbe removed
+                        return found >= 0 ? -1 : index;
+                    })
+                    // keep just the indexes to remove
+                    .filter(x => x >= 0)
+                    // sorted tail --> head (descending)
+                    .sort((a, b) => b - a);
+
+                // removed starting from the tail each item so that indexes remain correct
+                for (const index of indexes) {
+                    lvalue.items.splice(index, 1);
+                }
+            } else {
+                // clear out the list because rvalue is empty
+                lvalue.items.splice(0, lvalue.items.length);
+            }
         }
+
         return lvalue;
     }
 
@@ -85,8 +83,11 @@ export class CollectionMerger {
         lvalue: T,
         rvalue: T,
         options?: ResourceAssignOptions & CollectionMergerOptions): T {
-        const { equalityOperator = CanonicalOrSelf } = { ...options };
 
+        const {
+            equalityOperator = CanonicalOrSelf,
+            equalityMatcher = defaultEqualityMatcher,
+        } = { ...options };
         const { items } = lvalue;
 
         if (!items) {
@@ -97,14 +98,11 @@ export class CollectionMerger {
             } else {
                 lvalue.items = [];
             }
-            return lvalue;
-        }
-
-        if (rvalue.items) {
+        } else if (rvalue.items) {
             // create a set of items in rvalue that don't exist
             const include = rvalue
                 .items
-                .filter(item => items.findIndex(r => EqualityUtil.matches(item, r, equalityOperator)) < 0);
+                .filter(item => items.findIndex(r => equalityMatcher(item, r, equalityOperator)) < 0);
 
             // add into the set at the tail
             lvalue.items.splice(lvalue.items.length, 0, ...include);
@@ -128,7 +126,12 @@ export class CollectionMerger {
         rvalue: T,
         options?: ResourceAssignOptions & CollectionMergerOptions): T {
 
-        const { set, mergeLinks = true } = { ...options };
+        const {
+            set,
+            mergeLinks = true,
+            mergeHeaders = true,
+        } = { ...options };
+
         if (mergeLinks) {
             if (set) {
                 // update the links
@@ -137,6 +140,13 @@ export class CollectionMerger {
                 set(lvalue, 'links', rvalue.links);
             } else {
                 Object.assign(lvalue.links, rvalue.links);
+            }
+        }
+
+        if (mergeHeaders) {
+            if (instanceOfTrackedRepresentation(lvalue) && instanceOfTrackedRepresentation(rvalue)) {
+                const { headers } = TrackedRepresentationUtil.getState(rvalue);
+                TrackedRepresentationUtil.setHeaders(lvalue, headers);
             }
         }
 

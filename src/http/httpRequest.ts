@@ -34,6 +34,7 @@ export class HttpRequest {
 
         const { getFactory = this.options.getFactory } = { ...options };
 
+        // TODO: does the id factory needs to be eTag aware?
         // note: leaving media type out of id
         const id = LinkUtil.getUri(link, rel);
         if (id) {

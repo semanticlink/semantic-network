@@ -61,8 +61,9 @@ export class TrackedRepresentationUtil {
      */
     public static getETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): string | undefined {
         const state = this.getState(resource);
-        const { headers: { etag } } = { ...state };
-        return etag;
+        // permissive naming strategy for eTags
+        const { headers: { etag, ETag, eTag } } = { ...state };
+        return etag || ETag || eTag;
     }
 
     /**
@@ -70,8 +71,9 @@ export class TrackedRepresentationUtil {
      */
     public static getFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): string | undefined {
         const state = this.getState(resource);
-        const { feedHeaders: { etag } } = { ...state };
-        return etag;
+        // permissive naming strategy for eTags
+        const { feedHeaders: { etag, ETag, eTag } } = { ...state };
+        return etag || ETag || eTag;
     }
 
     /**
@@ -99,14 +101,14 @@ export class TrackedRepresentationUtil {
      * Checks if an eTag exists based on looking through into the {@link State} headers for the ETag
      */
     public static hasFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): boolean {
-        return this.getETag(resource) !== undefined;
+        return this.getFeedETag(resource) !== undefined;
     }
 
     /**
      * Checks if the header eTag matches the feed eTag. It is deemed stale when both eTags are present and different
      * suggesting that the latest is not present
      */
-    public static hasStaleETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): boolean {
+    public static hasStaleFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): boolean {
         const feedETag = this.getFeedETag(resource);
         const requestETag = this.getETag(resource);
         return feedETag !== undefined &&

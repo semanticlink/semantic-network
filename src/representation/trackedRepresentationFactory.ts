@@ -315,7 +315,7 @@ export class TrackedRepresentationFactory {
 
                         // add eTag detection for when feed items had the eTag included
                         // default strategy is to cache bust back to get the latest
-                        // this is really important where the canonical resource has changed (say out of band)
+                        // this is really important where the resource has changed (say out of band)
                         const axiosRequestConfigHeaders = trackedState.status === Status.staleFromETag && useStaleEtagStrategy ?
                             defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
                             {};
@@ -334,7 +334,7 @@ export class TrackedRepresentationFactory {
 
                         // retry strategy if the eTags aren't matching
                         if (TrackedRepresentationUtil.hasFeedETag(resource)) {
-                            if (TrackedRepresentationUtil.getETag(resource) !== TrackedRepresentationUtil.getFeedETag(resource)) {
+                            if (TrackedRepresentationUtil.hasStaleFeedETag(resource)) {
                                 // feed item is out of date and need to do extra request
                                 const axiosRequestConfigHeaders = useStaleEtagStrategy ?
                                     defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
@@ -351,7 +351,7 @@ export class TrackedRepresentationFactory {
                                 trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
                             }
                             // clear the eTags
-                            TrackedRepresentationUtil.setFeedETag(resource);
+                            // TrackedRepresentationUtil.setFeedETag(resource);
                         }
                         // save the across-the-wire metadata, so we can check for collisions/staleness
                         trackedState.previousStatus = trackedState.status;

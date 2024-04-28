@@ -328,7 +328,7 @@ export class SparseRepresentationFactory {
             const title = item[mappedTitleFrom];
 
             // const resourceFactoryOptions = { title, eTag: etag } as ResourceFactoryOptions;
-            return this.mergeFeedItem(firstMatchingItem, {  ...options, title, eTag: etag }); // item from the pool
+            return this.mergeFeedItem(firstMatchingItem, { ...options, title, eTag: etag }); // item from the pool
         } else {
             const newItem = this.makeSparse<SingletonRepresentation>({
                 ...options,
@@ -347,13 +347,13 @@ export class SparseRepresentationFactory {
      * note: combined with {@link includeItems} items with eTag changes should be refreshed
      */
     private static mergeFeedItemETag(
-        resource: LinkedRepresentation | Tracked, options?: ResourceFactoryOptions): LinkedRepresentation {
+        resource: LinkedRepresentation | Tracked,
+        options?: ResourceFactoryOptions): LinkedRepresentation {
 
         const { eTag } = { ...options };
 
-
         if (instanceOfTrackedRepresentation(resource)) {
-
+            // factory passed in eTag on newly created resources
             if (eTag) {
                 const previousFeedETag = TrackedRepresentationUtil.getFeedETag(resource);
                 if (previousFeedETag !== eTag) {
@@ -363,7 +363,8 @@ export class SparseRepresentationFactory {
                     // update the feed item eTag with the new incoming—which mostly is the same but can be updated
                     TrackedRepresentationUtil.setFeedETag(resource, eTag);
                 }
-            } else if (TrackedRepresentationUtil.hasStaleETag(resource)) {
+                // look inside the resource that may have been already hydrated and has an eTag value in the headers
+            } else if (TrackedRepresentationUtil.hasStaleFeedETag(resource)) {
                 const state = TrackedRepresentationUtil.getState(resource);
                 state.previousStatus = state.status;
                 state.status = Status.staleFromETag;

@@ -202,8 +202,8 @@ export class TrackedRepresentationUtil {
         const { headers = {} } = this.getState(resource);
         const {
             'expires': expires = undefined,
-            'last-modified': lastModified = undefined,
             'cache-control': cacheControl = undefined,
+            'date': date = undefined,
         } = headers;
 
         const now = new Date();
@@ -213,13 +213,16 @@ export class TrackedRepresentationUtil {
          * here is whether to return the in-memory resource or push through to the browser request (ie xhr).
          *
          * The main issue is whether "time" is up and a potential refresh is required. This calculation is the
-         * last-modified + max-age. However, the server provides this as an absolute date in the expires header.
+         * last-modified + max-age. The server provides this as an absolute date in the expires header.
          */
         if (checkExpiresHeader && expires) {
+            // TODO: be able to inject this as a override-able strategy
             return now > new Date(expires);
         }
 
+        // TODO: be able to inject this as a override-able strategy
         if (checkCacheControlHeader && cacheControl) {
+            // TODO: be able to inject this as a override-able strategy
             const {
                 'max-age': maxAge = undefined,
                 'no-cache': noCache = undefined,
@@ -228,10 +231,12 @@ export class TrackedRepresentationUtil {
             if (maxAge === 0 || noCache) {
                 return true;
             }
-            if (lastModified && maxAge) {
-                const date = new Date(lastModified);
-                date.setSeconds(date.getSeconds() + maxAge || 0);
-                return now > date;
+
+            // date will need to be exposed (eg as CORS headers—Access-Control-Expose-Headers: Date)
+            if (date && maxAge) {
+                const d = new Date(date);
+                d.setSeconds(d.getSeconds() + maxAge || 0);
+                return now > d;
             }
         }
 

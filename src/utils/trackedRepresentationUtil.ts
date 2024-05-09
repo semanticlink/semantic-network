@@ -9,7 +9,7 @@ import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SingletonMerger } from '../representation/singletonMerger';
 import { instanceOfCollection } from './instanceOf/instanceOfCollection';
 import { instanceOfTrackedRepresentation } from './instanceOf/instanceOfTrackedRepresentation';
-import { CheckHeaders } from '../representation/checkCacheControlHeaderStrategy';
+import { CheckHeaders } from '../representation/checkHeaders';
 
 const log = anylogger('TrackedRepresentationUtil');
 

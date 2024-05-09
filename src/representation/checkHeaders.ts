@@ -1,6 +1,5 @@
 import { parse } from 'cache-control-parser';
-
-export type CheckHeaderStrategy = (headers: Record<string, string>, now: Date) => boolean;
+import { CheckHeaderStrategy } from '../interfaces/checkHeaderStrategy';
 
 /**
  * The goal is to leave all heavy lifting to the browser (ie implement caching rules). The key issue
@@ -42,7 +41,7 @@ export class CheckHeaders {
      */
     public static checkExpiresBeforeDateHeaderStrategy(headers: Record<string, string>): boolean {
         const {
-            'date': date = undefined,
+            date = undefined,
             expires = undefined,
         } = headers;
 

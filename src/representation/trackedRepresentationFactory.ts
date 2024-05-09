@@ -25,7 +25,8 @@ import { FormRepresentation } from '../interfaces/formRepresentation';
 import { LoaderJobOptions } from '../interfaces/loader';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { defaultRequestOptions } from '../http/defaultRequestOptions';
-import { loadOnStaleETagAddNoCacheHeaderStrategy } from './loadOnStaleETagAddNoCacheHeaderStrategy';
+import { RequestHeaders } from './requestHeaders';
+import { AxiosRequestConfig } from 'axios';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -281,8 +282,7 @@ export class TrackedRepresentationFactory {
                 getUri = LinkUtil.getUri,
                 includeItems = false,
                 throwOnLoadError = defaultRequestOptions.throwOnLoadError,
-                useStaleEtagStrategy = false,
-                defaultStaleEtagAddRequestHeaderStrategy = loadOnStaleETagAddNoCacheHeaderStrategy,
+                requestHeadersStrategies = RequestHeaders.defaultStrategies,
             } = { ...options };
 
             const uri = getUri(resource, rel);
@@ -313,12 +313,8 @@ export class TrackedRepresentationFactory {
                     TrackedRepresentationUtil.needsFetchFromHeaders(resource, options)) {
                     try {
 
-                        // add eTag detection for when feed items had the eTag included
-                        // default strategy is to cache bust back to get the latest
-                        // this is really important where the resource has changed (say out of band)
-                        const axiosRequestConfigHeaders = trackedState.status === Status.staleFromETag && useStaleEtagStrategy ?
-                            defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
-                            {};
+                        const axiosRequestConfigHeaders = requestHeadersStrategies.reduce<AxiosRequestConfig>(
+                            (acc, curr) => ({ ...acc, ...(curr(resource, options)) }), RequestHeaders.emptyHeaders);
 
                         let response = await HttpRequestFactory.Instance().load(
                             resource,
@@ -336,9 +332,10 @@ export class TrackedRepresentationFactory {
                         if (TrackedRepresentationUtil.hasFeedETag(resource)) {
                             if (TrackedRepresentationUtil.hasStaleFeedETag(resource)) {
                                 // feed item is out of date and need to do extra request
-                                const axiosRequestConfigHeaders = useStaleEtagStrategy ?
-                                    defaultStaleEtagAddRequestHeaderStrategy(resource, options) :
-                                    {};
+
+                                const axiosRequestConfigHeaders = requestHeadersStrategies.reduce<AxiosRequestConfig>(
+                                    (acc, curr) => ({ ...acc, ...(curr(resource, options)) }), RequestHeaders.emptyHeaders);
+
                                 // retry with strategy (ie no cache)
                                 log.debug('ETags do not match: load again');
                                 response = await HttpRequestFactory.Instance().load(

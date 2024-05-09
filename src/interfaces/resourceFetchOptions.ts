@@ -1,5 +1,6 @@
 import { AddRequestHeaderStrategy } from './addRequestHeaderStrategy';
-import { CheckHeaderStrategy } from '../representation/checkCacheControlHeaderStrategy';
+
+import { CheckHeaderStrategy } from './checkHeaderStrategy';
 
 export interface ResourceFetchOptions {
 
@@ -33,7 +34,10 @@ export interface ResourceFetchOptions {
      * This functionality allows the server to provide the eTag in the feed and then detection back through to the server
      *
      * @default false (currently experimental)
+     * @deprecated use {@link axiosRequestConfigHeadersStrategies}
      */
     readonly defaultStaleEtagAddRequestHeaderStrategy? : AddRequestHeaderStrategy;
+
+    readonly requestHeadersStrategies?: AddRequestHeaderStrategy[];
 
 }

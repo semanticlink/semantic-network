@@ -105,4 +105,4 @@ export { EqualityUtil } from './utils/equalityUtil';
 export { defaultEqualityOperators } from './utils/comparators/defaultEqualityOperators';
 export { ComparableRepresentation } from './interfaces/comparableRepresentation';
 export { AddRequestHeaderStrategy } from './interfaces/addRequestHeaderStrategy';
-export { CheckHeaders } from './representation/checkCacheControlHeaderStrategy';
+export { CheckHeaders } from './representation/checkHeaders';

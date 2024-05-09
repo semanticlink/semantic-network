@@ -9,7 +9,7 @@ import { ResourceAssignOptions } from '../interfaces/resourceAssignOptions';
 import { SingletonMerger } from '../representation/singletonMerger';
 import { instanceOfCollection } from './instanceOf/instanceOfCollection';
 import { instanceOfTrackedRepresentation } from './instanceOf/instanceOfTrackedRepresentation';
-import { parse } from 'cache-control-parser';
+import { CheckHeaders } from '../representation/checkCacheControlHeaderStrategy';
 
 const log = anylogger('TrackedRepresentationUtil');
 
@@ -198,45 +198,16 @@ export class TrackedRepresentationUtil {
         resource: T,
         options?: ResourceFetchOptions): boolean {
 
-        const { checkCacheControlHeader = false, checkExpiresHeader = true } = { ...options };
-        const { headers = {} } = this.getState(resource);
         const {
-            'expires': expires = undefined,
-            'cache-control': cacheControl = undefined,
-            'date': date = undefined,
-        } = headers;
+            checkHeaderStrategies = CheckHeaders.defaultStrategies,
+        } = { ...options };
 
+        const { headers = {} } = this.getState(resource);
         const now = new Date();
 
-        /*
-         * The goal is to leave all heavy lifting to the browser (ie implement caching rules). The key issue
-         * here is whether to return the in-memory resource or push through to the browser request (ie xhr).
-         *
-         * The main issue is whether "time" is up and a potential refresh is required. This calculation is the
-         * last-modified + max-age. The server provides this as an absolute date in the expires header.
-         */
-        if (checkExpiresHeader && expires) {
-            // TODO: be able to inject this as a override-able strategy
-            return now > new Date(expires);
-        }
-
-        // TODO: be able to inject this as a override-able strategy
-        if (checkCacheControlHeader && cacheControl) {
-            // TODO: be able to inject this as a override-able strategy
-            const {
-                'max-age': maxAge = undefined,
-                'no-cache': noCache = undefined,
-            } = parse(cacheControl);
-
-            if (maxAge === 0 || noCache) {
+        for (const strategy of checkHeaderStrategies) {
+            if (strategy(headers, now)) {
                 return true;
-            }
-
-            // date will need to be exposed (eg as CORS headers—Access-Control-Expose-Headers: Date)
-            if (date && maxAge) {
-                const d = new Date(date);
-                d.setSeconds(d.getSeconds() + maxAge || 0);
-                return now > d;
             }
         }
 
@@ -297,6 +268,5 @@ export class TrackedRepresentationUtil {
         name: K): boolean {
         return this.getState(resource).collection.has(name as string);
     }
-
-
 }
+

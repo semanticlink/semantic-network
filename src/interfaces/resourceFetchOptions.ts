@@ -1,4 +1,5 @@
 import { AddRequestHeaderStrategy } from './addRequestHeaderStrategy';
+import { CheckHeaderStrategy } from '../representation/checkCacheControlHeaderStrategy';
 
 export interface ResourceFetchOptions {
 
@@ -14,20 +15,10 @@ export interface ResourceFetchOptions {
     readonly forceLoadFeedOnly?: boolean;
 
     /**
-     * When set to true, the next check on the resource looks through the expires header (if avaiable) to check whether the resource
-     * requires fetching
-     *
-     * @default true
+     * Set of strategies to check where the resource based on its headers requires fetching. Override this the default
+     * to change
      */
-    readonly checkExpiresHeader?: boolean;
-
-    /**
-     * When set to true, the next check on the resource looks through the cache-control headers (if available) to check whether the resource
-     * requires fetching
-     *
-     * @default true
-     */
-    readonly checkCacheControlHeader?: boolean;
+    checkHeaderStrategies?: CheckHeaderStrategy[];
 
     /**
      * When set to true, the loader will detect a stale eTag state and then call the provided {@link AddRequestHeaderStrategy}

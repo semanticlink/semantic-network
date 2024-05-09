@@ -52,7 +52,7 @@ export class CheckHeaders {
     /**
      * Looks through the 'cache-control' headers and checks for max-age and no-cache.
      */
-    public static checkNoCacheHeaderStrategy(headers: Record<string, string>, now: Date): boolean {
+    public static checkNoCacheHeaderStrategy(headers: Record<string, string>): boolean {
         const {
             'cache-control': cacheControl = undefined,
         } = headers;

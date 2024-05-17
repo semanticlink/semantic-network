@@ -90,10 +90,10 @@ export enum Status {
     forbidden,
 
     /**
-     * This resource is a client-side artifact which is a place holder for other resources. As such, there
+     * This resource is a client-side artifact which is a placeholder for other resources. As such, there
      * is no server-side resource to be retrieved. It is used rarely and is more of the group of
      * {@link unknown}, {@link locationOnly} - however, we know that we will never retrieve it
-     * unlike {@link unknown} where it may or may not be update with a location.
+     * unlike {@link unknown} where it may or may not be updated with a location.
      */
     virtual,
 

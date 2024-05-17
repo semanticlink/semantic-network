@@ -26,16 +26,23 @@ export class RequestHeaders {
             'cache-control': 'no-cache',
         },
     };
-
     public static emptyHeaders: AxiosRequestConfig = {
         headers: {},
     };
-
-
     public static defaultStrategies: AddRequestHeaderStrategy[] = [
+        RequestHeaders.ifNoneMatchesOnStaleEtagStatusHeaderStrategy,
         RequestHeaders.noCacheOnStaleEtagStatusHeaderStrategy,
         RequestHeaders.noCacheOnStaleExpiresHeaderStrategy,
     ];
+
+    public static conditionalGetHeaders = (documentResource: Tracked): AxiosRequestConfig =>
+        ({
+            headers: {
+                'if-none-match': TrackedRepresentationUtil.getETag(documentResource),
+                'if-modified-since': TrackedRepresentationUtil.getState(documentResource).headers['Last-Modified'] ||
+                    TrackedRepresentationUtil.getState(documentResource).headers['Date'],
+            },
+        });
 
     /**
      * Add eTag detection for when feed items had the eTag included. Provides the request with a no-cache directive for http 1.0/1.1/2.
@@ -53,8 +60,23 @@ export class RequestHeaders {
 
         if (useStaleEtagStrategy) {
             const trackedState = TrackedRepresentationUtil.getState(resource);
-            if (trackedState.status === Status.staleFromETag) {
+            if (trackedState.status === Status.staleFromETag && !TrackedRepresentationUtil.hasETag(resource)) {
                 return RequestHeaders.noCacheHeader;
+            }
+        }
+
+        return RequestHeaders.emptyHeaders;
+    }
+
+    public static ifNoneMatchesOnStaleEtagStatusHeaderStrategy(resource: Tracked, options?: ResourceFetchOptions): AxiosRequestConfig {
+        const {
+            useStaleEtagStrategy = false,
+        } = { ...options };
+
+        if (useStaleEtagStrategy) {
+            const trackedState = TrackedRepresentationUtil.getState(resource);
+            if (trackedState.status === Status.staleFromETag && TrackedRepresentationUtil.hasETag(resource)) {
+                return RequestHeaders.conditionalGetHeaders(resource);
             }
         }
 
@@ -65,7 +87,7 @@ export class RequestHeaders {
      *  Detect that the resource has a stale 'expires' header
      */
     public static noCacheOnStaleExpiresHeaderStrategy(resource: Tracked): AxiosRequestConfig {
-        const { headers  } = TrackedRepresentationUtil.getState(resource);
+        const { headers } = TrackedRepresentationUtil.getState(resource);
 
         if (headers && CheckHeaders.checkExpiresBeforeDateHeaderStrategy(headers)) {
             return RequestHeaders.noCacheHeader;

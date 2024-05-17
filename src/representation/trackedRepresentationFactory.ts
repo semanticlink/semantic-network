@@ -332,6 +332,7 @@ export class TrackedRepresentationFactory {
                         if (TrackedRepresentationUtil.hasFeedETag(resource)) {
                             if (TrackedRepresentationUtil.hasStaleFeedETag(resource)) {
                                 // feed item is out of date and need to do extra request
+                                TrackedRepresentationUtil.setStateStaleFromETag(resource);
 
                                 const axiosRequestConfigHeaders = requestHeadersStrategies.reduce<AxiosRequestConfig>(
                                     (acc, curr) => ({ ...acc, ...(curr(resource, options)) }), RequestHeaders.emptyHeaders);

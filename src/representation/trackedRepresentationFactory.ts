@@ -26,7 +26,7 @@ import { LoaderJobOptions } from '../interfaces/loader';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { defaultRequestOptions } from '../http/defaultRequestOptions';
 import { RequestHeaders } from './requestHeaders';
-import { AxiosRequestConfig } from 'axios';
+import { AxiosHeaders, AxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -313,7 +313,7 @@ export class TrackedRepresentationFactory {
                     TrackedRepresentationUtil.needsFetchFromHeaders(resource, options)) {
                     try {
 
-                        const axiosRequestConfigHeaders = requestHeadersStrategies.reduce<AxiosRequestConfig>(
+                        const requestHeaders = requestHeadersStrategies.reduce<Partial<RawAxiosRequestHeaders | AxiosHeaders>>(
                             (acc, curr) => ({ ...acc, ...(curr(resource, options)) }), RequestHeaders.emptyHeaders);
 
                         let response = await HttpRequestFactory.Instance().load(
@@ -321,7 +321,7 @@ export class TrackedRepresentationFactory {
                             rel,
                             {
                                 ...options,
-                                ...axiosRequestConfigHeaders,
+                                ...{ headers: requestHeaders } as AxiosRequestConfig,
                             });
 
                         // mutate the original resource headers
@@ -334,7 +334,7 @@ export class TrackedRepresentationFactory {
                                 // feed item is out of date and need to do extra request
                                 TrackedRepresentationUtil.setStateStaleFromETag(resource);
 
-                                const axiosRequestConfigHeaders = requestHeadersStrategies.reduce<AxiosRequestConfig>(
+                                const requestHeaders = requestHeadersStrategies.reduce<Partial<RawAxiosRequestHeaders | AxiosHeaders>>(
                                     (acc, curr) => ({ ...acc, ...(curr(resource, options)) }), RequestHeaders.emptyHeaders);
 
                                 // retry with strategy (ie no cache)
@@ -344,7 +344,7 @@ export class TrackedRepresentationFactory {
                                     rel,
                                     {
                                         ...options,
-                                        ...axiosRequestConfigHeaders,
+                                        ...{ headers: requestHeaders } as AxiosRequestConfig,
                                     });
                                 trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
                             }

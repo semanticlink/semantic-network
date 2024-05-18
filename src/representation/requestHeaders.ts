@@ -1,5 +1,5 @@
 import { AddRequestHeaderStrategy } from '../interfaces/addRequestHeaderStrategy';
-import { AxiosRequestConfig } from 'axios';
+import { AxiosHeaders, RawAxiosRequestHeaders } from 'axios';
 import { Tracked } from '../types/types';
 import { ResourceFetchOptions } from '../interfaces/resourceFetchOptions';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
@@ -18,30 +18,27 @@ export class RequestHeaders {
      *
      *          @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Request-Headers
      */
-    public static noCacheHeader: AxiosRequestConfig = {
-        headers: {
-            // http 1.0 - @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
-            'pragma': 'no-cache',
-            // http 1.1/2
-            'cache-control': 'no-cache',
-        },
+    public static noCacheHeader: Partial<RawAxiosRequestHeaders | AxiosHeaders> = {
+        // http 1.0 - @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
+        'pragma': 'no-cache',
+        // http 1.1/2
+        'cache-control': 'no-cache',
     };
-    public static emptyHeaders: AxiosRequestConfig = {
+    public static emptyHeaders: Partial<RawAxiosRequestHeaders | AxiosHeaders> = {
         headers: {},
     };
+
     public static defaultStrategies: AddRequestHeaderStrategy[] = [
         RequestHeaders.ifNoneMatchesOnStaleEtagStatusHeaderStrategy,
         RequestHeaders.noCacheOnStaleEtagStatusHeaderStrategy,
         RequestHeaders.noCacheOnStaleExpiresHeaderStrategy,
     ];
 
-    public static conditionalGetHeaders = (documentResource: Tracked): AxiosRequestConfig =>
+    public static conditionalGetHeaders = (documentResource: Tracked): Partial<RawAxiosRequestHeaders | AxiosHeaders> =>
         ({
-            headers: {
-                'if-none-match': TrackedRepresentationUtil.getETag(documentResource),
-                'if-modified-since': TrackedRepresentationUtil.getState(documentResource).headers['Last-Modified'] ||
-                    TrackedRepresentationUtil.getState(documentResource).headers['Date'],
-            },
+            'if-none-match': TrackedRepresentationUtil.getETag(documentResource),
+            'if-modified-since': TrackedRepresentationUtil.getState(documentResource).headers['last-modified'] ||
+                    TrackedRepresentationUtil.getState(documentResource).headers['date'],
         });
 
     /**
@@ -53,7 +50,7 @@ export class RequestHeaders {
      *
      * In effect, this strategy mimics the "disable cache" mechanism if performing a manual intervention
      */
-    public static noCacheOnStaleEtagStatusHeaderStrategy(resource: Tracked, options?: ResourceFetchOptions): AxiosRequestConfig {
+    public static noCacheOnStaleEtagStatusHeaderStrategy(resource: Tracked, options?: ResourceFetchOptions): Partial<RawAxiosRequestHeaders | AxiosHeaders> {
         const {
             useStaleEtagStrategy = false,
         } = { ...options };
@@ -68,7 +65,7 @@ export class RequestHeaders {
         return RequestHeaders.emptyHeaders;
     }
 
-    public static ifNoneMatchesOnStaleEtagStatusHeaderStrategy(resource: Tracked, options?: ResourceFetchOptions): AxiosRequestConfig {
+    public static ifNoneMatchesOnStaleEtagStatusHeaderStrategy(resource: Tracked, options?: ResourceFetchOptions): Partial<RawAxiosRequestHeaders | AxiosHeaders> {
         const {
             useStaleEtagStrategy = false,
         } = { ...options };
@@ -86,7 +83,7 @@ export class RequestHeaders {
     /**
      *  Detect that the resource has a stale 'expires' header
      */
-    public static noCacheOnStaleExpiresHeaderStrategy(resource: Tracked): AxiosRequestConfig {
+    public static noCacheOnStaleExpiresHeaderStrategy(resource: Tracked): Partial<RawAxiosRequestHeaders | AxiosHeaders> {
         const { headers } = TrackedRepresentationUtil.getState(resource);
 
         if (headers && CheckHeaders.checkExpiresBeforeDateHeaderStrategy(headers)) {

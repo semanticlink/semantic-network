@@ -69,7 +69,7 @@ export class RepresentationUtil {
                 resourceIdentifier = uri;
             } else {
                 log.debug(
-                    'find resource in collection: not found — no \'where\' and \'rel\' options that combine to create resource identifieron \'%s\'',
+                    'find resource in collection: not found — no \'where\' and \'rel\' options that combine to create resource identifier on \'%s\'',
                     rel || LinkRelation.Self,
                     LinkUtil.getUri(collection, LinkRelation.Self));
                 return undefined;
@@ -80,7 +80,7 @@ export class RepresentationUtil {
                 resourceIdentifier = uri;
             } else {
                 log.debug(
-                    'find resource in collection: not found — no \'where\' and link selector \'%s\' options that combine to create resource identifier on \'%s\'',
+                    'find resource in collection: not found — no \'where\' and link selector \'%o\' options that combine to create resource identifier on \'%s\'',
                     where,
                     LinkUtil.getUri(collection, LinkRelation.Self));
                 return undefined;

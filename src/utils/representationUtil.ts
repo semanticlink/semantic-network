@@ -52,7 +52,7 @@ export class RepresentationUtil {
         options?: ResourceQueryOptions): Nullable<T> {
 
         if (!collection || !instanceOfCollection(collection)) {
-            log.error(`find resource in collection failed: not an instance of collection — '${LinkUtil.getUri(collection, LinkRelation.Self, undefined)}'`);
+            log.error(`find resource in collection: failed — not an instance of collection '${LinkUtil.getUri(collection, LinkRelation.Self)}'`);
             return undefined;
         }
 
@@ -68,7 +68,10 @@ export class RepresentationUtil {
             if (uri) {
                 resourceIdentifier = uri;
             } else {
-                log.error('find resource in collection failed: no \'where\' and \'rel\' options that combine to create resource identifier');
+                log.debug(
+                    'find resource in collection: not found — no \'where\' and \'rel\' options that combine to create resource identifieron \'%s\'',
+                    rel || LinkRelation.Self,
+                    LinkUtil.getUri(collection, LinkRelation.Self));
                 return undefined;
             }
         } else if (instanceOfLinkSelector(where)) {
@@ -76,7 +79,10 @@ export class RepresentationUtil {
             if (uri) {
                 resourceIdentifier = uri;
             } else {
-                log.error('find resource in collection failed: no \'where\' and link selector options that combine to create resource identifier');
+                log.debug(
+                    'find resource in collection: not found — no \'where\' and link selector \'%s\' options that combine to create resource identifier on \'%s\'',
+                    where,
+                    LinkUtil.getUri(collection, LinkRelation.Self));
                 return undefined;
             }
         } else if (Array.isArray(where)) {
@@ -101,7 +107,7 @@ export class RepresentationUtil {
 
         const resourceTitle = getResourceTitle(where);
 
-        log.debug('find resource in collection: \'%s\' \'%s\' \'%s\'', name, resourceTitle);
+        log.debug('find resource in collection: \'%s\' \'%s\'', name, resourceTitle);
 
         // go through the collection and match the URI against either a link relation or attribute
         return collection

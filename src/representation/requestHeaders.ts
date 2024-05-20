@@ -5,6 +5,7 @@ import { ResourceFetchOptions } from '../interfaces/resourceFetchOptions';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { Status } from './status';
 import { CheckHeaders } from './checkHeaders';
+import { dateToGMTHeader } from '../utils/dateToGMTHeader';
 
 /**
  * The goal is to leave all heavy lifting to the browser (ie implement caching rules). The key issue
@@ -35,9 +36,11 @@ export class RequestHeaders {
 
     public static conditionalGetHeaders = (documentResource: Tracked): Partial<RawAxiosRequestHeaders | AxiosHeaders> =>
         ({
-            'if-none-match': TrackedRepresentationUtil.getETag(documentResource),
-            'if-modified-since': TrackedRepresentationUtil.getState(documentResource).headers['last-modified'] ||
-                TrackedRepresentationUtil.getState(documentResource).headers['date'],
+            'if-none-match': TrackedRepresentationUtil.getFeedETag(documentResource),
+            'if-modified-since': TrackedRepresentationUtil.getFeedLastModified(documentResource) ||
+                TrackedRepresentationUtil.getState(documentResource).headers['last-modified'] ||
+                TrackedRepresentationUtil.getState(documentResource).headers['date'] ||
+                dateToGMTHeader(new Date().toUTCString()),
         });
 
     /**
@@ -67,7 +70,7 @@ export class RequestHeaders {
 
         if (useStaleEtagStrategy) {
             const trackedState = TrackedRepresentationUtil.getState(resource);
-            if (trackedState.status === Status.staleFromETag && TrackedRepresentationUtil.hasETag(resource)) {
+            if (trackedState.status === Status.staleFromETag && TrackedRepresentationUtil.hasFeedETag(resource)) {
                 return RequestHeaders.conditionalGetHeaders(resource);
             }
         }

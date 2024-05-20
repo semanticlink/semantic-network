@@ -106,3 +106,4 @@ export { defaultEqualityOperators } from './utils/comparators/defaultEqualityOpe
 export { ComparableRepresentation } from './interfaces/comparableRepresentation';
 export { AddRequestHeaderStrategy } from './interfaces/addRequestHeaderStrategy';
 export { CheckHeaders } from './representation/checkHeaders';
+export { dateToGMTHeader } from './utils/dateToGMTHeader';

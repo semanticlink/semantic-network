@@ -282,7 +282,6 @@ export class TrackedRepresentationFactory {
                 getUri = LinkUtil.getUri,
                 includeItems = false,
                 throwOnLoadError = defaultRequestOptions.throwOnLoadError,
-                requestHeadersStrategies = RequestHeaders.defaultStrategies,
             } = { ...options };
 
             const uri = getUri(resource, rel);
@@ -313,16 +312,28 @@ export class TrackedRepresentationFactory {
                     TrackedRepresentationUtil.needsFetchFromHeaders(resource, options)) {
                     try {
 
-                        const requestHeaders = requestHeadersStrategies.reduce<Partial<RawAxiosRequestHeaders | AxiosHeaders>>(
-                            (acc, curr) => ({ ...acc, ...(curr(resource, options)) }), RequestHeaders.emptyHeaders);
+                        const loadResource = async (options?: ResourceQueryOptions & ResourceFetchOptions) => {
+                            const {
+                                rel = LinkRelation.Self,
+                                requestHeadersStrategies = RequestHeaders.defaultStrategies,
+                                ...opts
+                            } = { ...options };
 
-                        let response = await HttpRequestFactory.Instance().load(
-                            resource,
-                            rel,
-                            {
-                                ...options,
-                                ...{ headers: requestHeaders } as AxiosRequestConfig,
-                            });
+                            const requestHeaders = requestHeadersStrategies.reduce<Partial<RawAxiosRequestHeaders | AxiosHeaders>>(
+                                (acc, curr) => ({ ...acc, ...(curr(resource, opts)) }), RequestHeaders.emptyHeaders);
+
+                            return await HttpRequestFactory
+                                .Instance()
+                                .load(
+                                    resource,
+                                    rel,
+                                    {
+                                        ...options,
+                                        ...{ headers: requestHeaders } as AxiosRequestConfig,
+                                    });
+                        };
+
+                        let response = await loadResource(options);
 
                         // mutate the original resource headers
                         // how was it retrieved
@@ -334,18 +345,10 @@ export class TrackedRepresentationFactory {
                                 // feed item is out of date and need to do extra request
                                 TrackedRepresentationUtil.setStateStaleFromETag(resource);
 
-                                const requestHeaders = requestHeadersStrategies.reduce<Partial<RawAxiosRequestHeaders | AxiosHeaders>>(
-                                    (acc, curr) => ({ ...acc, ...(curr(resource, options)) }), RequestHeaders.emptyHeaders);
-
                                 // retry with strategy (ie no cache)
                                 log.debug('ETags do not match: load again');
-                                response = await HttpRequestFactory.Instance().load(
-                                    resource,
-                                    rel,
-                                    {
-                                        ...options,
-                                        ...{ headers: requestHeaders } as AxiosRequestConfig,
-                                    });
+                                response = await loadResource(options);
+
                                 trackedState.headers = this.mergeHeaders(trackedState.headers, response.headers as Record<string, string>);
                             }
                             // clear the eTags

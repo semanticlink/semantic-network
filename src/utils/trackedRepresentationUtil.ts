@@ -10,6 +10,7 @@ import { SingletonMerger } from '../representation/singletonMerger';
 import { instanceOfCollection } from './instanceOf/instanceOfCollection';
 import { instanceOfTrackedRepresentation } from './instanceOf/instanceOfTrackedRepresentation';
 import { CheckHeaders } from '../representation/checkHeaders';
+import { dateToGMTHeader } from './dateToGMTHeader';
 
 const log = anylogger('TrackedRepresentationUtil');
 
@@ -77,14 +78,30 @@ export class TrackedRepresentationUtil {
     }
 
     /**
-     * Sets the value of the feed eTag and if null is provided, it is cleared
-     * @param resource
-     * @param eTag
+     * Looks through into the {@link State} headers for the 'last-modified'
      */
-    public static setFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U, eTag?: string): void {
+    public static getFeedLastModified<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U): string | undefined {
         const state = this.getState(resource);
+        // permissive naming strategy for eTags
+        const { feedHeaders: { 'last-modified': lastModified } } = { ...state };
+        return lastModified;
+    }
+
+    /**
+     * Sets the value of the feed eTag and if null is provided, it is cleared
+     */
+    public static setFeedETag<T extends LinkedRepresentation, U extends Tracked<T>>(resource: U, eTag?: string, lastModified?: string): void {
+        const state = this.getState(resource);
+
+        // ensure that UTC dates are converted across to GMT headers
+        const lastModifiedHeader = dateToGMTHeader(lastModified);
+
         if (eTag) {
-            state.feedHeaders = { ...state.feedHeaders, etag: eTag };
+            state.feedHeaders = {
+                ...state.feedHeaders,
+                etag: eTag,
+                ...(lastModifiedHeader && { 'last-modified': lastModifiedHeader }),
+            };
         } else {
             delete state.feedHeaders.etag;
         }

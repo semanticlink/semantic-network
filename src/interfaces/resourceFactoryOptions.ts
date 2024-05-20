@@ -25,9 +25,14 @@ export interface ResourceFactoryOptions {
     readonly updated?: string;
 
     /**
-     * The ETag set on the sparsely populated resource.
+     * The ETag set in the State on the sparsely populated resource.
      */
     readonly eTag?: string;
+
+    /**
+     * The 'last-modified' set in the State on the sparsely populated resource.
+     */
+    readonly lastModified?: string;
 
     /**
      * Explicitly set the {@link State} 'status' on the resource. Currently, when there is a uri, it is set to location

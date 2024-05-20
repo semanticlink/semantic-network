@@ -198,7 +198,7 @@ export class SparseRepresentationFactory {
         } = { ...options };
 
         const sparseResource = {
-            [state]: new State(status, eTag),
+            [state]: new State(status, eTag, updated),
             links: [{
                 rel: LinkRelation.Self,
                 href: uri,
@@ -283,7 +283,7 @@ export class SparseRepresentationFactory {
         // this will include links
         const tracked = <Tracked<T>>{
             ...resource,
-            [state]: new State(status, eTag),
+            [state]: new State(status, eTag /* currently no last modified passed through */),
         };
 
         if (instanceOfCollection(resource)) {
@@ -320,6 +320,7 @@ export class SparseRepresentationFactory {
             const {
                 mappedTitleFrom = this.defaultMappedFromFeedItemFieldName,
                 mappedETagFrom = this.defaultMappedFromFeedItemETagFieldName,
+                mappedUpdatedFrom = this.defaultMappedFromFeedItemUpdatedFieldName,
             } = { ...options };
 
             const etag = item[mappedETagFrom];
@@ -327,8 +328,12 @@ export class SparseRepresentationFactory {
             // @ts-ignore
             const title = item[mappedTitleFrom];
 
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const lastModified = item[mappedUpdatedFrom];
+
             // const resourceFactoryOptions = { title, eTag: etag } as ResourceFactoryOptions;
-            return this.mergeFeedItem(firstMatchingItem, { ...options, title, eTag: etag }); // item from the pool
+            return this.mergeFeedItem(firstMatchingItem, { ...options, title, eTag: etag, lastModified }); // item from the pool
         } else {
             const newItem = this.makeSparse<SingletonRepresentation>({
                 ...options,
@@ -350,7 +355,7 @@ export class SparseRepresentationFactory {
         resource: LinkedRepresentation | Tracked,
         options?: ResourceFactoryOptions): LinkedRepresentation {
 
-        const { eTag } = { ...options };
+        const { eTag, lastModified } = { ...options };
 
         if (instanceOfTrackedRepresentation(resource)) {
             // factory passed in eTag on newly created resources
@@ -361,7 +366,7 @@ export class SparseRepresentationFactory {
                     state.previousStatus = state.status;
                     state.status = Status.staleFromETag;
                     // update the feed item eTag with the new incoming—which mostly is the same but can be updated
-                    TrackedRepresentationUtil.setFeedETag(resource, eTag);
+                    TrackedRepresentationUtil.setFeedETag(resource, eTag, lastModified);
                 }
                 // look inside the resource that may have been already hydrated and has an eTag value in the headers
             } else if (TrackedRepresentationUtil.hasStaleFeedETag(resource)) {

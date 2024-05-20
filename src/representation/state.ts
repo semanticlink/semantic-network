@@ -1,6 +1,7 @@
 import { Status } from './status';
 import { StandardResponseHeader } from '../types/types';
 import { HttpRequestError } from '../interfaces/httpRequestError';
+import { dateToGMTHeader } from '../utils/dateToGMTHeader';
 
 export class State {
 
@@ -41,14 +42,21 @@ export class State {
      */
     feedHeaders: Record<StandardResponseHeader | string, string>;
 
-    constructor(status?: Status, eTag?: string) {
+    constructor(status?: Status, eTag?: string, lastModified?: string) {
+
+        // ensure that UTC dates are converted across to GMT headers
+        const lastModifiedHeader = dateToGMTHeader(lastModified);
+
         this.status = status || Status.unknown;
         this.previousStatus = undefined;
         this.singleton = new Set<string>();
         this.collection = new Set<string>();
         this.headers = {};
         this.retrieved = undefined;
-        this.feedHeaders = { ...(eTag && { etag: eTag }) };
+        this.feedHeaders = {
+            ...(eTag && { etag: eTag }),
+            ...(lastModifiedHeader && { 'last-modified': lastModifiedHeader }),
+        };
     }
 }
 

@@ -29,7 +29,6 @@ export class RequestHeaders {
     public static emptyHeaders: Partial<RawAxiosRequestHeaders | AxiosHeaders> = {};
 
     public static defaultStrategies: AddRequestHeaderStrategy[] = [
-        RequestHeaders.ifNoneMatchesOnStaleEtagStatusHeaderStrategy,
         RequestHeaders.noCacheOnStaleEtagStatusHeaderStrategy,
         RequestHeaders.noCacheOnStaleExpiresHeaderStrategy,
     ];
@@ -57,7 +56,7 @@ export class RequestHeaders {
 
         if (useStaleEtagStrategy) {
             const trackedState = TrackedRepresentationUtil.getState(resource);
-            if (trackedState.status === Status.staleFromETag && !TrackedRepresentationUtil.hasETag(resource)) {
+            if (trackedState.status === Status.staleFromETag) {
                 return RequestHeaders.noCacheHeader;
             }
         }

@@ -512,6 +512,7 @@ export class TrackedRepresentationFactory {
         const {
             rel = LinkRelation.Self,
             includeItems,
+            refreshStaleItems = true,
         } = { ...options };
 
         const uri = LinkUtil.getUri(resource, rel);
@@ -539,6 +540,9 @@ export class TrackedRepresentationFactory {
         // disable force load on collections items for items only when {@forceLoadFeedOnly} is set
         if (includeItems) {
             await this.processCollectionItems(resource, options);
+        } else if (refreshStaleItems){
+            // otherwise, walk through the collection and ensure stale items are refreshed
+            await this.processStaleCollectionItems(resource, options);
         }
 
         // now merge the collection (attributes) (and do so with observers to trigger)

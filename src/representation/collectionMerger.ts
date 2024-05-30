@@ -6,6 +6,7 @@ import { CollectionMergerOptions } from '../interfaces/collectionMergerOptions';
 import { defaultEqualityMatcher } from '../utils/equalityUtil';
 import { TrackedRepresentationUtil } from '../utils/trackedRepresentationUtil';
 import { instanceOfTrackedRepresentation } from '../utils/instanceOf/instanceOfTrackedRepresentation';
+import { SingletonMerger } from './singletonMerger';
 
 const log = anylogger('CollectionMerger');
 
@@ -13,6 +14,38 @@ const log = anylogger('CollectionMerger');
  * A helper class for manipulating items in a {@link CollectionRepresentation.items}.
  */
 export class CollectionMerger {
+    /**
+     * Update existing items in the lvalue that are in the rvalue.
+     * Returns the lvalue (mutated).
+     *
+     * The equality operator is {@link CanonicalOrSelf}.
+     */
+    public static updateItems<T extends CollectionRepresentation>(
+        lvalue: T,
+        rvalue: T,
+        options?: ResourceAssignOptions & CollectionMergerOptions): T {
+
+        const {
+            equalityOperator = CanonicalOrSelf,
+            equalityMatcher = defaultEqualityMatcher,
+        } = { ...options };
+        const { items } = lvalue;
+
+        if (items && rvalue.items?.length > 0) {
+
+            // find existing and update
+            for (const item of items) {
+                // TODO: implement eTag aware singletons
+                const found = rvalue.items.find(r => equalityMatcher(item, r, equalityOperator));
+                if (found) {
+                    SingletonMerger.merge(item, found, options);
+                }
+            }
+        }
+
+        return lvalue;
+    }
+
     /**
      * Omit items in the lvalue that are not in the rvalue.
      * Returns the lvalue (mutated).
@@ -151,6 +184,7 @@ export class CollectionMerger {
         }
 
         const omitted = this.omitItems(lvalue, rvalue, options);
-        return this.extractItems(omitted, rvalue, options);
+        const updated = this.updateItems(omitted, rvalue);
+        return this.extractItems(updated, rvalue, options);
     }
 }

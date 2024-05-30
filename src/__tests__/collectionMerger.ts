@@ -1,6 +1,7 @@
 import { CollectionRepresentation, Uri } from 'semantic-link';
 import { CollectionMerger } from '../representation/collectionMerger';
 import { SparseRepresentationFactory } from '../representation/sparseRepresentationFactory';
+import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
 
 /**
  * Increasing counter to create new & unique resource names
@@ -97,6 +98,57 @@ describe('Collection Merger', () => {
 
         ])('merge, items %#', (lVal, rVal, expectedVal) => {
         const actual = CollectionMerger.merge(makeCollection(lVal), makeCollection(rVal));
+        const expected = makeCollection(expectedVal);
+        expect(actual.items).toEqual(expected.items);
+    });
+
+    test.each(
+        [
+            [
+                { defaultItems: [{ id: '1', title: 'x' }] },
+                { defaultItems: [{ id: '1', title: 'x' }] },
+                { defaultItems: [{ id: '1', title: 'x' }] },
+            ],
+            [
+                { defaultItems: [{ id: '1', title: 'x' }] },
+                { defaultItems: [{ id: '1', title: 'y' }] },
+                { defaultItems: [{ id: '1', title: 'y' }] },
+            ],
+            [
+                { defaultItems: [{ id: '1', title: 'x', eTag: '34vg' }] },
+                { defaultItems: [{ id: '1', title: 'x', eTag: '34vg' }] },
+                { defaultItems: [{ id: '1', title: 'x', eTag: '34vg' }] }],
+            [
+                { defaultItems: [{ id: '1', title: 'x', eTag: '34vg' }] },
+                { defaultItems: [{ id: '1', title: 'y', eTag: '34vg' }] },
+                { defaultItems: [{ id: '1', title: 'y', eTag: '34vg' }] },
+            ],
+            [
+                { defaultItems: [{ id: '1', title: 'x', eTag: '34vg' }] },
+                {},
+                { defaultItems: [{ id: '1', title: 'x', eTag: '34vg' }] },
+            ],
+            [
+                {},
+                { defaultItems: [{ id: '1', title: 'x', eTag: '34vg' }] },
+                {},
+            ],
+
+
+        ])('update items, %#', (lVal: ResourceFactoryOptions, options: ResourceFactoryOptions, expectedVal) => {
+
+        function makeCollection(options: ResourceFactoryOptions) {
+            return SparseRepresentationFactory.make<CollectionRepresentation>({
+                uri: uniqueUri(10),
+                sparseType: 'collection',
+                ...options,
+            });
+        }
+
+        const lvalue = makeCollection(lVal);
+        const rvalue = makeCollection(options);
+
+        const actual = CollectionMerger.updateItems(lvalue, rvalue);
         const expected = makeCollection(expectedVal);
         expect(actual.items).toEqual(expected.items);
     });

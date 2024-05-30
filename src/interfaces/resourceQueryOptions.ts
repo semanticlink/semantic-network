@@ -45,6 +45,14 @@ export interface ResourceQueryOptions {
     readonly includeItems?: boolean;
 
     /**
+     * The refresh strategy for {@link CollectionRepresentation{T}}} existing items that have become stale on a collection load.
+     * Items will be stale when the eTag has been updated but the new version not yet loaded.
+     *
+     * @default true
+     */
+    readonly refreshStaleItems?: boolean;
+
+    /**
      * Alters the hydration strategy that it treats the resource as an array of resource and then does a further
      * get using the options as an iterator.
      *

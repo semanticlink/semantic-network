@@ -281,6 +281,7 @@ export class TrackedRepresentationFactory {
                 rel = LinkRelation.Self,
                 getUri = LinkUtil.getUri,
                 includeItems = false,
+                refreshStaleItems = true,
                 throwOnLoadError = defaultRequestOptions.throwOnLoadError,
             } = { ...options };
 
@@ -370,12 +371,15 @@ export class TrackedRepresentationFactory {
                         }
                     }
                 } else {
-                    // Iff the resource is a collection, then if the collection has been loaded (hydrated), and
-                    // the caller has requested the items be loaded, then iterate over the individual items
-                    // to check they are loaded.
                     if (instanceOfCollection(resource)) {
+                        // If the resource is a collection, then if the collection has been loaded (hydrated), and
+                        // the caller has requested the items be loaded, then iterate over the individual items
+                        // to check they are loaded.
                         if (includeItems) {
                             await this.processCollectionItems(resource, options);
+                        } else if (refreshStaleItems){
+                            // otherwise, walk through the collection and ensure stale items are refreshed
+                            await this.processStaleCollectionItems(resource, options);
                         }
                     }
                 }
@@ -540,6 +544,31 @@ export class TrackedRepresentationFactory {
         // now merge the collection (attributes) (and do so with observers to trigger)
         // return SingletonMerger.merge(resource2, representation, options);
         return resource;
+    }
+
+    private static async processStaleCollectionItems<T extends LinkedRepresentation>(
+        resource: CollectionRepresentation<T>,
+        options?: (ResourceLinkOptions &
+            HttpRequestOptions &
+            ResourceMergeOptions &
+            ResourceFetchOptions &
+            ResourceQueryOptions &
+            LoaderJobOptions)): Promise<void> {
+
+        const {  batchSize = 1 } = { ...options };
+
+        /**
+         * Iterating over the resource(s) and use the options for the iterator. The batch size
+         * indicates at this stage whether the queries or sequential or parallel (ie batch size is a bit misleading
+         * because in practice batch size is either one (sequential) or all (parallel). This can be extended when needed.
+         */
+        const waitAll = (batchSize > 0) ? parallelWaitAll : sequentialWaitAll;
+
+        await waitAll(resource, async item => {
+            if (instanceOfTrackedRepresentation(item) && TrackedRepresentationUtil.hasStaleFeedETag(item)){
+                await this.load(item, { ...options, rel: LinkRelation.Self });
+            }
+        });
     }
 
 

@@ -109,6 +109,17 @@ async function createCollectionItem<T extends LinkedRepresentation>(
         rel: formRel,
     }) /*as FormRepresentation*/;
 
+    /*
+     * TODO
+     * TODO: Upgrade to load reference collections inside form items. Note: use FormItemsUtil
+     * TODO
+     *
+     * The problem is that a previously loaded form is overwritten with the get above and items from a reference
+     * collection are removed.
+     *   - needs a merge on existing items
+     *   - refresh on items existing items (with merge)
+     */
+
     if (instanceOfForm(form)) {
         try {
             const mergedDocument = await mergeStrategy(document, form, options);

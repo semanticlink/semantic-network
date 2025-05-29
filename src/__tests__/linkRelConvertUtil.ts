@@ -59,4 +59,34 @@ describe('link rel converter utils', () => {
             expect(relTypeToCamel('create-form')).toBe('createForm');
         });
     });
+
+    describe('rel type link selector to camel', function() {
+        it('should match link selector rel', function() {
+            expect(relTypeToCamel({ rel: 'test' })).toBe('test');
+        });
+
+        it('should match link selector with title—match title off ', function() {
+            expect(relTypeToCamel({ rel: 'test', title: 'service' })).toBe('test');
+        });
+
+        it('should match link selector with title—match title on ', function() {
+            expect(relTypeToCamel({ rel: 'test', title: 'service' }, true)).toBe('testService');
+        });
+
+        it('should match link selector with title empty—match title empty on ', function() {
+            expect(relTypeToCamel({ rel: 'test', title: '' }, true)).toBe('test');
+        });
+
+        it('should match link selector with title empty—match title null on ', function() {
+            expect(relTypeToCamel({ rel: 'test' }, true)).toBe('test');
+        });
+
+        it('should match camel case regex', function() {
+            expect(relTypeToCamel({ rel: 'create-form' })).toBe('createForm');
+        });
+
+        it('should match camel case regex', function() {
+            expect(relTypeToCamel({ rel: 'create-form', title: 'invites' }, true)).toBe('createFormInvites');
+        });
+    });
 });

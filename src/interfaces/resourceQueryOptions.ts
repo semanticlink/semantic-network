@@ -1,4 +1,5 @@
 import { LinkedRepresentation, LinkSelector, RelationshipType, Uri } from 'semantic-link';
+import { NameStrategy } from '../representation/namedRepresentationFactory';
 
 export interface ResourceQueryOptions {
     /**
@@ -36,7 +37,14 @@ export interface ResourceQueryOptions {
      * value is defaulted based on the {@link rel} if not specified. If the {@link rel} is
      * an array then this value must be explicitly set.
      */
-    readonly nameStrategy?: (name: RelationshipType) => string | undefined | never;
+    readonly nameStrategy?: NameStrategy;
+
+    /**
+     * Legacy name strategy is to use only the link rel for the Name. New strategy is to use link rel and tile (if exists).
+     *
+     * @default false
+     */
+    readonly useLegacyNameStrategy?: boolean;
 
     /**
      * Alters the hydration strategy for {@link CollectionRepresentation{T}}}. By default collections are sparsely populated (that is

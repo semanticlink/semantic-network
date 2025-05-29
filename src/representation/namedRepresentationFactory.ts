@@ -16,18 +16,18 @@ const log = anylogger('NamedRepresentationFactory');
 /**
  *
  */
-type NameStrategy = (rel: RelationshipType | undefined, representation?: Representation | Document | undefined) => string;
+export type NameStrategy = (rel: RelationshipType | undefined, representation?: Representation | Document | undefined) => string;
 
 /**
  * Where the rel is multiple pick the first matched link to be converted as the name, otherwise use the given rel
  * @param rel
  * @param representation
  */
-function firstLinkNameStrategy(rel: RelationshipType | undefined, representation: Representation | Document | undefined): string {
+export const firstLinkNameStrategy = (includeTitle: boolean) => (rel: RelationshipType | undefined, representation: Representation | Document | undefined): string => {
     if (representation && Array.isArray(rel)) {
         const [first] = LinkUtil.filter(representation as LinkedRepresentation, rel);
         if (first) {
-            return LinkRelConvertUtil.relTypeToCamel(first);
+            return LinkRelConvertUtil.relTypeToCamel(first, includeTitle);
         } else {
             // broken and should not fall through
             // what is the return strategy on link not found?
@@ -35,13 +35,14 @@ function firstLinkNameStrategy(rel: RelationshipType | undefined, representation
             return '';
         }
     } else {
-        return LinkRelConvertUtil.relTypeToCamel(rel);
+        return LinkRelConvertUtil.relTypeToCamel(rel, includeTitle);
     }
-}
+};
+
 
 export class NamedRepresentationFactory {
 
-    public static defaultNameStrategy: NameStrategy = firstLinkNameStrategy;
+    public static defaultNameStrategy: NameStrategy = firstLinkNameStrategy(true);
 
     /**
      * Manages the loading (returning) of a named resource (sub-resource collection or singleton) on a context based on
@@ -61,7 +62,14 @@ export class NamedRepresentationFactory {
         options?: ResourceQueryOptions & ResourceAssignOptions & LoaderJobOptions): Promise<Nullable<Tracked<TResult>>> {
         const {
             rel = undefined,
-            name = NamedRepresentationFactory.defaultNameStrategy(rel, resource),
+            useLegacyNameStrategy = false,
+        } = { ...options };
+        const {
+            nameStrategy = useLegacyNameStrategy ? firstLinkNameStrategy(false) : NamedRepresentationFactory.defaultNameStrategy,
+        } = { ...options };
+
+        const {
+            name = nameStrategy(rel, resource),
         } = { ...options };
 
         if (rel && name) {

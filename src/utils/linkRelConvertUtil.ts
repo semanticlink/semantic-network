@@ -67,18 +67,19 @@ export class LinkRelConvertUtil {
      * @returns field name
      */
     public static relTypeToCamel(rel: RelationshipType | undefined, includeTitle = false): string {
-        const name = LinkRelConvertUtil.extracted(rel);
+        const name = LinkRelConvertUtil.relToCamel(rel);
 
         if (includeTitle && instanceOfLinkSelector(rel) && 'title' in rel) {
             const title = rel.title;
             if (typeof title === 'string') {
-                return name + title.charAt(0).toUpperCase() + title.slice(1);
+                const titleCamelCase = LinkRelConvertUtil.dashToCamel(title);
+                return name + titleCamelCase.charAt(0).toUpperCase() + titleCamelCase.slice(1);
             }
         }
         return name;
     }
 
-    public static extracted(rel: RelationshipType | undefined): string {
+    private static relToCamel(rel: RelationshipType | undefined): string {
         if (!rel) {
             // broken or at least log an warning
             return '';

@@ -38,6 +38,11 @@ export class State {
     retrieved: Date | undefined;
 
     /**
+     * Original request resource representation from the request data
+     */
+    representation: unknown;
+
+    /**
      * Header values that are eager provided via a feed. Currently, only eTags are likely to be provided
      */
     feedHeaders: Record<StandardResponseHeader | string, string>;

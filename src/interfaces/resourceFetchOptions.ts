@@ -1,6 +1,7 @@
 import { AddRequestHeaderStrategy } from './addRequestHeaderStrategy';
 
 import { CheckHeaderStrategy } from './checkHeaderStrategy';
+import { TrackResponseStrategy } from './trackResponseStrategy';
 
 export interface ResourceFetchOptions {
 
@@ -26,7 +27,7 @@ export interface ResourceFetchOptions {
      *
      * @default false (currently experimental)
      */
-    readonly useStaleEtagStrategy? : boolean;
+    readonly useStaleEtagStrategy?: boolean;
 
     /**
      * When set to true, the loader will detect any eTags in the headers and provided back on the request in the 'if-none-match' header
@@ -36,8 +37,20 @@ export interface ResourceFetchOptions {
      * @default false (currently experimental)
      * @deprecated use {@link axiosRequestConfigHeadersStrategies}
      */
-    readonly defaultStaleEtagAddRequestHeaderStrategy? : AddRequestHeaderStrategy;
+    readonly defaultStaleEtagAddRequestHeaderStrategy?: AddRequestHeaderStrategy;
 
     readonly requestHeadersStrategies?: AddRequestHeaderStrategy[];
 
+    /**
+     * Switch passed into the {@link trackResponseStrategies} whee in the {@link TrackedRepresentationFactory.defaultResponseStrategies}
+     * the response is not stored on the state
+     * @default true
+     */
+    readonly trackResponse?: boolean;
+
+    /**
+     * Current uses {@link TrackedRepresentationFactory.defaultResponseStrategies} to add the original response data
+     * onto the state object
+     */
+    readonly trackResponseStrategies?: TrackResponseStrategy[];
 }

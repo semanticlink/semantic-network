@@ -26,11 +26,24 @@ import { LoaderJobOptions } from '../interfaces/loader';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { defaultRequestOptions } from '../http/defaultRequestOptions';
 import { RequestHeaders } from './requestHeaders';
-import { AxiosHeaders, AxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
+import { AxiosHeaders, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
+import { TrackResponseStrategy } from '../interfaces/trackResponseStrategy';
 
 const log = anylogger('TrackedRepresentationFactory');
 
 export class TrackedRepresentationFactory {
+
+    public static defaultResponseStrategies: TrackResponseStrategy[] =
+        [
+            /**
+             * Strategy one allows for putting the original response data on to the state object. Can be turned
+             * off by setting {@link ResourceFetchOptions.trackResponse} to false
+             */
+            (axiosResponse: AxiosResponse, trackResponse: boolean): unknown => {
+                if (trackResponse) {
+                    return axiosResponse.data;
+                }
+            }];
 
     /**
      * Creates (POST) a representation in the context of a resource. The resulting representation from the Location header
@@ -275,6 +288,7 @@ export class TrackedRepresentationFactory {
             ResourceFetchOptions &
             LoaderJobOptions): Promise<T | Tracked<T>> {
 
+
         if (instanceOfTrackedRepresentation(resource)) {
 
             const {
@@ -283,7 +297,10 @@ export class TrackedRepresentationFactory {
                 includeItems = false,
                 refreshStaleItems = true,
                 throwOnLoadError = defaultRequestOptions.throwOnLoadError,
+                trackResponse = true,
+                trackResponseStrategies = TrackedRepresentationFactory.defaultResponseStrategies,
             } = { ...options };
+
 
             const uri = getUri(resource, rel);
 
@@ -361,6 +378,10 @@ export class TrackedRepresentationFactory {
                         // when was it retrieved - for later queries
                         trackedState.retrieved = new Date();
 
+                        for (const strategy of trackResponseStrategies) {
+                            trackedState.representation = strategy(response, trackResponse);
+                        }
+
                         return await this.processResource(resource, response.data as DocumentRepresentation<T>, options) as T;
                     } catch (e: unknown) {
                         if (isHttpRequestError(e)) {
@@ -377,7 +398,7 @@ export class TrackedRepresentationFactory {
                         // to check they are loaded.
                         if (includeItems) {
                             await this.processCollectionItems(resource, options);
-                        } else if (refreshStaleItems){
+                        } else if (refreshStaleItems) {
                             // otherwise, walk through the collection and ensure stale items are refreshed
                             await this.processStaleCollectionItems(resource, options);
                         }
@@ -494,7 +515,6 @@ export class TrackedRepresentationFactory {
         }
     }
 
-
     /**
      * Ensures the in-memory collection resource and its items are up-to-date with the server with
      * the number of items matching and all items at least sparsely populated. Use 'includeItems' flag
@@ -540,7 +560,7 @@ export class TrackedRepresentationFactory {
         // disable force load on collections items for items only when {@forceLoadFeedOnly} is set
         if (includeItems) {
             await this.processCollectionItems(resource, options);
-        } else if (refreshStaleItems){
+        } else if (refreshStaleItems) {
             // otherwise, walk through the collection and ensure stale items are refreshed
             await this.processStaleCollectionItems(resource, options);
         }
@@ -559,7 +579,7 @@ export class TrackedRepresentationFactory {
             ResourceQueryOptions &
             LoaderJobOptions)): Promise<void> {
 
-        const {  batchSize = 1 } = { ...options };
+        const { batchSize = 1 } = { ...options };
 
         /**
          * Iterating over the resource(s) and use the options for the iterator. The batch size
@@ -569,12 +589,11 @@ export class TrackedRepresentationFactory {
         const waitAll = (batchSize > 0) ? parallelWaitAll : sequentialWaitAll;
 
         await waitAll(resource, async item => {
-            if (instanceOfTrackedRepresentation(item) && TrackedRepresentationUtil.hasStaleFeedETag(item)){
+            if (instanceOfTrackedRepresentation(item) && TrackedRepresentationUtil.hasStaleFeedETag(item)) {
                 await this.load(item, { ...options, rel: LinkRelation.Self });
             }
         });
     }
-
 
     private static async processCollectionItems<T extends LinkedRepresentation>(
         resource: CollectionRepresentation<T>,
@@ -622,5 +641,4 @@ export class TrackedRepresentationFactory {
 
         return SingletonMerger.merge(resource, representation, options);
     }
-
 }

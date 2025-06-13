@@ -136,6 +136,7 @@ describe('Tracked Representation Factory', () => {
                     collection,
                     retrieved,
                     singleton,
+                    representation,
                 } = TrackedRepresentationUtil.getState(api);
                 assertThat(api).is(match.predicate(instanceOfSingleton));
                 assertThat(api).is($api);
@@ -146,10 +147,47 @@ describe('Tracked Representation Factory', () => {
                 assertThat(collection).is(new Set<string>());
                 assertThat(singleton).is(new Set<string>());
                 assertThat(retrieved).isNot(null);
+                assertThat(representation).isNot(null);
             });
 
         });
 
+        describe('state resource tracking', () => {
+            const $api = SparseRepresentationFactory.make<ApiRepresentation>({ uri });
+
+            it('success (200), singleton load via http', async () => {
+
+                get
+                    .mockResolvedValue(
+                        {
+                            data: {
+                                links: [
+                                    {
+                                        rel: LinkRelation.Self,
+                                        href: uri,
+                                    }],
+                                version: '56',
+                            } as ApiRepresentation,
+                            headers: { x: 'test' },
+                            status: 200,
+                            statusText: '',
+                            config: {},
+                        }
+                    );
+
+                const api = await TrackedRepresentationFactory.load($api, { trackResponse: false }) as Tracked<ApiRepresentation>;
+                expect(get).toHaveBeenCalled();
+
+                const {
+                    representation,
+                } = TrackedRepresentationUtil.getState(api);
+                assertThat(api).is(match.predicate(instanceOfSingleton));
+                assertThat(api).is($api);
+                assertThat(api.version).is('56');
+                assertThat(representation).is(undefined);
+            });
+
+        });
     });
 
 });

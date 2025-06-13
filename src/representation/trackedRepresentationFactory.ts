@@ -28,6 +28,7 @@ import { defaultRequestOptions } from '../http/defaultRequestOptions';
 import { RequestHeaders } from './requestHeaders';
 import { AxiosHeaders, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { TrackResponseStrategy } from '../interfaces/trackResponseStrategy';
+import { cloneDetached } from './cloneDetached';
 
 const log = anylogger('TrackedRepresentationFactory');
 
@@ -41,7 +42,7 @@ export class TrackedRepresentationFactory {
              */
             (axiosResponse: AxiosResponse, trackResponse: boolean): unknown => {
                 if (trackResponse) {
-                    return axiosResponse.data;
+                    return cloneDetached(axiosResponse.data);
                 }
             }];
 

@@ -107,3 +107,4 @@ export { ComparableRepresentation } from './interfaces/comparableRepresentation'
 export { AddRequestHeaderStrategy } from './interfaces/addRequestHeaderStrategy';
 export { CheckHeaders } from './representation/checkHeaders';
 export { dateToGMTHeader } from './utils/dateToGMTHeader';
+export { cloneDetached } from './representation/cloneDetached';

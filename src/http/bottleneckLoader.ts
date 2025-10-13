@@ -1,6 +1,6 @@
 import Bottleneck from 'bottleneck';
 import anylogger from 'anylogger';
-import { Loader, LoaderJobOptions, LoaderOptions } from '../interfaces/loader';
+import { Loader, LoaderJobOptions, LoaderOptions, LoaderStopOptions } from '../interfaces/loader';
 import { LoaderRequest } from '../interfaces/loaderRequest';
 
 const log = anylogger('Loader');
@@ -50,6 +50,12 @@ export class BottleneckLoader implements Loader {
             strategy: Bottleneck.strategy.LEAK,
             // use es6 promise over the default Bluebird
             Promise: Promise,
+        };
+    }
+
+    public static get defaultStopOptions(): LoaderStopOptions {
+        return {
+            dropWaitingJobs: true,
         };
     }
 
@@ -109,52 +115,58 @@ export class BottleneckLoader implements Loader {
      * @see https://github.com/SGrondin/bottleneck/issues/68
      *
      */
-    async schedule<T>(id: string, action: () => Promise<T>, options?: LoaderJobOptions | undefined): Promise<T> {
-        log.debug('request queue pending (%s total)', this.requests.size);
+    async schedule<T>(id: string, action: () => Promise<T>, options?: LoaderJobOptions | undefined): Promise<T | undefined> {
+        try {
+            log.debug('request queue pending (%s total)', this.requests.size);
 
-        const request = this.requests.get(id);
-        if (!request) {
-            const p = new Promise<T>(async (resolve, reject) => {
+            const request = this.requests.get(id);
+            if (!request) {
+                const p = new Promise<T>(async (resolve, reject) => {
 
-                try {
+                    try {
 
-                    const { loaderJob } = { ...options };
-                    const result = await this._limiter.schedule({ ...loaderJob, id }, action);
+                        const { loaderJob } = { ...options };
+                        const result = await this._limiter.schedule({ ...loaderJob, id }, action);
 
-                    // Do this before request is resolved,
-                    // so a request with the same id must now resolve to a new request
-                    log.debug('request queue remove \'%s\'', id);
-                    this.requests.delete(id);
+                        // Do this before request is resolved,
+                        // so a request with the same id must now resolve to a new request
+                        log.debug('request queue remove \'%s\'', id);
+                        this.requests.delete(id);
 
-                    // resolving with chain through to the pending requests
-                    resolve(result);
-                } catch (error) {
-                    // Do this before request is resolved,
-                    // so a request with the same id must now resolve to a new request
-                    this.requests.delete(id);
-                    reject(error);
-                }
-            });
+                        // resolving with chain through to the pending requests
+                        resolve(result);
+                    } catch (error) {
+                        // Do this before request is resolved,
+                        // so a request with the same id must now resolve to a new request
+                        this.requests.delete(id);
+                        reject(error);
+                    }
+                });
 
 
-            this.requests.set(id, { request: p, promises: [] });
+                this.requests.set(id, { request: p, promises: [] });
 
-            log.debug('request queue add \'%s\'', id);
+                log.debug('request queue add \'%s\'', id);
 
-            return p;
-        } else {
-            // construct an array of promises that will be resolved with the original request value
-            const p = new Promise<T>(async (resolve, reject) => {
-                try {
-                    const result = await request.request;
-                    resolve(result);
-                } catch (e) {
-                    reject(e);
-                }
-            });
-            request.promises.push(p);
-            log.debug('request queue resolved \'%s\' (%s in queue)', id, request.promises.length);
-            return p;
+                return p;
+            } else {
+                // construct an array of promises that will be resolved with the original request value
+                const p = new Promise<T>(async (resolve, reject) => {
+                    try {
+                        const result = await request.request;
+                        resolve(result);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+                request.promises.push(p);
+                log.debug('request queue resolved \'%s\' (%s in queue)', id, request.promises.length);
+                return p;
+            }
+        } catch (e: unknown) {
+            if (e instanceof Error && !e.message.includes('limiter has been stopped')) {
+                return Promise.reject(e);
+            }
         }
     }
 
@@ -170,7 +182,7 @@ export class BottleneckLoader implements Loader {
     /**
      * Stop all current and pending requests and reset all queues.
      */
-    async clearAll(): Promise<void> {
+    async clearAll(options?: LoaderStopOptions): Promise<void> {
         const { RECEIVED, RUNNING, EXECUTING, QUEUED } = this._limiter.counts();
         const itemsQueued = RECEIVED + QUEUED + RUNNING + EXECUTING;
 
@@ -183,9 +195,7 @@ export class BottleneckLoader implements Loader {
 
         // this will abort any xhr requests
         try {
-            await this._limiter.stop({ dropWaitingJobs: true });
-            // await this._limiter.stop();
-            // unfortunately, we still need one! TODO: ask library for update to be able to clear queues and keep running
+            await this._limiter.stop({ ...BottleneckLoader.defaultStopOptions, ...options });
             this._limiter = BottleneckLoader.limiterFactory(this._currentOptions);
         } catch (e) {
             log.warn('stopping loader failure');

@@ -83,6 +83,10 @@ export class HttpRequest {
         return await this.loader.submit(() => deleteFactory(resource, rel), options);
     }
 
+    public async clearAll(): Promise<void> {
+        await this.loader.clearAll();
+    }
+
 }
 
 

@@ -173,7 +173,7 @@ const config: Config.InitialOptions = {
         '^.+\\.(ts|tsx)$': [
             'ts-jest',
             {
-                tsconfig: 'tsconfig.json',
+                tsconfig: 'tsconfig.jest.json',
                 babelConfig: true,
                 diagnostics: true,
             }],

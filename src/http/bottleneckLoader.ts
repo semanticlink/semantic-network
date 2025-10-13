@@ -184,6 +184,7 @@ export class BottleneckLoader implements Loader {
         // this will abort any xhr requests
         try {
             await this._limiter.stop({ dropWaitingJobs: true });
+            // await this._limiter.stop();
             // unfortunately, we still need one! TODO: ask library for update to be able to clear queues and keep running
             this._limiter = BottleneckLoader.limiterFactory(this._currentOptions);
         } catch (e) {

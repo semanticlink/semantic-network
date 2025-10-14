@@ -21,7 +21,7 @@ export interface Loader {
     /**
      * Schedules a request based on an id
      */
-    schedule<T>(id: string, action: () => Promise<T>, options?: LoaderJobOptions): Promise<T | undefined>;
+    schedule<T>(id: string, action: () => Promise<T>, options?: LoaderJobOptions): Promise<T>;
 
     /**
      * Submits (schedules) a request

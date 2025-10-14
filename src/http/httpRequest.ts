@@ -38,7 +38,8 @@ export class HttpRequest {
         // note: leaving media type out of id
         const id = LinkUtil.getUri(link, rel);
         if (id) {
-            return await this.loader.schedule(id, () => getFactory<T>(link, rel, options), options);
+            // TODO: remove the cast as it can return an undefined
+            return await this.loader.schedule(id, () => getFactory<T>(link, rel, options), options) as AxiosResponse<T>;
         } else {
             log.warn('uri not found on link for id - using default loader');
             return await this.loader.submit(() => getFactory<T>(link, rel, options), options);

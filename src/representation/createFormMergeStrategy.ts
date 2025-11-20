@@ -14,6 +14,8 @@ export const defaultCreateFormStrategy: CreateFormMergeStrategy = async (documen
             log.error('[Merge form] unknown create error %s', e);
         } else {
             log.error('[Merge form] unknown create error %o', e);
-        }   }
+        }
+    }
 
 };
+

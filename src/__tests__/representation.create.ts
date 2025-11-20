@@ -44,7 +44,7 @@ describe('resource, create', () => {
         ],
     ])('%s', async (title: string, options: ResourceCreateOptions, factory: any, calledTimes: number, addItems: number) => {
 
-        const addItemToCollectionMock = jest.spyOn(RepresentationUtil, 'addItemToCollection');
+        const addItemToCollectionMock = jest.spyOn(RepresentationUtil, 'appendItemToCollection');
         addItemToCollectionMock.mockImplementation(() => ({ links: [], items: [] } as CollectionRepresentation));
 
         // return a create form targeting the version value

@@ -108,3 +108,6 @@ export { AddRequestHeaderStrategy } from './interfaces/addRequestHeaderStrategy'
 export { CheckHeaders } from './representation/checkHeaders';
 export { dateToGMTHeader } from './utils/dateToGMTHeader';
 export { cloneDetached } from './representation/cloneDetached';
+export { defaultAddToCollectionStrategy } from './representation/defaultAddToCollectionStrategy';
+export { AddItemToCollectionDirectionType } from './interfaces/addItemToCollectionDirectionType';
+export { AddItemToCollectionStrategy } from './interfaces/addItemToCollectionStrategy';

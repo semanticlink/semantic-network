@@ -149,12 +149,25 @@ export class RepresentationUtil {
     /**
      * Removes the item from the collection by matching its Self link. If not found, returns undefined.
      */
-    public static addItemToCollection<T extends LinkedRepresentation>(
+    public static appendItemToCollection<T extends LinkedRepresentation>(
         collection: CollectionRepresentation<T>,
         item: T): CollectionRepresentation<T> {
 
         if (collection.items) {
             collection.items.splice(collection.items.length, 0, item);
+        } else {
+            log.warn('Collection adding new items array, reactive bindings may fail');
+            collection.items = [item];
+        }
+        return collection;
+    }
+
+    public static prependItemToCollection<T extends LinkedRepresentation>(
+        collection: CollectionRepresentation<T>,
+        item: T): CollectionRepresentation<T> {
+
+        if (collection.items) {
+            collection.items.unshift(item);
         } else {
             log.warn('Collection adding new items array, reactive bindings may fail');
             collection.items = [item];

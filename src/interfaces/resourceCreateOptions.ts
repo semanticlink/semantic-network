@@ -1,4 +1,6 @@
 import { CollectionRepresentation, LinkedRepresentation, RelationshipType } from 'semantic-link';
+import { AddItemToCollectionDirectionType } from './addItemToCollectionDirectionType';
+import { AddItemToCollectionStrategy } from './addItemToCollectionStrategy';
 
 export interface ResourceCreateOptions {
 
@@ -24,5 +26,9 @@ export interface ResourceCreateOptions {
      * @default: {@link LinkRelation.Self}
      */
     readonly rel?: RelationshipType;
+
+    readonly addItemToCollectionStrategy?: AddItemToCollectionStrategy;
+    readonly addItemToCollectionDirectionType?: AddItemToCollectionDirectionType;
+
 }
 

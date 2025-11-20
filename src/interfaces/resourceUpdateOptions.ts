@@ -19,4 +19,3 @@ export type ResourceUpdateOptions = EditMergeOptions
      */
     readonly formRel?: RelationshipType;
 };
-

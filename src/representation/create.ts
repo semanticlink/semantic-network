@@ -14,7 +14,6 @@ import { HttpRequestOptions } from '../interfaces/httpRequestOptions';
 import { ResourceFactoryOptions } from '../interfaces/resourceFactoryOptions';
 import { ResourceFetchOptions } from '../interfaces/resourceFetchOptions';
 import anylogger from 'anylogger';
-import { RepresentationUtil } from '../utils/representationUtil';
 import { SparseRepresentationFactory } from './sparseRepresentationFactory';
 import { LinkRelation } from '../linkRelation';
 import { DocumentRepresentation } from '../interfaces/document';
@@ -25,6 +24,7 @@ import { ApiUtil } from '../apiUtil';
 import { instanceOfCollection } from '../utils/instanceOf/instanceOfCollection';
 import { instanceOfForm } from '../utils/instanceOf/instanceOfForm';
 import { ResourceCreateOptions } from '../interfaces/resourceCreateOptions';
+import { defaultAddToCollectionStrategy } from './defaultAddToCollectionStrategy';
 
 const log = anylogger('create');
 
@@ -93,6 +93,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
     resource: CollectionRepresentation<T>,
     document: DocumentRepresentation<T>,
     options?: ResourceUpdateOptions &
+        ResourceCreateOptions &
         ResourceLinkOptions &
         HttpRequestOptions &
         ResourceMergeOptions &
@@ -101,6 +102,8 @@ async function createCollectionItem<T extends LinkedRepresentation>(
     const {
         mergeStrategy = defaultCreateFormStrategy,
         formRel = [LinkRelation.CreateForm, LinkRelation.SearchForm] as RelationshipType,
+        addItemToCollectionDirectionType = 'append',
+        addItemToCollectionStrategy = defaultAddToCollectionStrategy,
         throwOnCreateError,
     } = { ...options };
 
@@ -142,7 +145,7 @@ async function createCollectionItem<T extends LinkedRepresentation>(
 
                 // 201 will return an item compared with 200, 202
                 if (item) {
-                    RepresentationUtil.addItemToCollection(resource, item);
+                    addItemToCollectionStrategy(resource, item, addItemToCollectionDirectionType);
                     return item as T;
                 } // drop through and return undefined
 

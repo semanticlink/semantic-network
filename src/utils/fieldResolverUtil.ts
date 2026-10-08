@@ -84,7 +84,8 @@ export class FieldResolverUtil {
         TField extends Extract<keyof T, string>>(
         document: DocumentRepresentation,
         form: TForm,
-        options?: MergeOptions): Promise<DocumentRepresentation> {
+        options?: MergeOptions,
+        fieldPath = ''): Promise<DocumentRepresentation> {
 
         const { defaultFields } = { ...options };
 
@@ -94,30 +95,46 @@ export class FieldResolverUtil {
         const fieldsToResolve = FormUtil.fieldsToResolve(document, form, defaultFields as TField[]);
 
         for (const field of fieldsToResolve) {
+            const currentFieldPath = fieldPath ? `${fieldPath}.${field}` : field as string;
             // find out whether there is a matching field in the form to the link relation
             const formItem = FormUtil.findByField(form, field as string);
             if (formItem) {
-                const fieldValue = await this.resolve(document[field as string] as FieldValue, formItem, options);
-                if (fieldValue) {
-                    const { fieldResolver } = { ...options };
-                    log.debug('resolving field \'%s\'', field);
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore TS2538: Type 'Omit ' cannot be used as an index type.
-                    (document)[field] = fieldResolver ?
-                        fieldResolver(field as string, fieldValue, options) :
-                        fieldValue;
-                } else {
-                    // an undefined result adds 'undefined' to field rather than remove
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore TS2538: Type 'Omit ' cannot be used as an index type.
-                    document[field] = fieldValue;
-                    // catering 'false' which would log this error (probably do !! on if)
-                    if (fieldValue === undefined || fieldValue === null) {
-                        log.warn('Field \'%s\' is not resolved', field);
+                try {
+                    const fieldValue = await this.resolve(
+                        document[field as string] as FieldValue,
+                        formItem,
+                        options,
+                        currentFieldPath
+                    );
+                    if (fieldValue) {
+                        const { fieldResolver } = { ...options };
+                        log.debug('resolving field \'%s\'', currentFieldPath);
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore TS2538: Type 'Omit ' cannot be used as an index type.
+                        (document)[field] = fieldResolver ?
+                            fieldResolver(field as string, fieldValue, options) :
+                            fieldValue;
+                    } else {
+                        // an undefined result adds 'undefined' to field rather than remove
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore TS2538: Type 'Omit ' cannot be used as an index type.
+                        document[field] = fieldValue;
+                        if (fieldValue === undefined || fieldValue === null) {
+                            log.warn('Field \'%s\' is not resolved', currentFieldPath);
+                        }
                     }
+                } catch (error) {
+                    log.error(
+                        'Field resolution failed for \'%s\' (type=%s, multiple=%s, actual=%s); preserving original value: %s',
+                        currentFieldPath,
+                        formItem.type,
+                        formItem.multiple,
+                        this.valueType(document[field as string]),
+                        error instanceof Error ? error.message : String(error)
+                    );
                 }
             } else {
-                log.info('Field \'%s\' is not matched in form', field);
+                log.info('Field \'%s\' is not matched in form', currentFieldPath);
             }
         }
         return document;
@@ -136,12 +153,13 @@ export class FieldResolverUtil {
     public static async resolve<T extends FieldValue>(
         fieldValue: T,
         item: FormItem,
-        options?: MergeOptions): Promise<T | undefined> {
+        options?: MergeOptions,
+        fieldPath = item.name): Promise<T | undefined> {
 
         const { resolver = noopResolver } = { ...options };
 
-        const field = await this.resolveByType(fieldValue, item, options);
-        if (field && instanceOfSimpleValue(field)) {
+        const field = await this.resolveByType(fieldValue, item, options, fieldPath);
+        if (field !== undefined && instanceOfSimpleValue(field)) {
             return resolver.resolve(field as Uri) as T;
         } else if (instanceOfUriListValue(field)) {
             return field.map(uri => resolver.resolve(uri)) as T;
@@ -249,7 +267,8 @@ export class FieldResolverUtil {
     public static async resolveByType<T extends FieldValue>(
         fieldValue: T,
         formItem: FormItem,
-        options?: MergeOptions): Promise<T | undefined> {
+        options?: MergeOptions,
+        fieldPath = formItem.name): Promise<T | undefined> {
 
         switch (formType(formItem)) {
             case FieldValueType.single: // could have checks to ensure this is a 'text' or 'uri' or object (but not array)
@@ -269,9 +288,18 @@ export class FieldResolverUtil {
              */
             case FieldValueType.multiple:
 
+                const hadItems = !!formItem.items;
                 await FormUtil.resolveItemsFromCollection(formItem, options);
                 // TODO: all resolutions must be on the outside
                 let value = await this.findValueInItems(formItem, fieldValue, options);
+
+                // A select without an items enumeration cannot validate membership.
+                // Preserve the submitted value and let the multiple branch below
+                // perform any required scalar-to-array normalisation.
+                if (!hadItems && fieldValue !== undefined &&
+                    (instanceOfSimpleValue(fieldValue) || instanceOfUriListValue(fieldValue))) {
+                    value = fieldValue;
+                }
 
                 if (!value && instanceOfDocumentRepresentation(fieldValue)) {
                     const { resourceResolver } = { ...options };
@@ -282,8 +310,25 @@ export class FieldResolverUtil {
 
                 // check the value returned needs to be an enumeration.
                 if (formItem.multiple) {
-                    // return back an Uri[] removing all undefined to meet {@link UriListValue}
-                    return ((instanceOfSimpleValue(value) ? [value] : value) as Uri[])
+                    // Multi-select controls may submit one scalar value. Normalise it,
+                    // but make the correction visible to developers.
+                    if (value !== undefined && !Array.isArray(value)) {
+                        if (instanceOfSimpleValue(value)) {
+                            log.warn(
+                                'Field configuration mismatch for \'%s\' (type=%s, multiple=true, expected=array, actual=%s); normalised scalar to array',
+                                fieldPath, formItem.type, this.valueType(value)
+                            );
+                            value = [value] as unknown as FieldValue;
+                        } else {
+                            log.error(
+                                'Field configuration error for \'%s\' (type=%s, multiple=true, expected=array, actual=%s); using empty array',
+                                fieldPath, formItem.type, this.valueType(value)
+                            );
+                            return [] as unknown as T;
+                        }
+                    }
+                    const values = instanceOfUriListValue(value) ? value : [];
+                    return values
                         .filter(x => !!x) as unknown as T;
                     // check that the value is part of the provided items enumeration in the form
                 } else {
@@ -303,27 +348,58 @@ export class FieldResolverUtil {
                         return (await Promise.all(
                             fieldValue.map(async value => {
                                 if (value) {
-                                    return await this.resolveFields(value, formItem as unknown as FormRepresentation, options);
+                                    return await this.resolveFields(value, formItem as unknown as FormRepresentation, options, fieldPath);
                                 } // else return undefined
                             })))
                             // remove any undefined
                             .filter(x => !!x) as T;
+                    } else if (instanceOfDocumentRepresentation(fieldValue)) {
+                        log.warn(
+                            'Field configuration mismatch for \'%s\' (type=%s, multiple=true, expected=array, actual=object); normalised object to array',
+                            fieldPath, formItem.type
+                        );
+                        return [await this.resolveFields(
+                            fieldValue,
+                            formItem as unknown as FormRepresentation,
+                            options,
+                            fieldPath
+                        )] as unknown as T;
+                    } else if (fieldValue === undefined || fieldValue === null) {
+                        return [] as unknown as T;
                     } else {
-                        log.error('Group with multiple must be implemented as an array of Document Representation');
+                        log.error(
+                            'Field configuration error for \'%s\' (type=%s, multiple=true, expected=array of DocumentRepresentation, actual=%s); skipping field',
+                            fieldPath, formItem.type, this.valueType(fieldValue)
+                        );
+                        return undefined;
                     }
                 } else {
                     if (!instanceOfDocumentRepresentation(fieldValue)) {
-                        log.warn('Group must be implemented a DocumentRepresentation');
+                        log.error(
+                            'Field configuration error for \'%s\' (type=%s, multiple=false, expected=object, actual=%s); skipping field',
+                            fieldPath, formItem.type, this.valueType(fieldValue)
+                        );
+                        return undefined;
                     }
                     // otherwise it is a single group and resolve treating the object as a LinkedRepresentation
                     // throw new Error('Group not implemented');
-                    return await this.resolveFields(fieldValue as DocumentRepresentation, formItem as unknown as FormRepresentation, options) as T;
+                    return await this.resolveFields(fieldValue as DocumentRepresentation, formItem as unknown as FormRepresentation, options, fieldPath) as T;
                 }
                 break;
             default:
                 log.warn('Unknown form type \'%s\' on \'%s\'', formItem.type, formItem.name);
                 return undefined;
         }
+    }
+
+    private static valueType(value: unknown): string {
+        if (value === null) {
+            return 'null';
+        }
+        if (Array.isArray(value)) {
+            return 'array';
+        }
+        return typeof value;
     }
 
     /**

@@ -390,7 +390,7 @@ describe('Resource Merger', () => {
         describe('fields //types/form/group', () => {
 
             test.each([
-                ['single to multiple', { singleMultiple: 'http://api.example.com/question/item/55555' }],
+                ['single to multiple', { singleMultiple: ['http://api.example.com/question/item/55555'] }],
                 ['multiple to multiple', {
                     questionItem: [
                         'http://api.example.com/question/item/572444', 'http://api.example.com/question/item/572445'],

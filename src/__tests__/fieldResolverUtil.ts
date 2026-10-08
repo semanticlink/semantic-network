@@ -98,7 +98,7 @@ describe('Form util, resolve', () => {
                 [],
             ],
             [
-                'multiple (select), multi select, no values in form returns empty array (2)',
+                'multiple (select), no enumeration normalises scalar to array',
                 'a',
                 {
                     name: '',
@@ -106,7 +106,7 @@ describe('Form util, resolve', () => {
                     multiple: true,
                     // items: [],
                 } as FormItem,
-                [],
+                ['a'],
             ],
             [
                 'multiple (address postal), multi select, no values in form returns empty array (2)',
@@ -118,6 +118,24 @@ describe('Form util, resolve', () => {
                     // items: [],
                 } as FormItem,
                 { label: 'a', postalCode: '0624' },
+            ],
+            [
+                'multiple group, scalar object is normalised to an array',
+                { child: 'value' },
+                { name: 'children', type: FieldType.Group, multiple: true, items: [] } as FormItem,
+                [{ child: 'value' }],
+            ],
+            [
+                'multiple group, empty array remains an empty array',
+                [],
+                { name: 'children', type: FieldType.Group, multiple: true, items: [] } as FormItem,
+                [],
+            ],
+            [
+                'multiple group, primitive is skipped without throwing',
+                'invalid scalar',
+                { name: 'children', type: FieldType.Group, multiple: true, items: [] } as FormItem,
+                undefined,
             ],
         ])('%s', async (title: string, fieldValue: FieldValue, formItem: FormItem, expected: FieldValue) => {
             const actual = await FieldResolverUtil.resolveByType(fieldValue, formItem);
